@@ -1,0 +1,46 @@
+{
+  "name": "dipen-ipod-classic",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal website inside a 1:1 iPod Classic interface",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "seed": "tsx scripts/seed.ts",
+    "seed:force": "tsx scripts/seed.ts --force",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "drizzle-orm": "^0.44.2",
+    "fast-xml-parser": "^4.5.3",
+    "next": "^15.3.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "drizzle-kit": "^0.31.1",
+    "esbuild": "^0.25.5",
+    "jsdom": "^26.1.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}
