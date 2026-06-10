@@ -12,6 +12,7 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "seed": "tsx scripts/seed.ts",
     "seed:force": "tsx scripts/seed.ts --force",
+    "optimize:images": "tsx scripts/optimize-images.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
@@ -38,6 +39,7 @@
     "drizzle-kit": "^0.31.1",
     "esbuild": "^0.25.5",
     "jsdom": "^26.1.0",
+    "sharp": "^0.35.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"

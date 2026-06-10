@@ -9,12 +9,12 @@ test.beforeEach(async ({ page }) => {
 
 test('boots to the main menu with a preview pane', async ({ page }) => {
   const rows = page.getByTestId('menu-row');
-  await expect(rows).toHaveCount(6);
-  for (const [i, label] of ['Music', 'Photos', 'Articles', 'Collections', 'Professional', 'Extras'].entries()) {
+  await expect(rows).toHaveCount(5);
+  for (const [i, label] of ['Music', 'Articles', 'Collections', 'Professional', 'Rabbit Hole'].entries()) {
     await expect(rows.nth(i)).toContainText(label);
   }
   await expect(rows.first()).toHaveAttribute('data-selected', 'true');
-  await expect(page.getByTestId('status-bar')).toContainText('iPod');
+  await expect(page.getByTestId('status-bar')).toContainText("Dipen's iPod");
 });
 
 test('plays a YouTube video and keeps playing after MENU (persistent player)', async ({ page }) => {
@@ -42,6 +42,9 @@ test('plays a YouTube video and keeps playing after MENU (persistent player)', a
 });
 
 test('photos cover flow shows profile pics and flips to captions', async ({ page }) => {
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Rabbit Hole
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('Rabbit Hole');
   await page.keyboard.press('ArrowDown'); // Photos
   await page.keyboard.press('Enter');
   const coverflow = page.getByTestId('coverflow');
@@ -69,7 +72,6 @@ test('SoundCloud lists tracks (or the fallback link) as an iPod menu', async ({ 
 });
 
 test('reads an article: scroll with the wheel, View Original links out', async ({ page }) => {
-  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown'); // Articles
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText("Reversing into learner's mindset");
@@ -111,7 +113,6 @@ test('guitar Cover Flow: browse covers and flip for the caption', async ({ page 
 test('professional timeline and links sections have content', async ({ page }) => {
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown'); // Professional
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('Software Developer');
@@ -120,10 +121,10 @@ test('professional timeline and links sections have content', async ({ page }) =
   await expect(page.getByTestId('reader-content')).toContainText('Took ownership of the commission system');
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  // Extras → Links
+  // Rabbit Hole → Links
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
-  await page.keyboard.press('ArrowDown');
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Links
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row')).toHaveCount(9);
   await expect(page.getByTestId('menu-row').first()).toContainText('LinkedIn');
@@ -131,9 +132,9 @@ test('professional timeline and links sections have content', async ({ page }) =
 
 test('theme toggle switches to the black iPod and persists across reload', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'silver');
-  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Extras
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Rabbit Hole
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown'); // Settings
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('Theme');
   await page.keyboard.press('Enter');
@@ -143,11 +144,40 @@ test('theme toggle switches to the black iPod and persists across reload', async
   await expect(page.getByTestId('ipod')).toBeVisible();
 });
 
-test('random tweet view shows a tweet and shuffles on center press', async ({ page }) => {
-  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Extras
+test('Rabbit Hole: kitchen wins flip, concerts by year, wifi names', async ({ page }) => {
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Rabbit Hole
   await page.keyboard.press('Enter');
+  // Kitchen Wins coverflow
   await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown'); // pennguytweets
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  const coverflow = page.getByTestId('coverflow');
+  await expect(coverflow).toContainText('1 of 10');
+  await expect(coverflow).toContainText('Homemade Pizza');
+  await page.keyboard.press('Enter'); // flip
+  await expect(page.getByTestId('cover-back')).toContainText('Homemade Pizza');
+  await page.keyboard.press('Escape'); // unflip
+  await page.keyboard.press('Escape'); // back to Rabbit Hole
+  // Concerts: chronological year groups, drill into 2012
+  await page.keyboard.press('ArrowDown'); // Concerts
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('menu-row').first()).toContainText('2010/2011');
+  await page.keyboard.press('ArrowDown'); // 2012
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('menu-row').first()).toContainText("Guns N' Roses");
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  // Wi-Fi names list
+  await page.keyboard.press('ArrowDown'); // Wi-Fi Names
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('menu-row').first()).toContainText('Martin Router King');
+  await expect(page.getByTestId('menu-row')).toHaveCount(25);
+});
+
+test('random tweet view shows a tweet and shuffles on center press', async ({ page }) => {
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Rabbit Hole
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowDown'); // pennguytweets
   await page.keyboard.press('Enter');
   const view = page.getByTestId('tweet-view');
   await expect(view).toContainText('@20swithepennguy');

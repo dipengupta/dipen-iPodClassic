@@ -17,7 +17,7 @@ beforeAll(() => {
 
 describe('/api/content/[section]', () => {
   it('serves every registered section', async () => {
-    for (const section of ['guitars', 'mugs', 'locations', 'gallery', 'photos', 'timeline', 'links', 'reels']) {
+    for (const section of ['guitars', 'mugs', 'locations', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi', 'timeline', 'links', 'reels']) {
       const res = await getContent(req, params({ section }));
       expect(res.status, section).toBe(200);
       const { items } = await res.json();
@@ -25,14 +25,31 @@ describe('/api/content/[section]', () => {
     }
   });
 
-  it('splits profile photos out of the gallery', async () => {
+  it('splits profile photos and kitchen wins out of the gallery', async () => {
     const photos = await (await getContent(req, params({ section: 'photos' }))).json();
     expect(photos.items).toHaveLength(10);
     for (const item of photos.items) {
       expect(item.category).toBe('profile');
     }
+    const kitchen = await (await getContent(req, params({ section: 'kitchen' }))).json();
+    expect(kitchen.items).toHaveLength(10);
+    for (const item of kitchen.items) {
+      expect(item.category).toBe('kitchen');
+    }
     const gallery = await (await getContent(req, params({ section: 'gallery' }))).json();
-    expect(gallery.items.every((g: { category: string }) => g.category !== 'profile')).toBe(true);
+    expect(
+      gallery.items.every((g: { category: string }) => ['vinyl', 'mug', 'magnet', 'pin'].includes(g.category)),
+    ).toBe(true);
+  });
+
+  it('serves concerts in year groups and the wifi list', async () => {
+    const concerts = await (await getContent(req, params({ section: 'concerts' }))).json();
+    expect(concerts.items.length).toBeGreaterThan(50);
+    expect(concerts.items[0].year).toBe('2010/2011');
+    expect(concerts.items.some((c: { name: string }) => c.name === 'lol')).toBe(true);
+    const wifi = await (await getContent(req, params({ section: 'wifi' }))).json();
+    expect(wifi.items).toHaveLength(25);
+    expect(wifi.items[0].name).toBe('Martin Router King');
   });
 
   it('404s unknown sections', async () => {

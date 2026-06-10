@@ -98,6 +98,20 @@ export const links = sqliteTable('links', {
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
+export const concerts = sqliteTable('concerts', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  // Display year-group, e.g. "2010/2011" — kept as text on purpose.
+  year: text('year').notNull(),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
+export const wifiNames = sqliteTable('wifi_names', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
 // Tracks when each live fetcher last succeeded, for staleness checks.
 export const fetchMeta = sqliteTable('fetch_meta', {
   key: text('key').primaryKey(),

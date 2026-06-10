@@ -261,6 +261,53 @@ async function photos(): Promise<FrameItem[]> {
   }));
 }
 
+async function kitchen(): Promise<FrameItem[]> {
+  const { items } = await fetchJson<{ items: GalleryRow[] }>('/api/content/kitchen');
+  return items.map((dish) => ({
+    id: `dish-${dish.id}`,
+    label: dish.title,
+    imagePath: dish.imagePath,
+    flipText: dish.description || dish.title,
+  }));
+}
+
+interface ConcertRow {
+  id: number;
+  year: string;
+  name: string;
+}
+
+async function concerts(): Promise<FrameItem[]> {
+  const { items } = await fetchJson<{ items: ConcertRow[] }>('/api/content/concerts');
+  // Chronological year groups (seed order); each year opens a readable list.
+  const byYear = new Map<string, ConcertRow[]>();
+  for (const concert of items) {
+    if (!byYear.has(concert.year)) byYear.set(concert.year, []);
+    byYear.get(concert.year)!.push(concert);
+  }
+  return [...byYear.entries()].map(([year, shows]) => ({
+    id: `concerts-${year}`,
+    label: year,
+    sublabel: `${shows.length} show${shows.length === 1 ? '' : 's'}`,
+    onSelect: {
+      kind: 'items',
+      title: year,
+      view: 'list',
+      items: shows.map((show) => ({ id: `concert-${show.id}`, label: show.name })),
+    },
+  }));
+}
+
+interface WifiRow {
+  id: number;
+  name: string;
+}
+
+async function wifi(): Promise<FrameItem[]> {
+  const { items } = await fetchJson<{ items: WifiRow[] }>('/api/content/wifi');
+  return items.map((row) => ({ id: `wifi-${row.id}`, label: row.name }));
+}
+
 interface TimelineRow {
   id: number;
   role: string;
@@ -313,6 +360,9 @@ const builders: Record<string, () => Promise<FrameItem[]>> = {
   mugs,
   gallery,
   photos,
+  kitchen,
+  concerts,
+  wifi,
   timeline,
   links,
 };

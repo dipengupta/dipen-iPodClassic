@@ -21,7 +21,7 @@ export default function SplitMenuView({ frame }: { frame: Frame }) {
       <div className={styles.preview}>
         {selected?.imagePath ? (
           // eslint-disable-next-line @next/next/no-img-element -- fixed-size logical screen; next/image adds nothing here
-          <img src={selected.imagePath} alt="" className={styles.previewImage} />
+          <img src={selected.imagePath} alt="" className={styles.previewImage} decoding="async" />
         ) : (
           <div className={styles.previewFallback}>
             <span className={styles.previewGlyph}>♫</span>

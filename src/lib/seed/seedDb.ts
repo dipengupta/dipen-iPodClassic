@@ -38,7 +38,8 @@ export function clearAll(db: Db): void {
   for (const table of [
     schema.articles, schema.tweets, schema.reels, schema.guitars,
     schema.locations, schema.mugs, schema.galleryItems, schema.timelineEntries,
-    schema.youtubeVideos, schema.soundcloudTracks, schema.links, schema.fetchMeta,
+    schema.youtubeVideos, schema.soundcloudTracks, schema.links,
+    schema.concerts, schema.wifiNames, schema.fetchMeta,
   ]) {
     db.delete(table).run();
   }
@@ -166,5 +167,20 @@ export function seedDb(db: Db, seedDir: string = SEED_DIR): void {
   const links = readJson<Array<{ label: string; url: string }>>(seedDir, 'links.json');
   links.forEach((link, i) => {
     db.insert(schema.links).values({ ...link, sortOrder: i }).run();
+  });
+
+  // Concerts: an ordered array of year groups — an object keyed by year
+  // would re-order integer-like keys ("2012") ahead of "2010/2011".
+  const concerts = readJson<Array<{ year: string; shows: string[] }>>(seedDir, 'concerts.json');
+  let concertOrder = 0;
+  for (const group of concerts) {
+    for (const name of group.shows) {
+      db.insert(schema.concerts).values({ year: group.year, name, sortOrder: concertOrder++ }).run();
+    }
+  }
+
+  const wifi = readJson<string[]>(seedDir, 'wifi.json');
+  wifi.forEach((name, i) => {
+    db.insert(schema.wifiNames).values({ name, sortOrder: i }).run();
   });
 }

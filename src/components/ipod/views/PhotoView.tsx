@@ -31,7 +31,7 @@ export default function PhotoView({ frame }: { frame: Frame }) {
       >
         {payload?.imagePath && (
           // eslint-disable-next-line @next/next/no-img-element -- fixed-size logical screen
-          <img src={payload.imagePath} alt={payload.title ?? ''} className={styles.photo} />
+          <img src={payload.imagePath} alt={payload.title ?? ''} className={styles.photo} decoding="async" />
         )}
         {payload?.text && <p className={styles.caption}>{payload.text}</p>}
       </div>

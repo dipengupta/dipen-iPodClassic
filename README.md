@@ -37,6 +37,9 @@ content persists in the `ipod-data` volume.
 Prev/Next skip tracks while something is playing (media keeps playing when
 you browse away — like a real iPod); otherwise they step the selection.
 
+Don't miss the **Rabbit Hole** section: photos, kitchen wins, concert
+history, amusing Wi-Fi names, and more.
+
 Scrolling clicks like the real thing (synthesized Web Audio tick) and vibrates
 on devices that support it (Android). The theme switcher in `Extras →
 Settings` swaps between the silver and black iPod.
@@ -49,6 +52,7 @@ Settings` swaps between the silver and black iPod.
 | `npm run build`      | Production build (standalone output)          |
 | `npm run seed`       | Migrate + seed the SQLite DB (skip if seeded) |
 | `npm run seed:force` | Wipe and reseed                               |
+| `npm run optimize:images` | Convert new images to right-sized WebP   |
 | `npm run db:generate`| Generate a Drizzle migration from schema.ts   |
 | `npm test`           | Vitest unit + integration tests               |
 | `npm run e2e`        | Playwright end-to-end suite (builds + seeds)  |

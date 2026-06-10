@@ -9,7 +9,8 @@ const VALID_VIEWS: ViewType[] = [
 
 const DATA_SOURCES = [
   'articles', 'youtube', 'guitars', 'reels', 'soundcloud',
-  'locations', 'mugs', 'gallery', 'photos', 'timeline', 'links',
+  'locations', 'mugs', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi',
+  'timeline', 'links',
 ];
 
 describe('menu tree integrity', () => {
@@ -44,9 +45,20 @@ describe('menu tree integrity', () => {
     }
   });
 
-  it('contains the six top-level sections in order', () => {
+  it('contains the five top-level sections in order', () => {
     expect(menuTree.children!.map((c: MenuNode) => c.label)).toEqual([
-      'Music', 'Photos', 'Articles', 'Collections', 'Professional', 'Extras',
+      'Music', 'Articles', 'Collections', 'Professional', 'Rabbit Hole',
+    ]);
+  });
+
+  it('the root title is the status-bar boot title', () => {
+    expect(menuTree.label).toBe("Dipen's iPod");
+  });
+
+  it('the Rabbit Hole holds the fun sections in order', () => {
+    expect(findNode('extras')?.children?.map((c) => c.label)).toEqual([
+      'About', 'Photos', 'Kitchen Wins', 'Concerts', 'Wi-Fi Names',
+      'Links', 'pennguytweets', 'Settings',
     ]);
   });
 

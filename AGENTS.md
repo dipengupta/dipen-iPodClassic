@@ -30,6 +30,7 @@ screen driven by a Zustand navigation stack and pure click-wheel math.
 | Wheel feel / input | `src/lib/input/wheel.ts` (pure; covered by `tests/unit/wheel.test.ts`) |
 | Live data source | `src/lib/fetchers/`, `fetch_meta` staleness, `tests/integration/fetchers.test.ts` + fixture XML in `tests/fixtures/` |
 | Theming | CSS custom properties in `app/globals.css` only |
+| New images | drop in `public/images/`, run `npm run optimize:images`, reference the `.webp` path in seed data |
 
 ## Invariants (do not break)
 

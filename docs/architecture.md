@@ -114,6 +114,20 @@ detail view, follow an external link, or run an action).
   normalized title (cross-posts), and excludes Substack's default
   "coming-soon" post.
 
+## Images
+
+The screen's largest physical rendering is ~800px wide (380px device at ~2×
+DPR), so **all images are committed pre-optimized**: WebP, max 800px long
+edge, quality 80 (`public/images/**` is ~3MB total). The committed
+`scripts/optimize-images.ts` (sharp) does the conversion and deletes the
+heavy original.
+
+**Adding an image:** drop the original under `public/images/...`, run
+`npm run optimize:images`, reference the resulting `.webp` path in seed
+data. There is no runtime optimizer (`next/image` is deliberately unused —
+right-sized static WebP + plain `<img loading="lazy" decoding="async">` is
+simpler, Docker-friendly, and predictable inside the scaled 320×240 screen).
+
 ## Theming
 
 Two skins — `silver` (default) and `black` — are CSS custom property sets on
