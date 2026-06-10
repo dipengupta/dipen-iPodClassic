@@ -9,7 +9,7 @@ const VALID_VIEWS: ViewType[] = [
 
 const DATA_SOURCES = [
   'articles', 'youtube', 'guitars', 'reels', 'soundcloud',
-  'locations', 'mugs', 'gallery', 'timeline', 'links',
+  'locations', 'mugs', 'gallery', 'photos', 'timeline', 'links',
 ];
 
 describe('menu tree integrity', () => {
@@ -44,9 +44,9 @@ describe('menu tree integrity', () => {
     }
   });
 
-  it('contains the five top-level sections in order', () => {
+  it('contains the six top-level sections in order', () => {
     expect(menuTree.children!.map((c: MenuNode) => c.label)).toEqual([
-      'Music', 'Articles', 'Collections', 'Professional', 'Extras',
+      'Music', 'Photos', 'Articles', 'Collections', 'Professional', 'Extras',
     ]);
   });
 

@@ -25,8 +25,8 @@
 }
 
 .label svg {
-  width: calc(var(--device-w) * 0.055);
-  height: auto;
+  width: calc(var(--device-w) * 0.05);
+  height: calc(var(--device-w) * 0.05);
 }
 
 .menu {

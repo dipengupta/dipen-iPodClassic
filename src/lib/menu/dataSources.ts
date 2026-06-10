@@ -1,4 +1,5 @@
-import type { FrameItem, MenuNode } from './types';
+import { getSoundcloudTracks } from '../players/soundcloud';
+import type { FrameItem, MenuNode, PlayTrack } from './types';
 
 /**
  * Client-side loaders: fetch a node's dataSource from the API routes and map
@@ -57,26 +58,59 @@ async function youtube(): Promise<FrameItem[]> {
   }
   return [...byYear.entries()]
     .sort(([a], [b]) => b.localeCompare(a))
-    .map(([year, videos]) => ({
-      id: `yt-${year}`,
-      label: year,
-      sublabel: `${videos.length} video${videos.length === 1 ? '' : 's'}`,
-      onSelect: {
-        kind: 'items',
-        title: year,
-        view: 'list',
-        items: videos.map((v) => ({
-          id: v.videoId,
-          label: v.title,
-          sublabel: v.publishedAt,
-          onSelect: {
-            kind: 'detail',
-            view: 'video',
-            payload: { title: v.title, videoId: v.videoId },
-          },
-        })),
-      },
+    .map(([year, videos]) => {
+      // The year is the playback queue: prev/next and auto-advance move
+      // through it via the persistent player.
+      const queue: PlayTrack[] = videos.map((v) => ({
+        id: v.videoId,
+        title: v.title,
+        description: v.description,
+        date: v.publishedAt,
+      }));
+      return {
+        id: `yt-${year}`,
+        label: year,
+        sublabel: `${videos.length} video${videos.length === 1 ? '' : 's'}`,
+        onSelect: {
+          kind: 'items' as const,
+          title: year,
+          view: 'list' as const,
+          items: videos.map((v, i) => ({
+            id: v.videoId,
+            label: v.title,
+            sublabel: v.publishedAt,
+            onSelect: { kind: 'play' as const, source: 'youtube' as const, index: i, queue },
+          })),
+        },
+      };
+    });
+}
+
+interface SoundcloudFallbackRow {
+  id: number;
+  title: string;
+  url: string;
+}
+
+async function soundcloud(): Promise<FrameItem[]> {
+  // Live track list from the persistent widget (ascending, like the old
+  // site's iPod). If the widget is slow or blocked, fall back to the seeded
+  // rows that link out — never an eternal spinner.
+  const tracks = await getSoundcloudTracks();
+  if (tracks && tracks.length > 0) {
+    return tracks.map((track, i) => ({
+      id: `sc-${track.id}`,
+      label: track.title,
+      sublabel: track.date ? track.date.slice(0, 10).replace(/\//g, '-') : undefined,
+      onSelect: { kind: 'play', source: 'soundcloud', index: i, queue: tracks },
     }));
+  }
+  const { items } = await fetchJson<{ items: SoundcloudFallbackRow[] }>('/api/soundcloud');
+  return items.map((row) => ({
+    id: `sc-fallback-${row.id}`,
+    label: row.title,
+    onSelect: { kind: 'external', href: row.url },
+  }));
 }
 
 interface GuitarRow {
@@ -217,6 +251,16 @@ async function gallery(): Promise<FrameItem[]> {
   }));
 }
 
+async function photos(): Promise<FrameItem[]> {
+  const { items } = await fetchJson<{ items: GalleryRow[] }>('/api/content/photos');
+  return items.map((p) => ({
+    id: `photo-${p.id}`,
+    label: p.title,
+    imagePath: p.imagePath,
+    flipText: p.description || p.title,
+  }));
+}
+
 interface TimelineRow {
   id: number;
   role: string;
@@ -264,9 +308,11 @@ const builders: Record<string, () => Promise<FrameItem[]>> = {
   youtube,
   guitars,
   reels,
+  soundcloud,
   locations,
   mugs,
   gallery,
+  photos,
   timeline,
   links,
 };

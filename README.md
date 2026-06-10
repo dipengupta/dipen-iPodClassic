@@ -1,9 +1,9 @@
 # dipen-ipod-classic
 
 Dipen's personal website, rebuilt as a 1:1 **iPod Classic**. Spin the click
-wheel (or use the arrow keys) to browse guitars in Cover Flow, read articles,
-flip through a 64-mug collection, watch YouTube videos, and play SoundCloud
-tracks — all inside a 320×240 screen.
+wheel (or use the arrow keys) to browse guitars and photos in Cover Flow,
+read articles, flip through a 64-mug collection, watch YouTube videos, and
+play SoundCloud tracks — all inside a 320×240 screen.
 
 ## Quickstart
 
@@ -34,6 +34,9 @@ content persists in the `ipod-data` volume.
 | Prev / Next     | Tap wheel left / right      | ← / →                 |
 | Play / Pause    | Tap the bottom of the wheel | Space                 |
 
+Prev/Next skip tracks while something is playing (media keeps playing when
+you browse away — like a real iPod); otherwise they step the selection.
+
 Scrolling clicks like the real thing (synthesized Web Audio tick) and vibrates
 on devices that support it (Android). The theme switcher in `Extras →
 Settings` swaps between the silver and black iPod.
@@ -63,7 +66,7 @@ Secrets live in `.env` only — never in code.
 | ------------------------ | ---------------------------------------------------------- |
 | YouTube videos           | Seeded archive + live channel RSS merge (6h cache)        |
 | Articles                 | 10 seeded full-text articles + Substack RSS additions (24h cache) |
-| SoundCloud               | Live embedded widget                                       |
+| SoundCloud               | Live track list + audio via the hidden persistent widget   |
 | Instagram reels, tweets  | Seeded (no reliable public API); refresh via data exports  |
 | Guitars, mugs, places, timeline, links | Seeded from `src/data/seed/*.json`          |
 

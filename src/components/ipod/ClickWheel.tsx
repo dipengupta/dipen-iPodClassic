@@ -111,24 +111,21 @@ export default function ClickWheel() {
     >
       <span className={`${styles.label} ${styles.menu}`}>MENU</span>
       <span className={`${styles.label} ${styles.prev}`}>
-        <svg viewBox="0 0 24 12" width="22" height="11" fill="currentColor" aria-hidden="true">
-          <polygon points="10,0 10,12 0,6" />
-          <polygon points="20,0 20,12 10,6" />
-          <rect x="21" y="0" width="3" height="12" />
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M7 6h2v12H7z" />
+          <path d="M20 6v12l-9-6z" />
         </svg>
       </span>
       <span className={`${styles.label} ${styles.next}`}>
-        <svg viewBox="0 0 24 12" width="22" height="11" fill="currentColor" aria-hidden="true">
-          <polygon points="14,0 14,12 24,6" transform="scale(-1,1) translate(-24,0)" />
-          <polygon points="4,0 4,12 14,6" transform="scale(-1,1) translate(-24,0)" />
-          <rect x="0" y="0" width="3" height="12" />
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M15 6h2v12h-2z" />
+          <path d="M4 6v12l9-6z" />
         </svg>
       </span>
       <span className={`${styles.label} ${styles.playPause}`}>
-        <svg viewBox="0 0 26 12" width="24" height="11" fill="currentColor" aria-hidden="true">
-          <polygon points="0,0 0,12 10,6" />
-          <rect x="14" y="0" width="4" height="12" />
-          <rect x="21" y="0" width="4" height="12" />
+        <svg viewBox="0 0 28 24" fill="currentColor" aria-hidden="true">
+          <path d="M4 5l9 7-9 7z" />
+          <path d="M17 5h3v14h-3zM22 5h3v14h-3z" />
         </svg>
       </span>
       <button

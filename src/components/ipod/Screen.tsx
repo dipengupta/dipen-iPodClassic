@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import PlayersLayer from './PlayersLayer';
 import ScreenRouter from './ScreenRouter';
 import StatusBar from './StatusBar';
 import styles from './Screen.module.css';
@@ -32,6 +33,7 @@ export default function Screen() {
         <div className={styles.logical}>
           <StatusBar />
           <ScreenRouter />
+          <PlayersLayer />
         </div>
       </div>
     </div>

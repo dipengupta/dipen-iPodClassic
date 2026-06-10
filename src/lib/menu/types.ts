@@ -18,6 +18,7 @@ export type DataSourceKey =
   | 'locations'
   | 'mugs'
   | 'gallery'
+  | 'photos'
   | 'timeline'
   | 'links';
 
@@ -49,7 +50,6 @@ export interface DetailPayload {
   publishedLabel?: string;
   videoId?: string;
   reelShortcode?: string;
-  trackUrl?: string;
   /** TextReaderView lazily fetches the body for this slug. */
   articleSlug?: string;
 }
@@ -65,9 +65,21 @@ export interface FrameItem {
   onSelect?: SelectSpec;
 }
 
+/** One entry in a playback queue: a YouTube video or a SoundCloud track. */
+export interface PlayTrack {
+  /** videoId for YouTube; the widget index (stringified) for SoundCloud. */
+  id: string;
+  title: string;
+  description?: string;
+  date?: string;
+}
+
+export type PlaybackSource = 'youtube' | 'soundcloud';
+
 export type SelectSpec =
   | { kind: 'node'; node: MenuNode }
   | { kind: 'items'; title: string; view: ViewType; items: FrameItem[] }
   | { kind: 'detail'; view: ViewType; payload: DetailPayload }
   | { kind: 'external'; href: string }
-  | { kind: 'action'; action: 'toggleTheme' | 'shuffleTweet' };
+  | { kind: 'action'; action: 'toggleTheme' | 'shuffleTweet' }
+  | { kind: 'play'; source: PlaybackSource; index: number; queue: PlayTrack[] };

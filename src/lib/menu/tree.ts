@@ -46,12 +46,9 @@ export const menuTree: MenuNode = {
         {
           id: 'music.soundcloud',
           label: 'SoundCloud',
-          view: 'nowPlaying',
+          view: 'list',
+          dataSource: 'soundcloud',
           previewImage: '/images/music/soundcloud.png',
-          payload: {
-            title: 'The Side Project',
-            trackUrl: 'https://soundcloud.com/dipen-gupta/tracks',
-          },
         },
         {
           id: 'music.octavium',
@@ -65,6 +62,13 @@ export const menuTree: MenuNode = {
           },
         },
       ],
+    },
+    {
+      id: 'photos',
+      label: 'Photos',
+      view: 'coverflow',
+      dataSource: 'photos',
+      previewImage: '/images/home/main.jpeg',
     },
     {
       id: 'articles',

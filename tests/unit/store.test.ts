@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { FrameItem } from '@/lib/menu/types';
+import type { FrameItem, PlayTrack } from '@/lib/menu/types';
 import { findNode, menuTree } from '@/lib/menu/tree';
 import { SCROLL_STEP, useIpodStore } from '@/lib/store/ipodStore';
 
@@ -101,6 +101,60 @@ describe('media + tweet inputs', () => {
     const before = store().tweetNonce;
     store().handleInput({ type: 'select' });
     expect(store().tweetNonce).toBe(before + 1);
+  });
+});
+
+describe('playback', () => {
+  const queue: PlayTrack[] = [
+    { id: 'vid-a', title: 'First video' },
+    { id: 'vid-b', title: 'Second video' },
+    { id: 'vid-c', title: 'Third video' },
+  ];
+
+  it('playTrack sets the queue and pushes a now-playing frame', () => {
+    store().playTrack('youtube', queue, 1);
+    expect(store().playback).toMatchObject({ source: 'youtube', index: 1, playing: true });
+    const top = store().stack[store().stack.length - 1];
+    expect(top.view).toBe('video');
+    expect(top.payload?.videoId).toBe('vid-b');
+  });
+
+  it('skipTrack replaces the now-playing frame in place and clamps at the ends', () => {
+    store().playTrack('youtube', queue, 0);
+    const depth = store().stack.length;
+    const key = store().stack[depth - 1].key;
+    store().skipTrack(1);
+    expect(store().playback.index).toBe(1);
+    expect(store().stack).toHaveLength(depth);
+    expect(store().stack[depth - 1].key).toBe(key);
+    store().skipTrack(-1);
+    store().skipTrack(-1); // already at 0
+    expect(store().playback.index).toBe(0);
+    store().playTrack('youtube', queue, 2);
+    store().skipTrack(1); // already at the end
+    expect(store().playback.index).toBe(2);
+  });
+
+  it('prev/next act as transport controls while media is loaded', () => {
+    store().playTrack('youtube', queue, 0);
+    store().handleInput({ type: 'menu' }); // back to the menu, media keeps playing
+    store().handleInput({ type: 'next' });
+    expect(store().playback.index).toBe(1);
+    // The skip re-opened the now-playing frame on top.
+    expect(store().stack[store().stack.length - 1].view).toBe('video');
+  });
+
+  it('soundcloud playback pushes the nowPlaying card', () => {
+    const scQueue: PlayTrack[] = [{ id: '4', title: 'Old jam' }];
+    store().playTrack('soundcloud', scQueue, 0);
+    expect(store().stack[store().stack.length - 1].view).toBe('nowPlaying');
+    expect(store().playback.source).toBe('soundcloud');
+  });
+
+  it('setPlaying reflects player state without touching the queue', () => {
+    store().playTrack('youtube', queue, 0);
+    store().setPlaying(false);
+    expect(store().playback).toMatchObject({ playing: false, index: 0, source: 'youtube' });
   });
 });
 

@@ -1,48 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { useIpodStore, type Frame } from '@/lib/store/ipodStore';
+import type { Frame } from '@/lib/store/ipodStore';
 import styles from './VideoView.module.css';
 
-/** Full-screen-takeover player for YouTube videos and Instagram reels. */
+/**
+ * YouTube videos play in the persistent PlayersLayer stage that covers this
+ * frame, so the YT branch is just a black backdrop for the slide animation.
+ * Instagram reels render here directly (no persistence needed).
+ */
 export default function VideoView({ frame }: { frame: Frame }) {
-  const playPauseNonce = useIpodStore((s) => s.playPauseNonce);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [playing, setPlaying] = useState(true);
-  const mounted = useRef(false);
   const payload = frame.payload;
-
-  // YouTube IFrame API: wheel center / space toggles play-pause via postMessage.
-  useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true;
-      return;
-    }
-    if (!payload?.videoId || !iframeRef.current?.contentWindow) return;
-    const next = !playing;
-    setPlaying(next);
-    iframeRef.current.contentWindow.postMessage(
-      JSON.stringify({ event: 'command', func: next ? 'playVideo' : 'pauseVideo', args: [] }),
-      '*',
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the play/pause press
-  }, [playPauseNonce]);
-
-  if (payload?.videoId) {
-    return (
-      <div className={styles.stage}>
-        <iframe
-          ref={iframeRef}
-          className={styles.youtube}
-          data-testid="youtube-player"
-          src={`https://www.youtube.com/embed/${payload.videoId}?enablejsapi=1&autoplay=1&playsinline=1&rel=0`}
-          title={payload.title ?? 'YouTube video'}
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-    );
-  }
 
   if (payload?.reelShortcode) {
     return (
@@ -69,5 +36,5 @@ export default function VideoView({ frame }: { frame: Frame }) {
     );
   }
 
-  return <div className={styles.stage} />;
+  return <div className={styles.stage} data-testid="video-backdrop" />;
 }

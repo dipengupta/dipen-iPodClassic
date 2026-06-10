@@ -6,15 +6,20 @@ import styles from './CoverFlowView.module.css';
 
 /** Covers rendered either side of focus; the rest stay unmounted. */
 const RENDER_WINDOW = 5;
-const FLIP_TEXT_HEIGHT = 96;
+const FLIP_TEXT_HEIGHT = 124;
 
 function coverTransform(offset: number): string {
   if (offset === 0) {
-    return 'translateX(0) translateZ(60px) rotateY(0deg)';
+    return 'translateX(0) translateZ(70px) rotateY(0deg)';
   }
   const side = Math.sign(offset);
-  const x = side * (52 + Math.min(Math.abs(offset), RENDER_WINDOW) * 24);
-  return `translateX(${x}px) translateZ(-40px) rotateY(${-side * 62}deg)`;
+  const x = side * (62 + Math.min(Math.abs(offset), RENDER_WINDOW) * 26);
+  return `translateX(${x}px) translateZ(-46px) rotateY(${-side * 62}deg)`;
+}
+
+function coverOpacity(offset: number): number {
+  const distance = Math.abs(offset);
+  return distance >= 3 ? Math.max(0.55, 1 - (distance - 2) * 0.15) : 1;
 }
 
 export default function CoverFlowView({ frame }: { frame: Frame }) {
@@ -54,6 +59,7 @@ export default function CoverFlowView({ frame }: { frame: Frame }) {
               className={styles.coverSlot}
               style={{
                 transform: coverTransform(offset),
+                opacity: coverOpacity(offset),
                 zIndex: 10 - Math.abs(offset),
                 willChange: Math.abs(offset) <= 2 ? 'transform' : undefined,
               }}

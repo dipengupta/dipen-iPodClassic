@@ -5,9 +5,16 @@ import styles from './StatusBar.module.css';
 
 export default function StatusBar() {
   const title = useIpodStore((s) => s.stack[s.stack.length - 1].title);
+  const playing = useIpodStore((s) => s.playback.playing);
   return (
     <div className={styles.bar} data-testid="status-bar">
-      <span className={styles.side} />
+      <span className={styles.side}>
+        {playing && (
+          <span className={styles.playFlag} data-testid="playing-flag" aria-label="Now playing">
+            ▶
+          </span>
+        )}
+      </span>
       <span className={styles.title}>{title}</span>
       <span className={styles.side}>
         <svg viewBox="0 0 22 11" width="20" height="10" aria-hidden="true">

@@ -24,3 +24,12 @@
   align-items: center;
   justify-content: flex-end;
 }
+
+.side:first-child {
+  justify-content: flex-start;
+}
+
+.playFlag {
+  font-size: 9px;
+  color: #1d6fb8;
+}

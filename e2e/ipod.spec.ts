@@ -9,15 +9,15 @@ test.beforeEach(async ({ page }) => {
 
 test('boots to the main menu with a preview pane', async ({ page }) => {
   const rows = page.getByTestId('menu-row');
-  await expect(rows).toHaveCount(5);
-  for (const [i, label] of ['Music', 'Articles', 'Collections', 'Professional', 'Extras'].entries()) {
+  await expect(rows).toHaveCount(6);
+  for (const [i, label] of ['Music', 'Photos', 'Articles', 'Collections', 'Professional', 'Extras'].entries()) {
     await expect(rows.nth(i)).toContainText(label);
   }
   await expect(rows.first()).toHaveAttribute('data-selected', 'true');
   await expect(page.getByTestId('status-bar')).toContainText('iPod');
 });
 
-test('keyboard-navigates Music → YouTube → year → playing video', async ({ page }) => {
+test('plays a YouTube video and keeps playing after MENU (persistent player)', async ({ page }) => {
   await page.keyboard.press('Enter'); // Music
   await expect(page.getByTestId('status-bar')).toContainText('Music');
   await page.keyboard.press('ArrowDown'); // YouTube
@@ -28,15 +28,48 @@ test('keyboard-navigates Music → YouTube → year → playing video', async ({
   await page.keyboard.press('Enter'); // newest year
   await expect(page.getByTestId('menu-row').first()).toBeVisible();
   await page.keyboard.press('Enter'); // first video
-  const player = page.getByTestId('youtube-player');
-  await expect(player).toBeVisible();
-  await expect(player).toHaveAttribute('src', /youtube\.com\/embed\/[\w-]+\?enablejsapi=1/);
-  // MENU backs out of the video.
+  const stage = page.getByTestId('yt-stage');
+  await expect(stage).toHaveAttribute('data-watching', 'true');
+  // The IFrame API replaces the inner div with the player iframe.
+  const playerFrame = page.locator('#ipod-yt-player');
+  await expect(playerFrame).toBeAttached({ timeout: 15000 });
+  // MENU backs out of the video view, but the player must STAY mounted so
+  // the audio keeps going — the stage just drops behind the menu.
   await page.keyboard.press('Escape');
-  await expect(player).toHaveCount(0);
+  await expect(stage).not.toHaveAttribute('data-watching', 'true');
+  await expect(playerFrame).toBeAttached();
+  await expect(page.getByTestId('menu-row').first()).toBeVisible();
+});
+
+test('photos cover flow shows profile pics and flips to captions', async ({ page }) => {
+  await page.keyboard.press('ArrowDown'); // Photos
+  await page.keyboard.press('Enter');
+  const coverflow = page.getByTestId('coverflow');
+  await expect(coverflow).toBeVisible();
+  await expect(coverflow).toContainText('1 of 10');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await expect(coverflow).toContainText('3 of 10');
+  await page.keyboard.press('Enter');
+  await expect(coverflow).toHaveAttribute('data-flipped', 'true');
+  await expect(page.getByTestId('cover-back')).not.toBeEmpty();
+  await page.keyboard.press('Escape');
+  await expect(coverflow).not.toHaveAttribute('data-flipped', 'true');
+});
+
+test('SoundCloud lists tracks (or the fallback link) as an iPod menu', async ({ page }) => {
+  await page.keyboard.press('Enter'); // Music
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown'); // SoundCloud
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('SoundCloud');
+  // Live widget tracks, or the seeded fallback row — never a stuck spinner.
+  await expect(page.getByTestId('menu-row').first()).toBeVisible({ timeout: 15000 });
 });
 
 test('reads an article: scroll with the wheel, View Original links out', async ({ page }) => {
+  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown'); // Articles
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText("Reversing into learner's mindset");
@@ -78,6 +111,7 @@ test('guitar Cover Flow: browse covers and flip for the caption', async ({ page 
 test('professional timeline and links sections have content', async ({ page }) => {
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown'); // Professional
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('Software Developer');
@@ -97,7 +131,7 @@ test('professional timeline and links sections have content', async ({ page }) =
 
 test('theme toggle switches to the black iPod and persists across reload', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'silver');
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Extras
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Extras
   await page.keyboard.press('Enter');
   for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
@@ -110,7 +144,7 @@ test('theme toggle switches to the black iPod and persists across reload', async
 });
 
 test('random tweet view shows a tweet and shuffles on center press', async ({ page }) => {
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Extras
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Extras
   await page.keyboard.press('Enter');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown'); // pennguytweets

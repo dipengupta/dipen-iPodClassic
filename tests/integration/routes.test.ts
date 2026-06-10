@@ -17,12 +17,22 @@ beforeAll(() => {
 
 describe('/api/content/[section]', () => {
   it('serves every registered section', async () => {
-    for (const section of ['guitars', 'mugs', 'locations', 'gallery', 'timeline', 'links', 'reels']) {
+    for (const section of ['guitars', 'mugs', 'locations', 'gallery', 'photos', 'timeline', 'links', 'reels']) {
       const res = await getContent(req, params({ section }));
       expect(res.status, section).toBe(200);
       const { items } = await res.json();
       expect(items.length, section).toBeGreaterThan(0);
     }
+  });
+
+  it('splits profile photos out of the gallery', async () => {
+    const photos = await (await getContent(req, params({ section: 'photos' }))).json();
+    expect(photos.items).toHaveLength(10);
+    for (const item of photos.items) {
+      expect(item.category).toBe('profile');
+    }
+    const gallery = await (await getContent(req, params({ section: 'gallery' }))).json();
+    expect(gallery.items.every((g: { category: string }) => g.category !== 'profile')).toBe(true);
   });
 
   it('404s unknown sections', async () => {

@@ -34,12 +34,40 @@ pixels once; never query the viewport inside a view.
 2. `src/lib/input/keyboard.ts` maps keys to the same `IpodInput` events.
 3. `ipodStore.handleInput` interprets events **per the active view**: menus
    move the selection, text views scroll by `SCROLL_STEP`, coverflow flips on
-   select, media views treat select as play/pause.
+   select, media views treat select as play/pause. prev/next skip tracks
+   whenever media is loaded; otherwise they step the selection.
 4. Every effective tick fires `clicker.tick()` (`src/lib/audio/clicker.ts`):
    a synthesized Web Audio click + `navigator.vibrate(5)`. The AudioContext is
    resumed on the first user gesture (iOS requirement; iOS has no vibration).
 
 All wheel math is pure and unit-tested — tune `DETENT_DEG` fearlessly.
+
+## Persistent players (media survives navigation)
+
+Ported from the old site's `ipod.js`: **players are created once and never
+unmounted** — unmounting or moving an iframe reloads it, which kills
+playback. `src/components/ipod/PlayersLayer.tsx` (mounted once in
+`Screen.tsx`) owns both:
+
+- **YouTube** (`src/lib/players/youtube.ts`): one `YT.Player` (IFrame API) in
+  a stage covering the screen body. The stage is *revealed* (opacity +
+  z-index, never `display:none`) only while the top frame is the YouTube
+  now-playing frame; behind the menu the audio keeps playing. `onStateChange`
+  reports play/pause to the store and auto-advances on end.
+- **SoundCloud** (`src/lib/players/soundcloud.ts`): a permanently off-screen
+  audio-only widget. On READY, `getSounds()` yields the track list (reversed
+  to ascending — track ids keep the widget's index for `skip()`), which the
+  `soundcloud` dataSource awaits (6 s timeout → seeded fallback rows that
+  link out). `PLAY/PAUSE/FINISH` events report state back.
+
+The store's `playback` slice (`{ source, index, playing, queue }`) is the
+single source of truth: `playTrack` pushes (or in-place updates) the
+now-playing frame, `skipTrack` moves through the queue, and starting one
+source pauses the other. While media is loaded, the **prev/next wheel
+buttons are transport controls** (selection-stepping otherwise), and the
+status bar shows a ▶ flag. `NowPlayingView` is a passive card (EQ bars) over
+the hidden SoundCloud audio; `VideoView`'s YouTube branch is just a backdrop
+under the raised stage (its Instagram-reel branch still renders inline).
 
 ## Navigation: the frame stack
 

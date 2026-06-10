@@ -6,6 +6,8 @@ import type {
   DetailPayload,
   FrameItem,
   MenuNode,
+  PlaybackSource,
+  PlayTrack,
   SelectSpec,
   ViewType,
 } from '../menu/types';
@@ -63,10 +65,19 @@ function makeFrame(partial: Omit<Frame, 'key' | 'selectedIndex' | 'scrollOffset'
   };
 }
 
+export interface PlaybackState {
+  source: PlaybackSource | null;
+  index: number;
+  /** Actual player state, reported back by the persistent players. */
+  playing: boolean;
+  queue: PlayTrack[];
+}
+
 export interface IpodState {
   stack: Frame[];
   theme: Theme;
-  /** Bumped on play/pause press; media views subscribe and toggle themselves. */
+  playback: PlaybackState;
+  /** Bumped on play/pause press; PlayersLayer toggles the active source. */
   playPauseNonce: number;
   /** Bumped when the tweet view should shuffle to another random tweet. */
   tweetNonce: number;
@@ -77,6 +88,9 @@ export interface IpodState {
   pushNode: (node: MenuNode) => void;
   pushItems: (title: string, view: ViewType, items: FrameItem[]) => void;
   pushDetail: (view: ViewType, payload: DetailPayload) => void;
+  playTrack: (source: PlaybackSource, queue: PlayTrack[], index: number) => void;
+  skipTrack: (delta: 1 | -1) => void;
+  setPlaying: (playing: boolean) => void;
   pop: () => void;
   setFrameItems: (key: number, items: FrameItem[]) => void;
   setMaxScroll: (key: number, maxScroll: number) => void;
@@ -98,6 +112,7 @@ function initialStack(): Frame[] {
 export const useIpodStore = create<IpodState>((set, get) => ({
   stack: initialStack(),
   theme: 'silver',
+  playback: { source: null, index: -1, playing: false, queue: [] },
   playPauseNonce: 0,
   tweetNonce: 0,
 
@@ -145,6 +160,43 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     set((s) => ({
       stack: [...s.stack, makeFrame({ title: payload.title ?? '', view, items: [], payload })],
     }));
+  },
+
+  playTrack: (source, queue, index) => {
+    const track = queue[index];
+    if (!track) return;
+    set({ playback: { source, queue, index, playing: true } });
+    const view: ViewType = source === 'youtube' ? 'video' : 'nowPlaying';
+    const payload: DetailPayload =
+      source === 'youtube'
+        ? { title: track.title, videoId: track.id }
+        : { title: 'Now Playing' };
+    const { stack } = get();
+    const top = stack[stack.length - 1];
+    if (top.view === view) {
+      // Track-to-track skip: swap content in place, no slide animation.
+      set((s) => ({
+        stack: s.stack.map((f, i) =>
+          i === s.stack.length - 1 ? { ...f, title: payload.title ?? '', payload } : f,
+        ),
+      }));
+    } else {
+      get().pushDetail(view, payload);
+    }
+  },
+
+  skipTrack: (delta) => {
+    const { playback, playTrack } = get();
+    if (!playback.source) return;
+    const next = playback.index + delta;
+    if (next < 0 || next >= playback.queue.length) return;
+    playTrack(playback.source, playback.queue, next);
+  },
+
+  setPlaying: (playing) => {
+    set((s) =>
+      s.playback.playing === playing ? s : { playback: { ...s.playback, playing } },
+    );
   },
 
   pop: () => {
@@ -199,8 +251,11 @@ export const useIpodStore = create<IpodState>((set, get) => ({
 
       case 'prev':
       case 'next': {
-        // Side buttons step selection in browsing views (handy in coverflow).
-        if (top.view === 'coverflow' || top.view === 'list' || top.view === 'splitMenu') {
+        // Transport controls while media is loaded (like the real iPod);
+        // otherwise they step the selection in browsing views.
+        if (get().playback.source) {
+          get().skipTrack(input.type === 'next' ? 1 : -1);
+        } else if (top.view === 'coverflow' || top.view === 'list' || top.view === 'splitMenu') {
           get().handleInput({ type: 'scroll', dir: input.type === 'next' ? 1 : -1 });
         }
         break;
@@ -247,7 +302,11 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     }
   },
 
-  reset: () => set({ stack: initialStack() }),
+  reset: () =>
+    set({
+      stack: initialStack(),
+      playback: { source: null, index: -1, playing: false, queue: [] },
+    }),
 }));
 
 function executeSelect(state: IpodState, spec: SelectSpec): void {
@@ -263,6 +322,9 @@ function executeSelect(state: IpodState, spec: SelectSpec): void {
       break;
     case 'external':
       window.open(spec.href, '_blank', 'noopener');
+      break;
+    case 'play':
+      state.playTrack(spec.source, spec.queue, spec.index);
       break;
     case 'action':
       if (spec.action === 'toggleTheme') {

@@ -8,12 +8,6 @@
   position: relative;
 }
 
-.youtube {
-  width: 320px;
-  height: 220px;
-  border: 0;
-}
-
 .reelScaler {
   /* 326px-wide embed scaled into the 320px logical screen */
   width: 326px;
