@@ -1,0 +1,14 @@
+services:
+  ipod:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ipod-data:/data
+    env_file:
+      - path: .env
+        required: false
+    restart: unless-stopped
+
+volumes:
+  ipod-data:

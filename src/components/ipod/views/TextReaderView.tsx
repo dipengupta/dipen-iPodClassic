@@ -50,6 +50,9 @@ export default function TextReaderView({ frame }: { frame: Frame }) {
         <div
           ref={contentRef}
           className={styles.content}
+          data-testid="reader-content"
+          data-scroll={frame.scrollOffset}
+          data-max-scroll={frame.maxScroll}
           style={{ transform: `translateY(${-frame.scrollOffset}px)` }}
         >
           {payload?.publishedLabel && <p className={styles.muted}>{payload.publishedLabel}</p>}

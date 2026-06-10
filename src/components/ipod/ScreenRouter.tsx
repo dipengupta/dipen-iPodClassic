@@ -48,15 +48,20 @@ export default function ScreenRouter() {
   const top = useIpodStore((s) => s.stack[s.stack.length - 1]);
   const [outgoing, setOutgoing] = useState<Outgoing | null>(null);
   const prevTop = useRef<Frame>(top);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     const prev = prevTop.current;
     prevTop.current = top;
+    // Same frame re-rendering (e.g. its items finished loading) is not a
+    // navigation — and must not cancel a pending outgoing-layer unmount.
     if (prev.key === top.key) return;
     setOutgoing({ frame: prev, dir: top.key > prev.key ? 'push' : 'pop' });
-    const timer = setTimeout(() => setOutgoing(null), SLIDE_MS);
-    return () => clearTimeout(timer);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setOutgoing(null), SLIDE_MS);
   }, [top]);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   const dir = outgoing?.dir;
   return (
