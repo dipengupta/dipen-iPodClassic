@@ -1,0 +1,42 @@
+.split {
+  display: flex;
+  height: 100%;
+}
+
+.left {
+  width: 50%;
+  border-right: 1px solid #b9bbc0;
+}
+
+.preview {
+  width: 50%;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fdfdfd 0%, #ececee 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewFallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #a9abb1;
+}
+
+.previewGlyph {
+  font-size: 42px;
+  line-height: 1;
+}
+
+.previewLabel {
+  font-size: 11px;
+  font-weight: 600;
+}

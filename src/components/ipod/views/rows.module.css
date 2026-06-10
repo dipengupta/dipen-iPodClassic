@@ -1,0 +1,80 @@
+.list {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.rows {
+  will-change: transform;
+}
+
+.row {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rowLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowSub {
+  font-size: 10px;
+  font-weight: 400;
+  color: #777;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selected {
+  background: linear-gradient(180deg, #7db9f5 0%, #4a90e8 49%, #1f64d2 50%, #2e7ae0 100%);
+  color: #fff;
+}
+
+.selected .rowSub {
+  color: #dce9fb;
+}
+
+.chevron {
+  font-size: 10px;
+  color: #999;
+}
+
+.selected .chevron {
+  color: #fff;
+}
+
+.scrollbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 7px;
+  border-left: 1px solid #b9bbc0;
+  background: linear-gradient(90deg, #e8e9eb, #d2d3d6);
+}
+
+.scrollThumb {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #8e9097, #6e7077);
+}
+
+.empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 11px;
+}

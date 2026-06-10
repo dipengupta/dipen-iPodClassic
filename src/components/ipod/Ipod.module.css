@@ -1,0 +1,72 @@
+.stage {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px;
+}
+
+.device {
+  /* iPod Classic 6th gen is 61.8mm x 103.5mm — aspect ratio ~0.6 */
+  --device-w: min(380px, 100vw - 24px, calc((100dvh - 80px) * 0.6));
+  width: var(--device-w);
+  aspect-ratio: 0.6;
+  border-radius: calc(var(--device-w) * 0.055);
+  background: var(--shell-face);
+  border: 1px solid var(--shell-edge);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.12),
+    0 18px 50px var(--shell-shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(var(--device-w) * 0.07) calc(var(--device-w) * 0.06);
+  gap: calc(var(--device-w) * 0.065);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.hints {
+  font-size: 12px;
+  color: var(--hint-color);
+  letter-spacing: 0.02em;
+}
+
+.itunesLink {
+  position: fixed;
+  top: 14px;
+  right: 18px;
+  font-size: 12px;
+  color: var(--hint-color);
+  text-decoration: none;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 4px 10px;
+  opacity: 0.75;
+}
+
+.itunesLink:hover {
+  opacity: 1;
+}
+
+/* Mobile: device is the page */
+@media (max-width: 767px), (pointer: coarse) {
+  .stage {
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    gap: 6px;
+  }
+
+  .device {
+    --device-w: min(100vw - 16px, calc((100dvh - 30px) * 0.6));
+  }
+
+  .hints,
+  .itunesLink {
+    display: none;
+  }
+}

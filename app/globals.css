@@ -1,0 +1,57 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: var(--backdrop);
+  transition: background 300ms ease;
+}
+
+/* ---- Device themes: silver (default) and black iPod Classic ---- */
+
+:root,
+[data-theme='silver'] {
+  --backdrop: radial-gradient(ellipse at 50% 35%, #f4f4f6 0%, #d9dadd 70%, #c2c3c7 100%);
+
+  --shell-face: linear-gradient(160deg, #e9eaec 0%, #d4d5d9 45%, #c8c9cd 55%, #dddee1 100%);
+  --shell-edge: #9a9ba0;
+  --shell-shadow: rgba(40, 42, 48, 0.45);
+
+  --screen-bezel: linear-gradient(180deg, #36383c 0%, #1c1d20 100%);
+
+  --wheel-bg: radial-gradient(circle at 35% 30%, #ffffff 0%, #f2f2f4 55%, #e2e3e6 100%);
+  --wheel-edge: rgba(0, 0, 0, 0.18);
+  --wheel-label: #9b9da3;
+  --center-bg: radial-gradient(circle at 40% 35%, #f5f5f7 0%, #d9dadd 70%, #cbccd0 100%);
+  --center-edge: rgba(0, 0, 0, 0.22);
+
+  --hint-color: #6b6d73;
+}
+
+[data-theme='black'] {
+  --backdrop: radial-gradient(ellipse at 50% 35%, #3a3b40 0%, #232428 70%, #151619 100%);
+
+  --shell-face: linear-gradient(160deg, #3d3e43 0%, #2a2b2f 45%, #232428 55%, #34353a 100%);
+  --shell-edge: #0c0d0f;
+  --shell-shadow: rgba(0, 0, 0, 0.75);
+
+  --screen-bezel: linear-gradient(180deg, #2c2d31 0%, #131416 100%);
+
+  --wheel-bg: radial-gradient(circle at 35% 30%, #3a3b40 0%, #28292d 55%, #1d1e22 100%);
+  --wheel-edge: rgba(255, 255, 255, 0.08);
+  --wheel-label: #8e9096;
+  --center-bg: radial-gradient(circle at 40% 35%, #38393e 0%, #232428 70%, #1a1b1f 100%);
+  --center-edge: rgba(255, 255, 255, 0.1);
+
+  --hint-color: #9b9da3;
+}

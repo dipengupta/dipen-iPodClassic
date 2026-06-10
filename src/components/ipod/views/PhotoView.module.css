@@ -1,0 +1,22 @@
+.window {
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+.content {
+  will-change: transform;
+}
+
+.photo {
+  width: 320px;
+  display: block;
+}
+
+.caption {
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #f0f0f2;
+  white-space: pre-wrap;
+}

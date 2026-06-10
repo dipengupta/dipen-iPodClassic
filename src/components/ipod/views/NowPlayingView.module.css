@@ -1,0 +1,10 @@
+.stage {
+  height: 100%;
+  background: #1b1c1f;
+}
+
+.widget {
+  width: 320px;
+  height: 220px;
+  border: 0;
+}

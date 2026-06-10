@@ -1,0 +1,72 @@
+.reader {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.window {
+  overflow: hidden;
+}
+
+.content {
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.45;
+  will-change: transform;
+}
+
+.content :global(p) {
+  margin-bottom: 8px;
+}
+
+.content :global(img) {
+  max-width: 100%;
+  height: auto;
+}
+
+.content :global(a) {
+  color: #1f64d2;
+}
+
+.content :global(h1),
+.content :global(h2),
+.content :global(h3) {
+  font-size: 12px;
+  margin: 8px 0 4px;
+}
+
+.content :global(blockquote) {
+  border-left: 2px solid #c5c7cc;
+  padding-left: 6px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.content :global(ul),
+.content :global(ol) {
+  padding-left: 16px;
+  margin-bottom: 8px;
+}
+
+.plain {
+  white-space: pre-wrap;
+}
+
+.muted {
+  color: #888;
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+
+.footer {
+  flex: 0 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1f64d2;
+  text-decoration: none;
+  border-top: 1px solid #b9bbc0;
+  background: linear-gradient(180deg, #fdfdfd 0%, #e4e5e8 100%);
+}

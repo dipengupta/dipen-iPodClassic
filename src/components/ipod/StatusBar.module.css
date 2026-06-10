@@ -1,0 +1,26 @@
+.bar {
+  height: 20px;
+  flex: 0 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  background: linear-gradient(180deg, #fdfdfd 0%, #e8e9eb 50%, #d6d7da 51%, #c9cacd 100%);
+  border-bottom: 1px solid #9b9da3;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 230px;
+}
+
+.side {
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}

@@ -1,0 +1,48 @@
+.viewport {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  will-change: transform;
+}
+
+.inRight {
+  animation: inRight 180ms ease-out;
+}
+
+.inLeft {
+  animation: inLeft 180ms ease-out;
+}
+
+.outLeft {
+  animation: outLeft 180ms ease-out forwards;
+}
+
+.outRight {
+  animation: outRight 180ms ease-out forwards;
+}
+
+@keyframes inRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes inLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes outLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes outRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
