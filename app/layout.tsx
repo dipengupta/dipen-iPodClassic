@@ -21,7 +21,11 @@ export default async function RootLayout({
   const cookieTheme = cookieStore.get('ipod-theme')?.value;
   const theme = cookieTheme === 'black' ? 'black' : 'silver';
   return (
-    <html lang="en" data-theme={theme}>
+    // suppressHydrationWarning: the inline script below may legitimately
+    // rewrite data-theme before hydration (localStorage wins over a stale
+    // cookie), and browser extensions inject classes on <html>. Applies to
+    // this element's attributes only — children are still verified.
+    <html lang="en" data-theme={theme} suppressHydrationWarning>
       <head>
         {/* localStorage wins over the cookie pre-hydration so a stale cookie can't flash the wrong skin */}
         <script
