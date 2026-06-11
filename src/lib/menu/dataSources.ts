@@ -376,6 +376,45 @@ async function links(): Promise<FrameItem[]> {
   }));
 }
 
+interface TweetRow {
+  id: number;
+  number: number | null;
+  text: string;
+  postedAt: string | null;
+  url: string | null;
+}
+
+const TWEET_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+};
+
+async function tweets(): Promise<FrameItem[]> {
+  // Scraped @20swithepennguy archive, newest first from the API.
+  const { items } = await fetchJson<{ items: TweetRow[] }>('/api/content/tweets');
+  return items.map((t) => {
+    const posted = t.postedAt
+      ? new Date(t.postedAt).toLocaleDateString('en-US', TWEET_DATE_FORMAT)
+      : null;
+    return {
+      id: `tweet-${t.number ?? t.id}`,
+      label: t.text,
+      sublabel: t.postedAt ? t.postedAt.slice(0, 10) : undefined,
+      onSelect: {
+        kind: 'detail',
+        view: 'textReader',
+        payload: {
+          title: t.number !== null ? `#${t.number}` : 'pennguytweet',
+          text: `${t.number !== null ? `${t.number}/x ` : ''}${t.text}${posted ? `\n\nPosted: ${posted}` : ''}`,
+          sourceUrl: t.url ?? undefined,
+          sourceLabel: 'X',
+        },
+      },
+    };
+  });
+}
+
 const builders: Record<string, () => Promise<FrameItem[]>> = {
   articles,
   youtube,
@@ -391,6 +430,7 @@ const builders: Record<string, () => Promise<FrameItem[]>> = {
   wifi,
   timeline,
   links,
+  tweets,
 };
 
 export async function loadItems(node: MenuNode): Promise<FrameItem[]> {

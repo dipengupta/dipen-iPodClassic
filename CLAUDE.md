@@ -65,7 +65,7 @@ schema table → seed JSON + `seedDb.ts` → `sections` entry in
 - Frame identity: replacing the top frame (e.g. items loaded) keeps its
   `key`; `ScreenRouter` treats only `key` changes as navigations.
 - `npm run e2e` and `npm run dev` share port 3000 — stop one before the other.
-- The X/Twitter table holds `[sample]`-prefixed placeholder tweets until the
-  real export is imported (`isSample` flag).
+- Tweets are the committed @20swithepennguy scrape (`src/data/seed/tweets.json`,
+  710 rows); the `isSample` flag is legacy and always false now.
 - The gitignore rule for local data is `/data/` (root-anchored) on purpose —
   a bare `data/` would also ignore `src/data/`, the committed seed content.

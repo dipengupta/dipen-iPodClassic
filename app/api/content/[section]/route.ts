@@ -30,6 +30,10 @@ const sections = {
   // Most recent episode first; the menu groups these into year sub-lists.
   ugg: () =>
     getDb().select().from(schema.uggEpisodes).orderBy(desc(schema.uggEpisodes.episode)).all(),
+  // Scraped pennguytweets, newest first. Ordered by the account's own
+  // numbering — a few scraped rows have no resolvable date.
+  tweets: () =>
+    getDb().select().from(schema.tweets).orderBy(desc(schema.tweets.number)).all(),
 } satisfies Record<string, () => unknown[]>;
 
 export type ContentSection = keyof typeof sections;

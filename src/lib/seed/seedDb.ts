@@ -51,7 +51,13 @@ interface UggSeedRow {
 }
 
 export function isSeeded(db: Db): boolean {
-  return db.select().from(schema.articles).limit(1).all().length > 0;
+  // Checkouts missing parts of the seed content shouldn't re-seed forever
+  // (and double-insert what they do have) — any seeded table counts.
+  return (
+    db.select().from(schema.articles).limit(1).all().length > 0 ||
+    db.select().from(schema.tweets).limit(1).all().length > 0 ||
+    db.select().from(schema.uggEpisodes).limit(1).all().length > 0
+  );
 }
 
 export function clearAll(db: Db): void {
@@ -96,9 +102,20 @@ export function seedDb(db: Db, seedDir: string = SEED_DIR): void {
       .run();
   }
 
-  const tweets = readJsonOptional<Array<{ text: string; postedAt: string; url: string; isSample: boolean }>>(seedDir, 'tweets.json') ?? [];
+  // Scraped @20swithepennguy export (number/text/rawText/date/url). A null
+  // date means the scraper couldn't resolve the tweet page (last few rows).
+  const tweets = readJsonOptional<Array<{ number: number; text: string; date: string | null; url: string | null }>>(seedDir, 'tweets.json') ?? [];
   for (const t of tweets) {
-    db.insert(schema.tweets).values(t).run();
+    db.insert(schema.tweets)
+      .values({
+        number: t.number,
+        text: t.text,
+        postedAt: t.date,
+        url: t.url ?? null,
+        isSample: false,
+      })
+      .onConflictDoNothing()
+      .run();
   }
 
   const uggRows = readJsonOptional<UggSeedRow[]>(seedDir, 'ugg.json');

@@ -2,7 +2,6 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { GET as getArticle } from '@/../app/api/articles/[slug]/route';
 import { GET as getArticles } from '@/../app/api/articles/route';
 import { GET as getContent } from '@/../app/api/content/[section]/route';
-import { GET as getRandomTweet } from '@/../app/api/tweets/random/route';
 import { GET as getYoutube } from '@/../app/api/youtube/route';
 import { injectAppDb, makeTestDb } from './helpers';
 
@@ -17,7 +16,7 @@ beforeAll(() => {
 
 describe('/api/content/[section]', () => {
   it('serves every registered section', async () => {
-    for (const section of ['guitars', 'mugs', 'locations', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi', 'timeline', 'links', 'ugg']) {
+    for (const section of ['guitars', 'mugs', 'locations', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi', 'timeline', 'links', 'ugg', 'tweets']) {
       const res = await getContent(req, params({ section }));
       expect(res.status, section).toBe(200);
       const { items } = await res.json();
@@ -64,6 +63,16 @@ describe('/api/content/[section]', () => {
     }
   });
 
+  it('serves the scraped tweets newest first', async () => {
+    const { items } = await (await getContent(req, params({ section: 'tweets' }))).json();
+    expect(items).toHaveLength(710);
+    expect(items[0].number).toBe(710);
+    expect(items[items.length - 1].number).toBe(1);
+    expect(items[0].isSample).toBe(false);
+    // The last few scraped tweets have no URL; everything still serves.
+    expect(items.every((t: { text: string }) => t.text.length > 0)).toBe(true);
+  });
+
   it('404s unknown sections', async () => {
     const res = await getContent(req, params({ section: 'nope' }));
     expect(res.status).toBe(404);
@@ -100,11 +109,3 @@ describe('/api/youtube', () => {
   });
 });
 
-describe('/api/tweets/random', () => {
-  it('returns a tweet', async () => {
-    const res = await getRandomTweet();
-    const { tweet } = await res.json();
-    expect(typeof tweet.text).toBe('string');
-    expect(tweet.text.length).toBeGreaterThan(0);
-  });
-});

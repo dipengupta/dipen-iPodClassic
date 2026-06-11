@@ -38,7 +38,7 @@ export const menuTree: MenuNode = {
         },
         {
           id: 'music.instagram',
-          label: 'Instagram',
+          label: 'Instagram/UGG Chronicles',
           view: 'list',
           dataSource: 'ugg',
           previewImage: '/images/music/2024_insta.webp',
@@ -106,7 +106,7 @@ export const menuTree: MenuNode = {
     },
     {
       id: 'extras',
-      label: 'Rabbit Hole',
+      label: 'Misc',
       view: 'splitMenu',
       children: [
         {
@@ -151,7 +151,8 @@ export const menuTree: MenuNode = {
         {
           id: 'extras.tweets',
           label: 'pennguytweets',
-          view: 'tweet',
+          view: 'list',
+          dataSource: 'tweets',
         },
         {
           id: 'extras.settings',

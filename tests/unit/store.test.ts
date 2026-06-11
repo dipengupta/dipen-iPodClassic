@@ -88,19 +88,12 @@ describe('coverflow', () => {
   });
 });
 
-describe('media + tweet inputs', () => {
+describe('media inputs', () => {
   it('select on a video frame toggles play/pause instead of selecting', () => {
     store().pushDetail('video', { videoId: 'x' });
     const before = store().playPauseNonce;
     store().handleInput({ type: 'select' });
     expect(store().playPauseNonce).toBe(before + 1);
-  });
-
-  it('select on the tweet view shuffles', () => {
-    store().pushNode(findNode('extras.tweets')!);
-    const before = store().tweetNonce;
-    store().handleInput({ type: 'select' });
-    expect(store().tweetNonce).toBe(before + 1);
   });
 });
 

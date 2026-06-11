@@ -4,13 +4,13 @@ import type { MenuNode, ViewType } from '@/lib/menu/types';
 
 const VALID_VIEWS: ViewType[] = [
   'splitMenu', 'list', 'coverflow', 'textReader', 'video',
-  'nowPlaying', 'photo', 'settings', 'tweet',
+  'nowPlaying', 'photo', 'settings',
 ];
 
 const DATA_SOURCES = [
   'articles', 'youtube', 'guitars', 'ugg', 'soundcloud',
   'locations', 'mugs', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi',
-  'timeline', 'links',
+  'timeline', 'links', 'tweets',
 ];
 
 describe('menu tree integrity', () => {
@@ -34,7 +34,7 @@ describe('menu tree integrity', () => {
   });
 
   it('every node renders something: children, dataSource, payload, or a self-contained view', () => {
-    const selfContained: ViewType[] = ['tweet', 'settings'];
+    const selfContained: ViewType[] = ['settings'];
     for (const node of allNodes()) {
       const renders =
         (node.children?.length ?? 0) > 0 ||
@@ -47,7 +47,7 @@ describe('menu tree integrity', () => {
 
   it('contains the five top-level sections in order', () => {
     expect(menuTree.children!.map((c: MenuNode) => c.label)).toEqual([
-      'Music', 'Articles', 'Collections', 'Professional', 'Rabbit Hole',
+      'Music', 'Articles', 'Collections', 'Professional', 'Misc',
     ]);
   });
 
@@ -55,7 +55,7 @@ describe('menu tree integrity', () => {
     expect(menuTree.label).toBe("Dipen's iPod");
   });
 
-  it('the Rabbit Hole holds the fun sections in order', () => {
+  it('the Misc section holds the fun sections in order', () => {
     expect(findNode('extras')?.children?.map((c) => c.label)).toEqual([
       'About', 'Photos', 'Kitchen Wins', 'Concerts', 'Wi-Fi Names',
       'Links', 'pennguytweets', 'Settings',

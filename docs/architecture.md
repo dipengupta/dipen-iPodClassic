@@ -9,7 +9,7 @@ Browser ──► <Ipod/> (client)                    Next.js route handlers
   ClickWheel / keyboard                            /api/content/[section]
         │ IpodInput events                         /api/articles[/slug]
         ▼                                          /api/youtube
-  ipodStore (Zustand) ◄── dataSources.ts ──fetch──►/api/tweets/random
+  ipodStore (Zustand) ◄── dataSources.ts ──fetch──►    │
         │ stack of Frames                              │ Drizzle ORM
         ▼                                              ▼
   ScreenRouter ──► views (SplitMenu/List/CoverFlow/…)  SQLite (data/ipod.db)

@@ -14,6 +14,9 @@ export const articles = sqliteTable('articles', {
 
 export const tweets = sqliteTable('tweets', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  // The account numbers its tweets ("N/x"); shown as the detail title.
+  // Unique so re-running the seed can't duplicate the archive.
+  number: integer('number').unique(),
   text: text('text').notNull(),
   postedAt: text('posted_at'),
   url: text('url'),

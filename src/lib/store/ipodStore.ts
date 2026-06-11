@@ -80,8 +80,6 @@ export interface IpodState {
   playback: PlaybackState;
   /** Bumped on play/pause press; PlayersLayer toggles the active source. */
   playPauseNonce: number;
-  /** Bumped when the tweet view should shuffle to another random tweet. */
-  tweetNonce: number;
   /** Bumped on every wheel tick over a local video; shows the caption overlay. */
   captionNonce: number;
   loadItems?: (node: MenuNode) => Promise<FrameItem[]>;
@@ -117,7 +115,6 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   theme: 'silver',
   playback: { source: null, index: -1, playing: false, queue: [] },
   playPauseNonce: 0,
-  tweetNonce: 0,
   captionNonce: 0,
 
   setLoadItems: (fn) => set({ loadItems: fn }),
@@ -257,7 +254,7 @@ export const useIpodStore = create<IpodState>((set, get) => ({
           break;
         }
         const textual =
-          top.view === 'textReader' || top.view === 'photo' || top.view === 'tweet' ||
+          top.view === 'textReader' || top.view === 'photo' ||
           (top.view === 'coverflow' && top.flipped);
         if (textual) {
           const next = Math.max(0, Math.min(top.maxScroll, top.scrollOffset + input.dir * SCROLL_STEP));
@@ -291,10 +288,6 @@ export const useIpodStore = create<IpodState>((set, get) => ({
         clicker.vibrate(10);
         if (top.view === 'coverflow') {
           updateTop({ flipped: !top.flipped, scrollOffset: 0 });
-          break;
-        }
-        if (top.view === 'tweet') {
-          set((s) => ({ tweetNonce: s.tweetNonce + 1 }));
           break;
         }
         if (top.view === 'video' || top.view === 'nowPlaying') {

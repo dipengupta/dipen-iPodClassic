@@ -13,7 +13,7 @@ describe('seedDb', () => {
     expect(db.select().from(schema.timelineEntries).all()).toHaveLength(8);
     expect(db.select().from(schema.links).all()).toHaveLength(9);
     expect(db.select().from(schema.youtubeVideos).all().length).toBeGreaterThan(70);
-    expect(db.select().from(schema.tweets).all().length).toBeGreaterThan(5);
+    expect(db.select().from(schema.tweets).all()).toHaveLength(710);
     expect(db.select().from(schema.uggEpisodes).all()).toHaveLength(203);
     expect(db.select().from(schema.concerts).all().length).toBeGreaterThan(50);
     expect(db.select().from(schema.wifiNames).all()).toHaveLength(25);

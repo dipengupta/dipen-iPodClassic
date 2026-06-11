@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 test('boots to the main menu with a preview pane', async ({ page }) => {
   const rows = page.getByTestId('menu-row');
   await expect(rows).toHaveCount(5);
-  for (const [i, label] of ['Music', 'Articles', 'Collections', 'Professional', 'Rabbit Hole'].entries()) {
+  for (const [i, label] of ['Music', 'Articles', 'Collections', 'Professional', 'Misc'].entries()) {
     await expect(rows.nth(i)).toContainText(label);
   }
   await expect(rows.first()).toHaveAttribute('data-selected', 'true');
@@ -72,9 +72,9 @@ test('UGG Chronicles: year list, episode list, local video + caption overlay', a
 });
 
 test('photos cover flow shows profile pics and flips to captions', async ({ page }) => {
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Rabbit Hole
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  await expect(page.getByTestId('status-bar')).toContainText('Rabbit Hole');
+  await expect(page.getByTestId('status-bar')).toContainText('Misc');
   await page.keyboard.press('ArrowDown'); // Photos
   await page.keyboard.press('Enter');
   const coverflow = page.getByTestId('coverflow');
@@ -151,7 +151,7 @@ test('professional timeline and links sections have content', async ({ page }) =
   await expect(page.getByTestId('reader-content')).toContainText('Took ownership of the commission system');
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  // Rabbit Hole → Links
+  // Misc → Links
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Links
@@ -162,7 +162,7 @@ test('professional timeline and links sections have content', async ({ page }) =
 
 test('theme toggle switches to the black iPod and persists across reload', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'silver');
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Rabbit Hole
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
   for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
@@ -174,8 +174,8 @@ test('theme toggle switches to the black iPod and persists across reload', async
   await expect(page.getByTestId('ipod')).toBeVisible();
 });
 
-test('Rabbit Hole: kitchen wins flip, concerts by year, wifi names', async ({ page }) => {
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Rabbit Hole
+test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) => {
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
   // Kitchen Wins coverflow
   await page.keyboard.press('ArrowDown');
@@ -187,7 +187,7 @@ test('Rabbit Hole: kitchen wins flip, concerts by year, wifi names', async ({ pa
   await page.keyboard.press('Enter'); // flip
   await expect(page.getByTestId('cover-back')).toContainText('Homemade Pizza');
   await page.keyboard.press('Escape'); // unflip
-  await page.keyboard.press('Escape'); // back to Rabbit Hole
+  await page.keyboard.press('Escape'); // back to Misc
   // Concerts: chronological year groups, drill into 2012
   await page.keyboard.press('ArrowDown'); // Concerts
   await page.keyboard.press('Enter');
@@ -204,14 +204,29 @@ test('Rabbit Hole: kitchen wins flip, concerts by year, wifi names', async ({ pa
   await expect(page.getByTestId('menu-row')).toHaveCount(25);
 });
 
-test('random tweet view shows a tweet and shuffles on center press', async ({ page }) => {
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Rabbit Hole
+test('pennguytweets: newest-first list opens a tweet with its date', async ({ page }) => {
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
   for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowDown'); // pennguytweets
   await page.keyboard.press('Enter');
-  const view = page.getByTestId('tweet-view');
-  await expect(view).toContainText('@20swithepennguy');
-  await expect(view).toContainText('[sample]');
+  await expect(page.getByTestId('status-bar')).toContainText('pennguytweets');
+  const rows = page.getByTestId('menu-row');
+  // Wait for the tweet rows themselves (the outgoing menu's rows linger
+  // during the slide): the 9th row is #702, the newest with a resolved
+  // date sublabel — the final few scraped rows have none.
+  await expect(rows.nth(8)).toContainText(/\d{4}-\d{2}-\d{2}/);
+  // Step down to it and open it.
+  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown');
+  await expect(rows.nth(8)).toHaveAttribute('data-selected', 'true');
+  await page.keyboard.press('Enter');
+  const content = page.getByTestId('reader-content');
+  // Detail shows the "N/x" numbered text plus when it was posted.
+  await expect(content).toContainText(/^\s*\d+\/x /);
+  await expect(content).toContainText(/Posted: \w{3} \d{1,2}, \d{4}/);
+  await expect(page.getByTestId('status-bar')).toContainText('#');
+  await expect(page.getByTestId('view-original')).toHaveAttribute('href', /x\.com\/20swithepennguy/);
+  await page.keyboard.press('Escape'); // back to the list
+  await expect(rows.nth(8)).toContainText(/\d{4}-\d{2}-\d{2}/);
 });
 
 test('the iTunes stub page is reachable', async ({ page }) => {

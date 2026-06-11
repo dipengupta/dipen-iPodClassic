@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `tweets_number_unique` ON `tweets` (`number`);

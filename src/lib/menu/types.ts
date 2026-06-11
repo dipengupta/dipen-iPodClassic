@@ -6,8 +6,7 @@ export type ViewType =
   | 'video'
   | 'nowPlaying'
   | 'photo'
-  | 'settings'
-  | 'tweet';
+  | 'settings';
 
 export type DataSourceKey =
   | 'articles'
@@ -23,7 +22,8 @@ export type DataSourceKey =
   | 'concerts'
   | 'wifi'
   | 'timeline'
-  | 'links';
+  | 'links'
+  | 'tweets';
 
 export interface MenuNode {
   id: string;
@@ -91,5 +91,5 @@ export type SelectSpec =
   | { kind: 'items'; title: string; view: ViewType; items: FrameItem[] }
   | { kind: 'detail'; view: ViewType; payload: DetailPayload }
   | { kind: 'external'; href: string }
-  | { kind: 'action'; action: 'toggleTheme' | 'shuffleTweet' }
+  | { kind: 'action'; action: 'toggleTheme' }
   | { kind: 'play'; source: PlaybackSource; index: number; queue: PlayTrack[] };

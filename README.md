@@ -37,7 +37,7 @@ content persists in the `ipod-data` volume.
 Prev/Next skip tracks while something is playing (media keeps playing when
 you browse away — like a real iPod); otherwise they step the selection.
 
-Don't miss the **Rabbit Hole** section: photos, kitchen wins, concert
+Don't miss the **Misc** section: photos, kitchen wins, concert
 history, amusing Wi-Fi names, and more.
 
 Scrolling clicks like the real thing (synthesized Web Audio tick) and vibrates
@@ -75,7 +75,7 @@ Secrets live in `.env` only — never in code.
 | Articles                 | 10 seeded full-text articles + Substack RSS additions (24h cache) |
 | SoundCloud               | Live track list + audio via the hidden persistent widget   |
 | Instagram (UGG Chronicles) | Local MP4s in `data/videos/ugg` (gitignored) + committed `src/data/seed/ugg.json`; refresh via `npm run import:ugg` |
-| Tweets                   | Seeded (no reliable public API); refresh via data exports  |
+| Tweets (pennguytweets)   | Scraped @20swithepennguy export, 710 tweets committed in `src/data/seed/tweets.json` |
 | Guitars, mugs, places, timeline, links | Seeded from `src/data/seed/*.json`          |
 
 Live fetchers never leave the screen blank: on any failure they fall back to

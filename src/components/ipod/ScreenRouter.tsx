@@ -9,7 +9,6 @@ import NowPlayingView from './views/NowPlayingView';
 import PhotoView from './views/PhotoView';
 import SplitMenuView from './views/SplitMenuView';
 import TextReaderView from './views/TextReaderView';
-import TweetView from './views/TweetView';
 import VideoView from './views/VideoView';
 import styles from './ScreenRouter.module.css';
 
@@ -32,8 +31,6 @@ function renderView(frame: Frame, live: boolean) {
       return live ? <NowPlayingView frame={frame} /> : null;
     case 'photo':
       return <PhotoView frame={frame} />;
-    case 'tweet':
-      return <TweetView frame={frame} />;
     default:
       return null;
   }
