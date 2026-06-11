@@ -216,3 +216,22 @@ prebuilds). The runner gets the Next standalone output, the esbuild-bundled
 seed script, migrations, and seed JSON. The entrypoint migrates + seeds an
 empty `/data` volume, then runs `server.js`. Pin Node 22 everywhere
 (`.nvmrc`, Dockerfile) so native module ABIs match.
+
+## Deployment (Fly.io)
+
+Production runs the same Docker image on a single Fly machine
+(`fly.toml`; app `dipen-ipod-classic`, region `iad`) with a volume named
+`ipod_data` mounted at `/data` — the entrypoint migrates + seeds it on first
+boot exactly like local Docker, and a non-empty DB is never re-seeded, so the
+volume's content survives `fly deploy`. **Never scale past one machine**:
+better-sqlite3 writes a local file and the volume belongs to one machine.
+
+- Deploy: `fly deploy` (builds the Dockerfile remotely).
+- Trial vs production: `fly.toml` ships in trial mode
+  (`auto_stop_machines = "stop"`, `min_machines_running = 0`); for production
+  flip to `"off"` / `1` so there are no cold starts.
+- Videos: the UGG MP4s are not in the image; upload them once with
+  `fly ssh sftp` into `/data/videos/ugg` (`VIDEOS_DIR` already points there).
+- Domain: `fly certs add <domain>`, then at the DNS host an A/AAAA record on
+  the apex to the IPs from `fly ips list` and a CNAME `www` →
+  `dipen-ipod-classic.fly.dev`, all DNS-only (no proxy) so Fly can issue certs.

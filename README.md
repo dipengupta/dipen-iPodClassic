@@ -24,6 +24,11 @@ docker compose up --build   # http://localhost:3000
 The container applies migrations and seeds an empty database on first boot;
 content persists in the `ipod-data` volume.
 
+### Hosting
+
+The same image deploys to Fly.io with `fly deploy` (config in `fly.toml`);
+see the Deployment section of [docs/architecture.md](docs/architecture.md).
+
 ## Controls
 
 | Action          | Touch (mobile)              | Keyboard (desktop)    |
