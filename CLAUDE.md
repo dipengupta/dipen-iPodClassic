@@ -55,6 +55,8 @@ schema table → seed JSON + `seedDb.ts` → `sections` entry in
 - `src/components/ipod/views/` — one component per `ViewType`
 - `src/data/seed/` — committed content (JSON + saved article HTML)
 - `data/ipod.db` — local SQLite (gitignored; recreate with `npm run seed`)
+- `data/videos/ugg/` — UGG Chronicles MP4s (gitignored, ~2.7GB; populated by
+  `npm run import:ugg`, streamed by `app/api/video/[file]`)
 
 ## Gotchas
 
@@ -65,3 +67,5 @@ schema table → seed JSON + `seedDb.ts` → `sections` entry in
 - `npm run e2e` and `npm run dev` share port 3000 — stop one before the other.
 - The X/Twitter table holds `[sample]`-prefixed placeholder tweets until the
   real export is imported (`isSample` flag).
+- The gitignore rule for local data is `/data/` (root-anchored) on purpose —
+  a bare `data/` would also ignore `src/data/`, the committed seed content.

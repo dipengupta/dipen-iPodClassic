@@ -1,4 +1,4 @@
-import { asc, eq, inArray } from 'drizzle-orm';
+import { asc, desc, eq, inArray } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
@@ -27,7 +27,9 @@ const sections = {
     getDb().select().from(schema.wifiNames).orderBy(asc(schema.wifiNames.sortOrder)).all(),
   timeline: () => getDb().select().from(schema.timelineEntries).orderBy(asc(schema.timelineEntries.sortOrder)).all(),
   links: () => getDb().select().from(schema.links).orderBy(asc(schema.links.sortOrder)).all(),
-  reels: () => getDb().select().from(schema.reels).orderBy(asc(schema.reels.sortOrder)).all(),
+  // Most recent episode first; the menu groups these into year sub-lists.
+  ugg: () =>
+    getDb().select().from(schema.uggEpisodes).orderBy(desc(schema.uggEpisodes.episode)).all(),
 } satisfies Record<string, () => unknown[]>;
 
 export type ContentSection = keyof typeof sections;

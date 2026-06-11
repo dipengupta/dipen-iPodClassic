@@ -53,6 +53,7 @@ Settings` swaps between the silver and black iPod.
 | `npm run seed`       | Migrate + seed the SQLite DB (skip if seeded) |
 | `npm run seed:force` | Wipe and reseed                               |
 | `npm run optimize:images` | Convert new images to right-sized WebP   |
+| `npm run import:ugg` | Import UGG videos + captions (`-- --source "<dir>"`) |
 | `npm run db:generate`| Generate a Drizzle migration from schema.ts   |
 | `npm test`           | Vitest unit + integration tests               |
 | `npm run e2e`        | Playwright end-to-end suite (builds + seeds)  |
@@ -62,6 +63,8 @@ Settings` swaps between the silver and black iPod.
 
 Copy `.env.example` to `.env` if you need overrides. `DATABASE_PATH` points at
 the SQLite file (defaults to `./data/ipod.db`; `/data/ipod.db` in Docker).
+`VIDEOS_DIR` points at the UGG Chronicles videos (defaults to
+`./data/videos/ugg`; put them on the volume at `/data/videos/ugg` in Docker).
 Secrets live in `.env` only — never in code.
 
 ## Data: live vs. seeded
@@ -71,7 +74,8 @@ Secrets live in `.env` only — never in code.
 | YouTube videos           | Seeded archive + live channel RSS merge (6h cache)        |
 | Articles                 | 10 seeded full-text articles + Substack RSS additions (24h cache) |
 | SoundCloud               | Live track list + audio via the hidden persistent widget   |
-| Instagram reels, tweets  | Seeded (no reliable public API); refresh via data exports  |
+| Instagram (UGG Chronicles) | Local MP4s in `data/videos/ugg` (gitignored) + committed `src/data/seed/ugg.json`; refresh via `npm run import:ugg` |
+| Tweets                   | Seeded (no reliable public API); refresh via data exports  |
 | Guitars, mugs, places, timeline, links | Seeded from `src/data/seed/*.json`          |
 
 Live fetchers never leave the screen blank: on any failure they fall back to

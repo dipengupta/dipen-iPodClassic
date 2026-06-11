@@ -27,7 +27,7 @@ function renderView(frame: Frame, live: boolean) {
     case 'textReader':
       return <TextReaderView frame={frame} />;
     case 'video':
-      return live ? <VideoView frame={frame} /> : null;
+      return live ? <VideoView /> : null;
     case 'nowPlaying':
       return live ? <NowPlayingView frame={frame} /> : null;
     case 'photo':

@@ -13,7 +13,7 @@ export type DataSourceKey =
   | 'articles'
   | 'youtube'
   | 'guitars'
-  | 'reels'
+  | 'ugg'
   | 'soundcloud'
   | 'locations'
   | 'mugs'
@@ -52,7 +52,10 @@ export interface DetailPayload {
   sourceLabel?: string;
   publishedLabel?: string;
   videoId?: string;
-  reelShortcode?: string;
+  /** Local video URL (/api/video/...) — UGG Chronicles episodes. */
+  videoSrc?: string;
+  /** Instagram caption shown in the wheel-scrollable overlay. */
+  caption?: string;
   /** TextReaderView lazily fetches the body for this slug. */
   articleSlug?: string;
 }
@@ -68,16 +71,20 @@ export interface FrameItem {
   onSelect?: SelectSpec;
 }
 
-/** One entry in a playback queue: a YouTube video or a SoundCloud track. */
+/** One entry in a playback queue: a YouTube/local video or a SoundCloud track. */
 export interface PlayTrack {
-  /** videoId for YouTube; the widget index (stringified) for SoundCloud. */
+  /** videoId for YouTube; widget index for SoundCloud; episode no. for ugg. */
   id: string;
   title: string;
   description?: string;
   date?: string;
+  /** Local video URL (ugg only). */
+  videoSrc?: string;
+  /** Caption overlay text (ugg only). */
+  caption?: string;
 }
 
-export type PlaybackSource = 'youtube' | 'soundcloud';
+export type PlaybackSource = 'youtube' | 'soundcloud' | 'ugg';
 
 export type SelectSpec =
   | { kind: 'node'; node: MenuNode }

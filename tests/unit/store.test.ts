@@ -158,6 +158,62 @@ describe('playback', () => {
   });
 });
 
+describe('local (ugg) video playback', () => {
+  const uggQueue: PlayTrack[] = [
+    { id: '204', title: 'Ep. 204 · A', videoSrc: '/api/video/ugg-204.mp4', caption: 'latest' },
+    { id: '203', title: 'Ep. 203 · B', videoSrc: '/api/video/ugg-203.mp4', caption: 'older' },
+  ];
+
+  it('playTrack pushes a video frame carrying the file and caption', () => {
+    store().playTrack('ugg', uggQueue, 0);
+    const top = store().stack[store().stack.length - 1];
+    expect(top.view).toBe('video');
+    expect(top.payload?.videoSrc).toBe('/api/video/ugg-204.mp4');
+    expect(top.payload?.caption).toBe('latest');
+    expect(store().playback.source).toBe('ugg');
+  });
+
+  it('keeps playing behind the menu; prev/next stay transport controls', () => {
+    store().pushNode(findNode('music')!);
+    store().playTrack('ugg', uggQueue, 0);
+    store().handleInput({ type: 'menu' }); // back to the menu, audio keeps going
+    expect(store().playback).toMatchObject({ source: 'ugg', index: 0 });
+    store().handleInput({ type: 'next' });
+    expect(store().playback.index).toBe(1);
+    // The skip re-opened the now-playing frame on top.
+    const top = store().stack[store().stack.length - 1];
+    expect(top.view).toBe('video');
+    expect(top.payload?.videoSrc).toBe('/api/video/ugg-203.mp4');
+  });
+
+  it('wheel ticks wake the caption overlay and scroll within bounds', () => {
+    store().playTrack('ugg', uggQueue, 0);
+    const top = () => store().stack[store().stack.length - 1];
+    store().setMaxScroll(top().key, SCROLL_STEP);
+    const nonce = store().captionNonce;
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(store().captionNonce).toBe(nonce + 1);
+    expect(top().scrollOffset).toBe(SCROLL_STEP);
+    // Clamped at the end, but the overlay still wakes.
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(store().captionNonce).toBe(nonce + 2);
+    expect(top().scrollOffset).toBe(SCROLL_STEP);
+  });
+
+  it('episode skips reset the caption scroll in place', () => {
+    store().playTrack('ugg', uggQueue, 0);
+    const top = () => store().stack[store().stack.length - 1];
+    const key = top().key;
+    store().setMaxScroll(key, 64);
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(top().scrollOffset).toBe(SCROLL_STEP);
+    store().skipTrack(1);
+    expect(top().key).toBe(key); // same frame, no slide
+    expect(top().payload?.videoSrc).toBe('/api/video/ugg-203.mp4');
+    expect(top().scrollOffset).toBe(0);
+  });
+});
+
 describe('settings', () => {
   it('toggles the theme and updates the row sublabel', () => {
     store().pushNode(findNode('extras.settings')!);

@@ -17,7 +17,7 @@ beforeAll(() => {
 
 describe('/api/content/[section]', () => {
   it('serves every registered section', async () => {
-    for (const section of ['guitars', 'mugs', 'locations', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi', 'timeline', 'links', 'reels']) {
+    for (const section of ['guitars', 'mugs', 'locations', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi', 'timeline', 'links', 'ugg']) {
       const res = await getContent(req, params({ section }));
       expect(res.status, section).toBe(200);
       const { items } = await res.json();
@@ -50,6 +50,18 @@ describe('/api/content/[section]', () => {
     const wifi = await (await getContent(req, params({ section: 'wifi' }))).json();
     expect(wifi.items).toHaveLength(25);
     expect(wifi.items[0].name).toBe('Martin Router King');
+  });
+
+  it('serves UGG episodes most-recent first with playable fields', async () => {
+    const { items } = await (await getContent(req, params({ section: 'ugg' }))).json();
+    expect(items.length).toBe(203);
+    expect(items[0].episode).toBe(204);
+    expect(items[items.length - 1].episode).toBe(1);
+    for (const item of items.slice(0, 5)) {
+      expect(item.filename).toMatch(/^ugg-\d+\.mp4$/);
+      expect(item.year).toBeGreaterThanOrEqual(2021);
+      expect(typeof item.name).toBe('string');
+    }
   });
 
   it('404s unknown sections', async () => {

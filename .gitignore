@@ -9,12 +9,13 @@ next-env.d.ts
 # production
 dist/
 
-# local databases
+# local databases + on-device videos (root data/ only — a bare "data/" would
+# also ignore src/data/, which holds committed seed content)
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
-data/
+/data/
 
 # env
 .env

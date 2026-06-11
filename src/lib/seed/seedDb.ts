@@ -10,6 +10,19 @@ function readJson<T>(seedDir: string, file: string): T {
   return JSON.parse(fs.readFileSync(path.join(seedDir, file), 'utf8')) as T;
 }
 
+/**
+ * Some checkouts are missing parts of the seed content (it was accidentally
+ * gitignored for a while). Seeding stays best-effort per file: a missing
+ * source is skipped with a warning instead of aborting the whole seed.
+ */
+function readJsonOptional<T>(seedDir: string, file: string): T | undefined {
+  if (!fs.existsSync(path.join(seedDir, file))) {
+    console.warn(`seed: skipping ${file} (not found in ${seedDir})`);
+    return undefined;
+  }
+  return readJson<T>(seedDir, file);
+}
+
 interface TravelSeed {
   visitedLocations: Array<{
     title: string;
@@ -26,8 +39,15 @@ interface TravelSeed {
   mugSpecials: Array<{ title: string; gifted_by: string }>;
 }
 
-interface MusicSeed {
-  instagramReels: Array<{ shortcode: string; title: string; caption?: string }>;
+interface UggSeedRow {
+  episode: number;
+  title: string;
+  name: string;
+  caption: string;
+  postedAt: string;
+  year: number;
+  filename: string;
+  durationSec?: number;
 }
 
 export function isSeeded(db: Db): boolean {
@@ -36,7 +56,7 @@ export function isSeeded(db: Db): boolean {
 
 export function clearAll(db: Db): void {
   for (const table of [
-    schema.articles, schema.tweets, schema.reels, schema.guitars,
+    schema.articles, schema.tweets, schema.uggEpisodes, schema.guitars,
     schema.locations, schema.mugs, schema.galleryItems, schema.timelineEntries,
     schema.youtubeVideos, schema.soundcloudTracks, schema.links,
     schema.concerts, schema.wifiNames, schema.fetchMeta,
@@ -48,10 +68,15 @@ export function clearAll(db: Db): void {
 export function seedDb(db: Db, seedDir: string = SEED_DIR): void {
   // Articles: article1 (oldest) .. article10 (newest); list views sort by sortOrder desc.
   const articlesDir = path.join(seedDir, 'articles');
-  const articleFiles = fs
-    .readdirSync(articlesDir)
-    .filter((f) => /^article\d+\.html$/.test(f))
-    .sort((a, b) => parseInt(a.match(/\d+/)![0]) - parseInt(b.match(/\d+/)![0]));
+  let articleFiles: string[] = [];
+  if (fs.existsSync(articlesDir)) {
+    articleFiles = fs
+      .readdirSync(articlesDir)
+      .filter((f) => /^article\d+\.html$/.test(f))
+      .sort((a, b) => parseInt(a.match(/\d+/)![0]) - parseInt(b.match(/\d+/)![0]));
+  } else {
+    console.warn(`seed: skipping articles (no ${articlesDir})`);
+  }
   for (const file of articleFiles) {
     const num = parseInt(file.match(/\d+/)![0]);
     const parsed = parseArticleTemplate(fs.readFileSync(path.join(articlesDir, file), 'utf8'));
@@ -71,30 +96,36 @@ export function seedDb(db: Db, seedDir: string = SEED_DIR): void {
       .run();
   }
 
-  const tweets = readJson<Array<{ text: string; postedAt: string; url: string; isSample: boolean }>>(seedDir, 'tweets.json');
+  const tweets = readJsonOptional<Array<{ text: string; postedAt: string; url: string; isSample: boolean }>>(seedDir, 'tweets.json') ?? [];
   for (const t of tweets) {
     db.insert(schema.tweets).values(t).run();
   }
 
-  const music = readJson<MusicSeed>(seedDir, 'music.json');
-  music.instagramReels.forEach((reel, i) => {
-    db.insert(schema.reels)
+  const uggRows = readJsonOptional<UggSeedRow[]>(seedDir, 'ugg.json');
+  for (const row of uggRows ?? []) {
+    db.insert(schema.uggEpisodes)
       .values({
-        shortcode: reel.shortcode,
-        title: reel.title,
-        caption: reel.caption ?? null,
-        sortOrder: i,
+        episode: row.episode,
+        title: row.title,
+        name: row.name,
+        caption: row.caption,
+        postedAt: row.postedAt,
+        year: row.year,
+        filename: row.filename,
+        durationSec: row.durationSec ?? null,
       })
       .onConflictDoNothing()
       .run();
-  });
+  }
 
-  const guitars = readJson<Array<{ name: string; year: string; imagePath: string; description: string }>>(seedDir, 'guitars.json');
+  const guitars = readJsonOptional<Array<{ name: string; year: string; imagePath: string; description: string }>>(seedDir, 'guitars.json') ?? [];
   guitars.forEach((g, i) => {
     db.insert(schema.guitars).values({ ...g, sortOrder: i }).run();
   });
 
-  const travel = readJson<TravelSeed>(seedDir, 'travel.json');
+  const travel = readJsonOptional<TravelSeed>(seedDir, 'travel.json') ?? {
+    visitedLocations: [], mugStates: [], mugCities: [], mugCountries: [], mugSpecials: [],
+  };
   for (const loc of travel.visitedLocations) {
     db.insert(schema.locations)
       .values({
@@ -133,17 +164,17 @@ export function seedDb(db: Db, seedDir: string = SEED_DIR): void {
       .run();
   }
 
-  const gallery = readJson<Array<{ title: string; description: string; imagePath: string; category: string }>>(seedDir, 'gallery.json');
+  const gallery = readJsonOptional<Array<{ title: string; description: string; imagePath: string; category: string }>>(seedDir, 'gallery.json') ?? [];
   gallery.forEach((item, i) => {
     db.insert(schema.galleryItems).values({ ...item, sortOrder: i }).run();
   });
 
-  const timeline = readJson<Array<{ role: string; company: string; dates: string; location: string; description: string }>>(seedDir, 'timeline.json');
+  const timeline = readJsonOptional<Array<{ role: string; company: string; dates: string; location: string; description: string }>>(seedDir, 'timeline.json') ?? [];
   timeline.forEach((entry, i) => {
     db.insert(schema.timelineEntries).values({ ...entry, sortOrder: i }).run();
   });
 
-  const videos = readJson<Array<{ videoId: string; title: string; date: string; description?: string }>>(seedDir, 'youtube_videos.json');
+  const videos = readJsonOptional<Array<{ videoId: string; title: string; date: string; description?: string }>>(seedDir, 'youtube_videos.json') ?? [];
   for (const v of videos) {
     db.insert(schema.youtubeVideos)
       .values({
@@ -164,14 +195,14 @@ export function seedDb(db: Db, seedDir: string = SEED_DIR): void {
     db.insert(schema.soundcloudTracks).values(track).run();
   }
 
-  const links = readJson<Array<{ label: string; url: string }>>(seedDir, 'links.json');
+  const links = readJsonOptional<Array<{ label: string; url: string }>>(seedDir, 'links.json') ?? [];
   links.forEach((link, i) => {
     db.insert(schema.links).values({ ...link, sortOrder: i }).run();
   });
 
   // Concerts: an ordered array of year groups — an object keyed by year
   // would re-order integer-like keys ("2012") ahead of "2010/2011".
-  const concerts = readJson<Array<{ year: string; shows: string[] }>>(seedDir, 'concerts.json');
+  const concerts = readJsonOptional<Array<{ year: string; shows: string[] }>>(seedDir, 'concerts.json') ?? [];
   let concertOrder = 0;
   for (const group of concerts) {
     for (const name of group.shows) {
@@ -179,7 +210,7 @@ export function seedDb(db: Db, seedDir: string = SEED_DIR): void {
     }
   }
 
-  const wifi = readJson<string[]>(seedDir, 'wifi.json');
+  const wifi = readJsonOptional<string[]>(seedDir, 'wifi.json') ?? [];
   wifi.forEach((name, i) => {
     db.insert(schema.wifiNames).values({ name, sortOrder: i }).run();
   });

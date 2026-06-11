@@ -15,6 +15,20 @@
       "when": 1781121084511,
       "tag": "0001_pale_overlord",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1781136562513,
+      "tag": "0002_slippery_cerise",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1781136575981,
+      "tag": "0003_shallow_talisman",
+      "breakpoints": true
     }
   ]
 }

@@ -41,6 +41,36 @@ test('plays a YouTube video and keeps playing after MENU (persistent player)', a
   await expect(page.getByTestId('menu-row').first()).toBeVisible();
 });
 
+test('UGG Chronicles: year list, episode list, local video + caption overlay', async ({ page }) => {
+  await page.keyboard.press('Enter'); // Music
+  await page.keyboard.press('ArrowDown'); // YouTube
+  await page.keyboard.press('ArrowDown'); // Instagram
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('Instagram');
+  const rows = page.getByTestId('menu-row');
+  // Years load from the API, most recent first.
+  await expect(rows.first()).toContainText(/UGG Chronicles - 20\d\d/);
+  await page.keyboard.press('Enter'); // newest year
+  await expect(rows.first()).toContainText(/Ep\. \d+/);
+  await page.keyboard.press('Enter'); // most recent episode
+  const stage = page.getByTestId('ugg-stage');
+  await expect(stage).toHaveAttribute('data-watching', 'true');
+  const player = page.getByTestId('ugg-player');
+  // Decoded playback needs the gitignored video files, so assert the wiring
+  // (src), not frames.
+  await expect(player).toHaveAttribute('src', /\/api\/video\/ugg-\d+\.mp4$/);
+  // A wheel tick summons the caption overlay (opacity-only, so check the
+  // aria state rather than visibility).
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByTestId('ugg-caption')).toHaveAttribute('aria-hidden', 'false');
+  // MENU backs out to the episode list, but the persistent player STAYS
+  // mounted so the audio keeps going — the stage just drops behind the menu.
+  await page.keyboard.press('Escape');
+  await expect(stage).not.toHaveAttribute('data-watching', 'true');
+  await expect(player).toBeAttached();
+  await expect(rows.first()).toContainText(/Ep\. \d+/);
+});
+
 test('photos cover flow shows profile pics and flips to captions', async ({ page }) => {
   for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Rabbit Hole
   await page.keyboard.press('Enter');

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import * as clicker from '../audio/clicker';
 import type { IpodInput } from '../input/keyboard';
+import { uggLoad } from '../players/uggVideo';
 import { menuTree } from '../menu/tree';
 import type {
   DetailPayload,
@@ -81,6 +82,8 @@ export interface IpodState {
   playPauseNonce: number;
   /** Bumped when the tweet view should shuffle to another random tweet. */
   tweetNonce: number;
+  /** Bumped on every wheel tick over a local video; shows the caption overlay. */
+  captionNonce: number;
   loadItems?: (node: MenuNode) => Promise<FrameItem[]>;
 
   setLoadItems: (fn: (node: MenuNode) => Promise<FrameItem[]>) => void;
@@ -115,6 +118,7 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   playback: { source: null, index: -1, playing: false, queue: [] },
   playPauseNonce: 0,
   tweetNonce: 0,
+  captionNonce: 0,
 
   setLoadItems: (fn) => set({ loadItems: fn }),
 
@@ -166,18 +170,28 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     const track = queue[index];
     if (!track) return;
     set({ playback: { source, queue, index, playing: true } });
-    const view: ViewType = source === 'youtube' ? 'video' : 'nowPlaying';
+    if (source === 'ugg' && track.videoSrc) {
+      // Start the persistent element NOW, while still inside the user's
+      // click/keypress — Safari refuses unmuted play() from a later effect.
+      uggLoad(track.videoSrc);
+    }
+    const view: ViewType = source === 'soundcloud' ? 'nowPlaying' : 'video';
     const payload: DetailPayload =
       source === 'youtube'
         ? { title: track.title, videoId: track.id }
-        : { title: 'Now Playing' };
+        : source === 'ugg'
+          ? { title: track.title, videoSrc: track.videoSrc, caption: track.caption }
+          : { title: 'Now Playing' };
     const { stack } = get();
     const top = stack[stack.length - 1];
     if (top.view === view) {
       // Track-to-track skip: swap content in place, no slide animation.
+      // Scroll state belongs to the previous track's caption — reset it.
       set((s) => ({
         stack: s.stack.map((f, i) =>
-          i === s.stack.length - 1 ? { ...f, title: payload.title ?? '', payload } : f,
+          i === s.stack.length - 1
+            ? { ...f, title: payload.title ?? '', payload, scrollOffset: 0, maxScroll: 0 }
+            : f,
         ),
       }));
     } else {
@@ -230,6 +244,18 @@ export const useIpodStore = create<IpodState>((set, get) => ({
 
     switch (input.type) {
       case 'scroll': {
+        if (top.view === 'video' && top.payload?.videoSrc) {
+          // Local video: the wheel reveals/scrolls the caption overlay. The
+          // nonce fires on every tick so the overlay wakes even when the
+          // caption is too short to scroll.
+          set((s) => ({ captionNonce: s.captionNonce + 1 }));
+          const next = Math.max(0, Math.min(top.maxScroll, top.scrollOffset + input.dir * SCROLL_STEP));
+          if (next !== top.scrollOffset) {
+            updateTop({ scrollOffset: next });
+            clicker.tick();
+          }
+          break;
+        }
         const textual =
           top.view === 'textReader' || top.view === 'photo' || top.view === 'tweet' ||
           (top.view === 'coverflow' && top.flipped);

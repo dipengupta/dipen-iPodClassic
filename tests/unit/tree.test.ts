@@ -8,7 +8,7 @@ const VALID_VIEWS: ViewType[] = [
 ];
 
 const DATA_SOURCES = [
-  'articles', 'youtube', 'guitars', 'reels', 'soundcloud',
+  'articles', 'youtube', 'guitars', 'ugg', 'soundcloud',
   'locations', 'mugs', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi',
   'timeline', 'links',
 ];

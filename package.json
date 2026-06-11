@@ -13,6 +13,7 @@
     "seed": "tsx scripts/seed.ts",
     "seed:force": "tsx scripts/seed.ts --force",
     "optimize:images": "tsx scripts/optimize-images.ts",
+    "import:ugg": "tsx scripts/import-ugg.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",

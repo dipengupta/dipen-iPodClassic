@@ -1,0 +1,100 @@
+/* Persistent local-video layer, same contract as the YouTube stage: below
+   the status bar, kept rendered behind the menu (opacity, never
+   display:none) so the audio keeps playing, raised only while watching. */
+.stage {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease-out;
+  overflow: hidden;
+}
+
+.visible {
+  z-index: 30;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Episode title / play-state OSD, iPod style. */
+.osd {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  max-width: 296px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 240ms ease;
+  pointer-events: none;
+}
+
+.osdVisible {
+  opacity: 1;
+}
+
+.unavailable {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 6px;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+/* Wheel-summoned caption overlay over the lower part of the video. */
+.captionPanel {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  height: 96px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.68);
+  border-radius: 6px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 240ms ease, transform 240ms ease;
+  pointer-events: none;
+}
+
+.captionVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* line-height matches the store's SCROLL_STEP so one tick = one line. */
+.captionText {
+  font-size: 11px;
+  line-height: 16px;
+  color: #fff;
+  white-space: pre-wrap;
+  word-break: break-word;
+  transition: transform 120ms ease-out;
+}

@@ -15,6 +15,8 @@ Browser ──► <Ipod/> (client)                    Next.js route handlers
   ScreenRouter ──► views (SplitMenu/List/CoverFlow/…)  SQLite (data/ipod.db)
                                                         ▲
                                      fetchers (YouTube RSS, Substack RSS)
+
+  <video> ◄──/api/video/[file] (Range streaming)──── data/videos/ugg/*.mp4
 ```
 
 ## The 320×240 logical screen
@@ -63,11 +65,47 @@ playback. `src/components/ipod/PlayersLayer.tsx` (mounted once in
 The store's `playback` slice (`{ source, index, playing, queue }`) is the
 single source of truth: `playTrack` pushes (or in-place updates) the
 now-playing frame, `skipTrack` moves through the queue, and starting one
-source pauses the other. While media is loaded, the **prev/next wheel
+source pauses the others (there are three: `youtube`, `soundcloud`, `ugg` —
+the local-video stage below). While media is loaded, the **prev/next wheel
 buttons are transport controls** (selection-stepping otherwise), and the
 status bar shows a ▶ flag. `NowPlayingView` is a passive card (EQ bars) over
-the hidden SoundCloud audio; `VideoView`'s YouTube branch is just a backdrop
-under the raised stage (its Instagram-reel branch still renders inline).
+the hidden SoundCloud audio; `VideoView` is just a backdrop under the raised
+stages.
+
+## Local video: UGG Chronicles (the Instagram section)
+
+The Instagram section plays the UGG Chronicles episodes from **on-device
+files** instead of embeds. The pieces:
+
+- **Import** (`npm run import:ugg -- --source "<UGG Project dir>"`,
+  `scripts/import-ugg.ts` + pure helpers in `scripts/ugg-lib.ts`): fixes the
+  export's UTF-8-as-latin-1 mojibake, recovers each episode's posting
+  timestamp from the official Instagram export (title match, then
+  caption-body match for the 2021 IGTV era; hard-fails rather than guess),
+  **moves** the MP4s to `data/videos/ugg/ugg-<ep>.mp4` (gitignored, ~2.7GB
+  never enters git), and writes the committed seed
+  `src/data/seed/ugg.json`. Idempotent — re-run it when new episodes land.
+- **Serving** (`app/api/video/[file]/route.ts`): streams with HTTP **Range**
+  support (Safari requires 206s; Next's `public/` serving doesn't reliably
+  honor Range in dev). Filenames are allowlisted (`ugg-N.mp4`), and the dir
+  is overridable via `VIDEOS_DIR` (Docker: `/data/videos/ugg`). A missing
+  file 404s and the view shows "Video unavailable" — menus never blank.
+- **Menu** (`ugg` dataSource): year rows ("UGG Chronicles - 2025", newest
+  first) → episode rows ("Ep. 204 | <name>", newest first). Selecting plays
+  with `source: 'ugg'` and the **year as the queue**: prev/next skip
+  episodes, `ended` auto-advances, center toggles play/pause.
+- **Player** (`UggStage`, mounted once inside `PlayersLayer`): a persistent
+  `<video>` with the same contract as the YouTube stage — revealed (opacity)
+  only on the episode's video frame, **audio keeps playing behind the
+  menus** after MENU. The element is driven through
+  `src/lib/players/uggVideo.ts`, and `playTrack` calls `uggLoad()`
+  **synchronously inside the user's gesture** — Safari refuses unmuted
+  `play()` from a later React effect, which would force a second press.
+  `VideoView` is just the black backdrop under the stage.
+- **Caption overlay**: a wheel tick bumps `captionNonce`, which slides up a
+  translucent panel with the original Instagram caption; further ticks
+  scroll it (the video frame's `scrollOffset`/`maxScroll`, one text line per
+  tick) and ~3 s of idle fades it out. All animation is transform/opacity.
 
 ## Navigation: the frame stack
 

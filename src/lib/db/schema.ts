@@ -20,12 +20,18 @@ export const tweets = sqliteTable('tweets', {
   isSample: integer('is_sample', { mode: 'boolean' }).notNull().default(false),
 });
 
-export const reels = sqliteTable('reels', {
+// UGG Chronicles episodes: local videos served by /api/video/[file].
+export const uggEpisodes = sqliteTable('ugg_episodes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  shortcode: text('shortcode').notNull().unique(),
+  episode: integer('episode').notNull().unique(),
   title: text('title').notNull(),
-  caption: text('caption'),
-  sortOrder: integer('sort_order').notNull().default(0),
+  // The song/jam name after "UGG Chronicles Ep. N | ".
+  name: text('name').notNull(),
+  caption: text('caption').notNull().default(''),
+  postedAt: text('posted_at').notNull(),
+  year: integer('year').notNull(),
+  filename: text('filename').notNull(),
+  durationSec: integer('duration_sec'),
 });
 
 export const guitars = sqliteTable('guitars', {

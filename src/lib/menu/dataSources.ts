@@ -132,25 +132,51 @@ async function guitars(): Promise<FrameItem[]> {
   }));
 }
 
-interface ReelRow {
-  id: number;
-  shortcode: string;
-  title: string;
-  caption: string | null;
+interface UggRow {
+  episode: number;
+  name: string;
+  caption: string;
+  postedAt: string;
+  year: number;
+  filename: string;
 }
 
-async function reels(): Promise<FrameItem[]> {
-  const { items } = await fetchJson<{ items: ReelRow[] }>('/api/content/reels');
-  return items.map((r) => ({
-    id: r.shortcode,
-    label: r.title,
-    sublabel: r.caption ?? undefined,
-    onSelect: {
-      kind: 'detail',
-      view: 'video',
-      payload: { title: r.title, reelShortcode: r.shortcode },
-    },
-  }));
+async function ugg(): Promise<FrameItem[]> {
+  // Rows arrive most-recent-episode first; years inherit that order.
+  const { items } = await fetchJson<{ items: UggRow[] }>('/api/content/ugg');
+  const byYear = new Map<number, UggRow[]>();
+  for (const row of items) {
+    if (!byYear.has(row.year)) byYear.set(row.year, []);
+    byYear.get(row.year)!.push(row);
+  }
+  return [...byYear.entries()]
+    .sort(([a], [b]) => b - a)
+    .map(([year, episodes]) => {
+      // The year is the playback queue: prev/next and auto-advance move
+      // through it inside the local video view.
+      const queue: PlayTrack[] = episodes.map((e) => ({
+        id: String(e.episode),
+        title: `Ep. ${e.episode} | ${e.name}`,
+        caption: e.caption,
+        videoSrc: `/api/video/${e.filename}`,
+        date: e.postedAt,
+      }));
+      return {
+        id: `ugg-${year}`,
+        label: `UGG Chronicles - ${year}`,
+        sublabel: `${episodes.length} episode${episodes.length === 1 ? '' : 's'}`,
+        onSelect: {
+          kind: 'items' as const,
+          title: `UGG Chronicles - ${year}`,
+          view: 'list' as const,
+          items: episodes.map((e, i) => ({
+            id: `ugg-ep-${e.episode}`,
+            label: `Ep. ${e.episode} | ${e.name}`,
+            onSelect: { kind: 'play' as const, source: 'ugg' as const, index: i, queue },
+          })),
+        },
+      };
+    });
 }
 
 interface LocationRow {
@@ -354,7 +380,7 @@ const builders: Record<string, () => Promise<FrameItem[]>> = {
   articles,
   youtube,
   guitars,
-  reels,
+  ugg,
   soundcloud,
   locations,
   mugs,

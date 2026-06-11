@@ -8,9 +8,11 @@ import {
   soundcloudPlayerSrc,
   soundcloudToggle,
 } from '@/lib/players/soundcloud';
+import { uggPause, uggToggle } from '@/lib/players/uggVideo';
 import { initYoutube, youtubeLoad, youtubePause, youtubeToggle } from '@/lib/players/youtube';
 import { useIpodStore } from '@/lib/store/ipodStore';
 import styles from './PlayersLayer.module.css';
+import UggStage from './UggStage';
 
 const YT_ELEMENT_ID = 'ipod-yt-player';
 
@@ -47,10 +49,17 @@ export default function PlayersLayer() {
     lastStarted.current = startKey;
     if (playback.source === 'youtube') {
       soundcloudPause();
+      uggPause();
       youtubeLoad(track.id);
-    } else {
+    } else if (playback.source === 'soundcloud') {
       youtubePause();
+      uggPause();
       soundcloudPlay(Number(track.id));
+    } else {
+      // Local (ugg) video: the store already started it inside the user's
+      // gesture (uggLoad); just silence the other sources.
+      youtubePause();
+      soundcloudPause();
     }
   }, [playback.source, playback.index, playback.queue]);
 
@@ -63,6 +72,7 @@ export default function PlayersLayer() {
     const { source } = useIpodStore.getState().playback;
     if (source === 'youtube') youtubeToggle();
     else if (source === 'soundcloud') soundcloudToggle();
+    else if (source === 'ugg') uggToggle();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fire only on the press
   }, [playPauseNonce]);
 
@@ -78,6 +88,7 @@ export default function PlayersLayer() {
       >
         <div id={YT_ELEMENT_ID} />
       </div>
+      <UggStage />
       <div className={styles.hiddenPlayers} aria-hidden="true">
         <iframe
           ref={scIframeRef}

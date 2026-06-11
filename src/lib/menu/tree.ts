@@ -40,7 +40,7 @@ export const menuTree: MenuNode = {
           id: 'music.instagram',
           label: 'Instagram',
           view: 'list',
-          dataSource: 'reels',
+          dataSource: 'ugg',
           previewImage: '/images/music/2024_insta.webp',
         },
         {
