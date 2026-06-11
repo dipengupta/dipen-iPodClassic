@@ -79,6 +79,11 @@ test('photos cover flow shows profile pics and flips to captions', async ({ page
   const coverflow = page.getByTestId('coverflow');
   await expect(coverflow).toBeVisible();
   await expect(coverflow).toContainText('1 of 10');
+  // Side covers carry a soft dim; the focused one stays bright.
+  await expect(coverflow.locator('[data-dimmed]').first()).toBeVisible();
+  await expect(
+    coverflow.locator('[data-dimmed]', { has: page.getByTestId('focused-cover') }),
+  ).toHaveCount(0);
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await expect(coverflow).toContainText('3 of 10');
@@ -171,7 +176,7 @@ test('professional timeline and links sections have content', async ({ page }) =
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Links
+  for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowDown'); // Links
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row')).toHaveCount(9);
   await expect(page.getByTestId('menu-row').first()).toContainText('LinkedIn');
@@ -204,14 +209,13 @@ test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) =
   await expect(page.getByTestId('cover-back')).toContainText('Homemade Pizza');
   await page.keyboard.press('Escape'); // unflip
   await page.keyboard.press('Escape'); // back to Misc
-  // Concerts: chronological year groups, drill into 2012
+  // Concerts: newest year group first, drill straight into it
   await page.keyboard.press('ArrowDown'); // Recipes
   await page.keyboard.press('ArrowDown'); // Concerts
   await page.keyboard.press('Enter');
-  await expect(page.getByTestId('menu-row').first()).toContainText('2010/2011');
-  await page.keyboard.press('ArrowDown'); // 2012
+  await expect(page.getByTestId('menu-row').first()).toContainText('2025');
   await page.keyboard.press('Enter');
-  await expect(page.getByTestId('menu-row').first()).toContainText("Guns N' Roses");
+  await expect(page.getByTestId('menu-row').first()).toContainText('Buckethead');
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
   // Wi-Fi names list
@@ -219,6 +223,26 @@ test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) =
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('Martin Router King');
   await expect(page.getByTestId('menu-row')).toHaveCount(25);
+});
+
+test('tweet shuffle setting toggles and the list still renders', async ({ page }) => {
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
+  await page.keyboard.press('Enter');
+  const rows = page.getByTestId('menu-row');
+  await expect(rows.nth(1)).toContainText('pennguytweets');
+  await expect(rows.nth(1)).toContainText('Newest First');
+  await page.keyboard.press('ArrowDown'); // the pennguytweets row
+  await page.keyboard.press('Enter');
+  await expect(rows.nth(1)).toContainText('Shuffled');
+  // The shuffled list still serves every tweet (order is random by design).
+  await page.keyboard.press('Escape'); // back to Misc, selection on Settings
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp'); // pennguytweets
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('pennguytweets');
+  await expect(rows.first()).not.toBeEmpty();
 });
 
 test('About on the home menu shows the contact email', async ({ page }) => {
@@ -263,7 +287,7 @@ test('Recipes: category groups open recipe lists and readable details', async ({
 test('pennguytweets: newest-first list opens a tweet with its date', async ({ page }) => {
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowDown'); // pennguytweets
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // pennguytweets
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('status-bar')).toContainText('pennguytweets');
   const rows = page.getByTestId('menu-row');

@@ -13,6 +13,7 @@ export default function Ipod() {
   const handleInput = useIpodStore((s) => s.handleInput);
   const setLoadItems = useIpodStore((s) => s.setLoadItems);
   const setTheme = useIpodStore((s) => s.setTheme);
+  const setTweetShuffle = useIpodStore((s) => s.setTweetShuffle);
 
   useEffect(() => {
     setLoadItems(loadItems);
@@ -21,7 +22,12 @@ export default function Ipod() {
     if (docTheme === 'black' || docTheme === 'silver') {
       setTheme(docTheme);
     }
-  }, [setLoadItems, setTheme]);
+    try {
+      if (localStorage.getItem('ipod-tweet-shuffle') === '1') setTweetShuffle(true);
+    } catch {
+      // Storage can be unavailable (private mode); the setting just won't restore.
+    }
+  }, [setLoadItems, setTheme, setTweetShuffle]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

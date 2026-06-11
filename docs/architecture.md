@@ -184,6 +184,11 @@ screen content never themes either (real iPods only varied the hardware
 color). Persistence: `localStorage` + cookie; an inline script in
 `app/layout.tsx` applies the theme pre-hydration to avoid flashes.
 
+The Settings menu (`settingsItems` in `ipodStore.ts`) also holds the
+pennguytweets order toggle (newest-first vs shuffled) — a `tweetShuffle`
+store flag persisted in `localStorage` and re-read by the `tweets()` builder
+on every visit to the list, so each shuffled visit deals a fresh order.
+
 ## Responsive
 
 One `<Ipod/>` component; differences are CSS-only (`Ipod.module.css`).

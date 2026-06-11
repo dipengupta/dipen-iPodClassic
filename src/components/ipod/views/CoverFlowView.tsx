@@ -22,6 +22,17 @@ function coverOpacity(offset: number): number {
   return distance >= 3 ? Math.max(0.55, 1 - (distance - 2) * 0.15) : 1;
 }
 
+/**
+ * The real Cover Flow kept every cover sharp — depth came from the angle,
+ * overlap and reflection. Instead of blur (which can only snap, since filters
+ * may not animate here) side covers get a dark overlay whose opacity scales
+ * with distance, so the "lighting" fades in step with the slide.
+ */
+function coverDim(offset: number): number {
+  const distance = Math.abs(offset);
+  return distance === 0 ? 0 : Math.min(0.4, 0.18 + (distance - 1) * 0.07);
+}
+
 export default function CoverFlowView({ frame }: { frame: Frame }) {
   const setMaxScroll = useIpodStore((s) => s.setMaxScroll);
   const backTextRef = useRef<HTMLDivElement>(null);
@@ -57,6 +68,7 @@ export default function CoverFlowView({ frame }: { frame: Frame }) {
             <div
               key={item.id}
               className={styles.coverSlot}
+              data-dimmed={isFocused ? undefined : true}
               style={{
                 transform: coverTransform(offset),
                 opacity: coverOpacity(offset),
@@ -99,6 +111,7 @@ export default function CoverFlowView({ frame }: { frame: Frame }) {
                   </div>
                 </div>
               </div>
+              <div className={styles.dim} style={{ opacity: coverDim(offset) }} aria-hidden="true" />
             </div>
           );
         })}

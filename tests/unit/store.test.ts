@@ -216,4 +216,18 @@ describe('settings', () => {
     expect(store().theme).toBe('black');
     expect(store().stack[1].items?.[0].sublabel).toBe('Black');
   });
+
+  it('toggles tweet shuffle and updates the row sublabel', () => {
+    store().pushNode(findNode('extras.settings')!);
+    expect(store().tweetShuffle).toBe(false);
+    expect(store().stack[1].items?.[1].label).toBe('pennguytweets');
+    expect(store().stack[1].items?.[1].sublabel).toBe('Newest First');
+    store().handleInput({ type: 'scroll', dir: 1 }); // down to the tweets row
+    store().handleInput({ type: 'select' });
+    expect(store().tweetShuffle).toBe(true);
+    expect(store().stack[1].items?.[1].sublabel).toBe('Shuffled');
+    store().handleInput({ type: 'select' });
+    expect(store().tweetShuffle).toBe(false);
+    expect(store().stack[1].items?.[1].sublabel).toBe('Newest First');
+  });
 });

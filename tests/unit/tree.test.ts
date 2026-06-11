@@ -68,7 +68,7 @@ describe('menu tree integrity', () => {
   it('the Misc section holds the fun sections in order', () => {
     expect(findNode('extras')?.children?.map((c) => c.label)).toEqual([
       'Photos', 'Kitchen Wins', 'Recipes', 'Concerts', 'Wi-Fi Names',
-      'Links', 'pennguytweets', 'Settings',
+      'pennguytweets', 'Links', 'Settings',
     ]);
   });
 

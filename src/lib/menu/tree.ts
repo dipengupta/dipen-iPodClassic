@@ -1,14 +1,14 @@
 import type { MenuNode } from './types';
 
-const ABOUT_TEXT = `This site is my personal corner of the internet, rebuilt as a 1:1 iPod Classic.
+const ABOUT_TEXT = `Hi, I'm Dipen. This is my personal website, built as a 1:1 replica of the iPod Classic.
 
-Spin the wheel (or use the arrow keys) to dig through my music, articles, collections and work history — the same way you'd have hunted for an album in 2007.
+Use the click wheel (or your arrow keys) to browse around: my music and guitars, articles I've written, my work history, recipes, photos, and a few other collections.
 
-Built with Next.js, SQLite and an unreasonable amount of CSS. The guitars, mugs and everything else in here are real. The battery icon, sadly, is not.
+Everything in here is real — built with Next.js, SQLite and a lot of CSS!
 
 Want to say hi? I'm at dipenrgupta@icloud.com.
 
-— Dipen`;
+— Dipen :)`;
 
 const OCTAVIUM_TEXT = `Octavium was my college band, where I played the bass. It was quite a ride, from playing in and winning band competitions, to writing original songs, to even performing at the Hard Rock Cafe!`;
 
@@ -170,16 +170,16 @@ export const menuTree: MenuNode = {
           dataSource: 'wifi',
         },
         {
-          id: 'extras.links',
-          label: 'Links',
-          view: 'list',
-          dataSource: 'links',
-        },
-        {
           id: 'extras.tweets',
           label: 'pennguytweets',
           view: 'list',
           dataSource: 'tweets',
+        },
+        {
+          id: 'extras.links',
+          label: 'Links',
+          view: 'list',
+          dataSource: 'links',
         },
         {
           id: 'extras.settings',

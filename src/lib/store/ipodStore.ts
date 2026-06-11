@@ -44,13 +44,19 @@ function itemsFromChildren(node: MenuNode): FrameItem[] {
   }));
 }
 
-function settingsItems(theme: Theme): FrameItem[] {
+function settingsItems(theme: Theme, tweetShuffle: boolean): FrameItem[] {
   return [
     {
       id: 'settings.theme',
       label: 'Theme',
       sublabel: theme === 'silver' ? 'Silver' : 'Black',
       onSelect: { kind: 'action', action: 'toggleTheme' },
+    },
+    {
+      id: 'settings.tweetShuffle',
+      label: 'pennguytweets',
+      sublabel: tweetShuffle ? 'Shuffled' : 'Newest First',
+      onSelect: { kind: 'action', action: 'toggleTweetShuffle' },
     },
   ];
 }
@@ -77,6 +83,8 @@ export interface PlaybackState {
 export interface IpodState {
   stack: Frame[];
   theme: Theme;
+  /** Settings: present the pennguytweets list in a random order. */
+  tweetShuffle: boolean;
   playback: PlaybackState;
   /** Bumped on play/pause press; PlayersLayer toggles the active source. */
   playPauseNonce: number;
@@ -86,6 +94,7 @@ export interface IpodState {
 
   setLoadItems: (fn: (node: MenuNode) => Promise<FrameItem[]>) => void;
   setTheme: (theme: Theme) => void;
+  setTweetShuffle: (on: boolean) => void;
   pushNode: (node: MenuNode) => void;
   pushItems: (title: string, view: ViewType, items: FrameItem[]) => void;
   pushDetail: (view: ViewType, payload: DetailPayload) => void;
@@ -113,6 +122,7 @@ function initialStack(): Frame[] {
 export const useIpodStore = create<IpodState>((set, get) => ({
   stack: initialStack(),
   theme: 'silver',
+  tweetShuffle: false,
   playback: { source: null, index: -1, playing: false, queue: [] },
   playPauseNonce: 0,
   captionNonce: 0,
@@ -132,11 +142,22 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     }
   },
 
+  setTweetShuffle: (on) => {
+    set({ tweetShuffle: on });
+    if (typeof document !== 'undefined') {
+      try {
+        localStorage.setItem('ipod-tweet-shuffle', on ? '1' : '0');
+      } catch {
+        // Storage can be unavailable (private mode); the setting just won't persist.
+      }
+    }
+  },
+
   pushNode: (node) => {
-    const { loadItems, theme } = get();
+    const { loadItems, theme, tweetShuffle } = get();
     let frame: Frame;
     if (node.view === 'settings') {
-      frame = makeFrame({ title: node.label, view: 'settings', node, items: settingsItems(theme) });
+      frame = makeFrame({ title: node.label, view: 'settings', node, items: settingsItems(theme, tweetShuffle) });
     } else if (node.children?.length) {
       frame = makeFrame({ title: node.label, view: node.view, node, items: itemsFromChildren(node) });
     } else if (node.dataSource) {
@@ -345,16 +366,19 @@ function executeSelect(state: IpodState, spec: SelectSpec): void {
     case 'play':
       state.playTrack(spec.source, spec.queue, spec.index);
       break;
-    case 'action':
+    case 'action': {
       if (spec.action === 'toggleTheme') {
-        const next = state.theme === 'silver' ? 'black' : 'silver';
-        state.setTheme(next);
-        // Refresh the visible settings row's sublabel.
-        const top = state.stack[state.stack.length - 1];
-        if (top.view === 'settings') {
-          state.setFrameItems(top.key, settingsItems(next));
-        }
+        state.setTheme(state.theme === 'silver' ? 'black' : 'silver');
+      } else if (spec.action === 'toggleTweetShuffle') {
+        state.setTweetShuffle(!state.tweetShuffle);
+      }
+      // Refresh the visible settings rows' sublabels.
+      const { stack, theme, tweetShuffle } = useIpodStore.getState();
+      const top = stack[stack.length - 1];
+      if (top.view === 'settings') {
+        useIpodStore.getState().setFrameItems(top.key, settingsItems(theme, tweetShuffle));
       }
       break;
+    }
   }
 }

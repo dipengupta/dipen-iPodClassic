@@ -1,4 +1,5 @@
 import { getSoundcloudTracks } from '../players/soundcloud';
+import { useIpodStore } from '../store/ipodStore';
 import type { FrameItem, MenuNode, PlayTrack } from './types';
 
 /**
@@ -300,13 +301,14 @@ interface ConcertRow {
 
 async function concerts(): Promise<FrameItem[]> {
   const { items } = await fetchJson<{ items: ConcertRow[] }>('/api/content/concerts');
-  // Chronological year groups (seed order); each year opens a readable list.
+  // Year groups newest first (seed order is chronological); each year opens
+  // a readable list.
   const byYear = new Map<string, ConcertRow[]>();
   for (const concert of items) {
     if (!byYear.has(concert.year)) byYear.set(concert.year, []);
     byYear.get(concert.year)!.push(concert);
   }
-  return [...byYear.entries()].map(([year, shows]) => ({
+  return [...byYear.entries()].reverse().map(([year, shows]) => ({
     id: `concerts-${year}`,
     label: year,
     sublabel: `${shows.length} show${shows.length === 1 ? '' : 's'}`,
@@ -385,10 +387,21 @@ const TWEET_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   year: 'numeric',
 };
 
+function shuffled<T>(rows: T[]): T[] {
+  const out = [...rows];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 async function tweets(): Promise<FrameItem[]> {
-  // Scraped @20swithepennguy archive, newest first from the API.
+  // Scraped @20swithepennguy archive, newest first from the API. The
+  // settings toggle re-deals the order on every visit to the list.
   const { items } = await fetchJson<{ items: TweetRow[] }>('/api/content/tweets');
-  return items.map((t) => {
+  const ordered = useIpodStore.getState().tweetShuffle ? shuffled(items) : items;
+  return ordered.map((t) => {
     const posted = t.postedAt
       ? new Date(t.postedAt).toLocaleDateString('en-US', TWEET_DATE_FORMAT)
       : null;
