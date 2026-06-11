@@ -9,8 +9,8 @@ test.beforeEach(async ({ page }) => {
 
 test('boots to the main menu with a preview pane', async ({ page }) => {
   const rows = page.getByTestId('menu-row');
-  await expect(rows).toHaveCount(5);
-  for (const [i, label] of ['Music', 'Collections', 'Professional', 'Articles', 'Misc'].entries()) {
+  await expect(rows).toHaveCount(6);
+  for (const [i, label] of ['Music', 'Collections', 'Professional', 'Articles', 'About', 'Misc'].entries()) {
     await expect(rows.nth(i)).toContainText(label);
   }
   await expect(rows.first()).toHaveAttribute('data-selected', 'true');
@@ -72,11 +72,10 @@ test('Instagram (UGG Chronicles): year list, episode list, local video + caption
 });
 
 test('photos cover flow shows profile pics and flips to captions', async ({ page }) => {
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Misc
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('status-bar')).toContainText('Misc');
-  await page.keyboard.press('ArrowDown'); // Photos
-  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter'); // Photos (first row)
   const coverflow = page.getByTestId('coverflow');
   await expect(coverflow).toBeVisible();
   await expect(coverflow).toContainText('1 of 10');
@@ -167,7 +166,8 @@ test('professional timeline and links sections have content', async ({ page }) =
   await expect(page.getByTestId('reader-content')).toContainText('Took ownership of the commission system');
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  // Misc → Links (root selection is still on Professional, two below Misc)
+  // Misc → Links (root selection is still on Professional, three below Misc)
+  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
@@ -179,7 +179,7 @@ test('professional timeline and links sections have content', async ({ page }) =
 
 test('theme toggle switches to the black iPod and persists across reload', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'silver');
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Misc
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
   for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
@@ -192,10 +192,9 @@ test('theme toggle switches to the black iPod and persists across reload', async
 });
 
 test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) => {
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Misc
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
   // Kitchen Wins coverflow
-  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
   const coverflow = page.getByTestId('coverflow');
@@ -206,6 +205,7 @@ test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) =
   await page.keyboard.press('Escape'); // unflip
   await page.keyboard.press('Escape'); // back to Misc
   // Concerts: chronological year groups, drill into 2012
+  await page.keyboard.press('ArrowDown'); // Recipes
   await page.keyboard.press('ArrowDown'); // Concerts
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('2010/2011');
@@ -221,8 +221,47 @@ test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) =
   await expect(page.getByTestId('menu-row')).toHaveCount(25);
 });
 
+test('About on the home menu shows the contact email', async ({ page }) => {
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // About
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('About');
+  await expect(page.getByTestId('reader-content')).toContainText('dipenrgupta@icloud.com');
+  await page.keyboard.press('Escape'); // back home
+  await expect(page.getByTestId('menu-row').nth(4)).toContainText('About');
+});
+
+test('Recipes: category groups open recipe lists and readable details', async ({ page }) => {
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown'); // Recipes
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('Recipes');
+  const rows = page.getByTestId('menu-row');
+  // The four category groups, each with a recipe count.
+  await expect(rows.nth(0)).toContainText('Food');
+  await expect(rows.nth(1)).toContainText('Baking');
+  await expect(rows.nth(2)).toContainText('Drinks');
+  await expect(rows.nth(3)).toContainText('Tips & Tricks');
+  await expect(rows.nth(0)).toContainText(/\d+ recipes/);
+  // A full recipe reads in the text reader.
+  await page.keyboard.press('Enter'); // Food
+  await expect(rows.first()).toContainText('Chicken Rice');
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('reader-content')).toContainText('Marinating the chicken');
+  await page.keyboard.press('Escape'); // back to the Food list
+  await page.keyboard.press('Escape'); // back to the categories
+  // A link-backed recipe keeps its View Original footer.
+  await page.keyboard.press('ArrowDown'); // Baking
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown'); // Tiramisu
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('reader-content')).toContainText('mascarpone');
+  await expect(page.getByTestId('view-original')).toHaveAttribute('href', /tastesbetterfromscratch\.com/);
+});
+
 test('pennguytweets: newest-first list opens a tweet with its date', async ({ page }) => {
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Misc
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
   for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowDown'); // pennguytweets
   await page.keyboard.press('Enter');

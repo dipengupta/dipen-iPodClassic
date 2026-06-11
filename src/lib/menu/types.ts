@@ -17,6 +17,7 @@ export type DataSourceKey =
   | 'mugs'
   | 'photos'
   | 'kitchen'
+  | 'recipes'
   | 'concerts'
   | 'wifi'
   | 'timeline'

@@ -65,7 +65,7 @@ export function clearAll(db: Db): void {
     schema.articles, schema.tweets, schema.uggEpisodes, schema.guitars,
     schema.locations, schema.mugs, schema.galleryItems, schema.timelineEntries,
     schema.youtubeVideos, schema.soundcloudTracks, schema.links,
-    schema.concerts, schema.wifiNames, schema.fetchMeta,
+    schema.concerts, schema.wifiNames, schema.recipes, schema.fetchMeta,
   ]) {
     db.delete(table).run();
   }
@@ -230,5 +230,19 @@ export function seedDb(db: Db, seedDir: string = SEED_DIR): void {
   const wifi = readJsonOptional<string[]>(seedDir, 'wifi.json') ?? [];
   wifi.forEach((name, i) => {
     db.insert(schema.wifiNames).values({ name, sortOrder: i }).run();
+  });
+
+  const recipes = readJsonOptional<Array<{ title: string; category: 'food' | 'baking' | 'drinks' | 'tips'; body: string; sourceUrl?: string; sourceLabel?: string }>>(seedDir, 'recipes.json') ?? [];
+  recipes.forEach((recipe, i) => {
+    db.insert(schema.recipes)
+      .values({
+        title: recipe.title,
+        category: recipe.category,
+        body: recipe.body,
+        sourceUrl: recipe.sourceUrl ?? null,
+        sourceLabel: recipe.sourceLabel ?? null,
+        sortOrder: i,
+      })
+      .run();
   });
 }

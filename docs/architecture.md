@@ -127,6 +127,13 @@ API), or a `payload` (leaf content). `src/lib/menu/dataSources.ts` maps each
 what selecting them does (`SelectSpec`: push a node, push built items, open a
 detail view, follow an external link, or run an action).
 
+Two patterns worth copying: **About** (home menu) is a pure static node — a
+`textReader` `payload` with no table or API behind it. **Recipes** (under
+Misc) is the full data-driven shape: the builder groups rows into category
+sub-lists (Food/Baking/Drinks/Tips & Tricks), and each recipe opens a
+scrollable `textReader` detail whose optional `sourceUrl` renders the
+"View Original" footer for recipes saved from the web.
+
 **To add a new section:**
 
 1. Add a table to `src/lib/db/schema.ts`, run `npm run db:generate`.

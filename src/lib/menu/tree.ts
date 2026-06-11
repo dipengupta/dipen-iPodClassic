@@ -6,6 +6,8 @@ Spin the wheel (or use the arrow keys) to dig through my music, articles, collec
 
 Built with Next.js, SQLite and an unreasonable amount of CSS. The guitars, mugs and everything else in here are real. The battery icon, sadly, is not.
 
+Want to say hi? I'm at dipenrgupta@icloud.com.
+
 — Dipen`;
 
 const OCTAVIUM_TEXT = `Octavium was my college band, where I played the bass. It was quite a ride, from playing in and winning band competitions, to writing original songs, to even performing at the Hard Rock Cafe!`;
@@ -124,16 +126,16 @@ export const menuTree: MenuNode = {
       dataSource: 'articles',
     },
     {
+      id: 'about',
+      label: 'About',
+      view: 'textReader',
+      payload: { title: 'About', text: ABOUT_TEXT },
+    },
+    {
       id: 'extras',
       label: 'Misc',
       view: 'splitMenu',
       children: [
-        {
-          id: 'extras.about',
-          label: 'About',
-          view: 'textReader',
-          payload: { title: 'About', text: ABOUT_TEXT },
-        },
         {
           id: 'extras.photos',
           label: 'Photos',
@@ -147,6 +149,12 @@ export const menuTree: MenuNode = {
           view: 'coverflow',
           dataSource: 'kitchen',
           previewImage: '/images/contact/pizza.webp',
+        },
+        {
+          id: 'extras.recipes',
+          label: 'Recipes',
+          view: 'list',
+          dataSource: 'recipes',
         },
         {
           id: 'extras.concerts',

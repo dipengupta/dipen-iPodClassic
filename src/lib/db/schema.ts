@@ -75,6 +75,18 @@ export const galleryItems = sqliteTable('gallery_items', {
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
+// Recipes: full ones carry the whole recipe in body; link-backed ones keep
+// the original URL for the "View Original" footer.
+export const recipes = sqliteTable('recipes', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  category: text('category', { enum: ['food', 'baking', 'drinks', 'tips'] }).notNull(),
+  body: text('body').notNull(),
+  sourceUrl: text('source_url'),
+  sourceLabel: text('source_label'),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
 export const timelineEntries = sqliteTable('timeline_entries', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   role: text('role').notNull(),

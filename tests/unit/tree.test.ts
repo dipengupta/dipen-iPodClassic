@@ -9,7 +9,7 @@ const VALID_VIEWS: ViewType[] = [
 
 const DATA_SOURCES = [
   'articles', 'youtube', 'guitars', 'ugg', 'soundcloud',
-  'mugs', 'photos', 'kitchen', 'concerts', 'wifi',
+  'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi',
   'timeline', 'links', 'tweets',
 ];
 
@@ -45,10 +45,14 @@ describe('menu tree integrity', () => {
     }
   });
 
-  it('contains the five top-level sections in order', () => {
+  it('contains the six top-level sections in order', () => {
     expect(menuTree.children!.map((c: MenuNode) => c.label)).toEqual([
-      'Music', 'Collections', 'Professional', 'Articles', 'Misc',
+      'Music', 'Collections', 'Professional', 'Articles', 'About', 'Misc',
     ]);
+  });
+
+  it('About sits on the home menu and shows the contact email', () => {
+    expect(findNode('about')?.payload?.text).toContain('dipenrgupta@icloud.com');
   });
 
   it('Collections holds the mug coverflow and the static collection photos', () => {
@@ -63,7 +67,7 @@ describe('menu tree integrity', () => {
 
   it('the Misc section holds the fun sections in order', () => {
     expect(findNode('extras')?.children?.map((c) => c.label)).toEqual([
-      'About', 'Photos', 'Kitchen Wins', 'Concerts', 'Wi-Fi Names',
+      'Photos', 'Kitchen Wins', 'Recipes', 'Concerts', 'Wi-Fi Names',
       'Links', 'pennguytweets', 'Settings',
     ]);
   });

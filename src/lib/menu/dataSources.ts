@@ -236,6 +236,62 @@ async function kitchen(): Promise<FrameItem[]> {
   }));
 }
 
+interface RecipeRow {
+  id: number;
+  title: string;
+  category: 'food' | 'baking' | 'drinks' | 'tips';
+  body: string;
+  sourceUrl: string | null;
+  sourceLabel: string | null;
+}
+
+const RECIPE_CATEGORY_LABEL: Record<RecipeRow['category'], string> = {
+  food: 'Food',
+  baking: 'Baking',
+  drinks: 'Drinks',
+  tips: 'Tips & Tricks',
+};
+
+async function recipes(): Promise<FrameItem[]> {
+  const { items } = await fetchJson<{ items: RecipeRow[] }>('/api/content/recipes');
+  // Category groups in fixed menu order; each opens a readable recipe list.
+  const byCategory = new Map<RecipeRow['category'], RecipeRow[]>();
+  for (const recipe of items) {
+    if (!byCategory.has(recipe.category)) byCategory.set(recipe.category, []);
+    byCategory.get(recipe.category)!.push(recipe);
+  }
+  return (Object.keys(RECIPE_CATEGORY_LABEL) as RecipeRow['category'][])
+    .filter((category) => byCategory.has(category))
+    .map((category) => {
+      const group = byCategory.get(category)!;
+      const label = RECIPE_CATEGORY_LABEL[category];
+      return {
+        id: `recipes-${category}`,
+        label,
+        sublabel: `${group.length} recipe${group.length === 1 ? '' : 's'}`,
+        onSelect: {
+          kind: 'items',
+          title: label,
+          view: 'list',
+          items: group.map((recipe) => ({
+            id: `recipe-${recipe.id}`,
+            label: recipe.title,
+            onSelect: {
+              kind: 'detail',
+              view: 'textReader',
+              payload: {
+                title: recipe.title,
+                text: recipe.body,
+                sourceUrl: recipe.sourceUrl ?? undefined,
+                sourceLabel: recipe.sourceLabel ?? undefined,
+              },
+            },
+          })),
+        },
+      };
+    });
+}
+
 interface ConcertRow {
   id: number;
   year: string;
@@ -363,6 +419,7 @@ const builders: Record<string, () => Promise<FrameItem[]>> = {
   mugs,
   photos,
   kitchen,
+  recipes,
   concerts,
   wifi,
   timeline,
