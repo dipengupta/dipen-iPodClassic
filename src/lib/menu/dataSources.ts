@@ -179,53 +179,6 @@ async function ugg(): Promise<FrameItem[]> {
     });
 }
 
-interface LocationRow {
-  id: number;
-  title: string;
-  notesJson: string;
-  state: string | null;
-  country: string | null;
-}
-
-async function locations(): Promise<FrameItem[]> {
-  const { items } = await fetchJson<{ items: LocationRow[] }>('/api/content/locations');
-  const byCountry = new Map<string, LocationRow[]>();
-  for (const loc of items) {
-    const country = loc.country ?? 'Elsewhere';
-    if (!byCountry.has(country)) byCountry.set(country, []);
-    byCountry.get(country)!.push(loc);
-  }
-  return [...byCountry.entries()]
-    .sort(([, a], [, b]) => b.length - a.length)
-    .map(([country, locs]) => ({
-      id: `country-${country}`,
-      label: country,
-      sublabel: `${locs.length} place${locs.length === 1 ? '' : 's'}`,
-      onSelect: {
-        kind: 'items',
-        title: country,
-        view: 'list',
-        items: locs.map((loc) => {
-          const notes = (JSON.parse(loc.notesJson) as string[]).filter(Boolean);
-          const trips = [...new Set(notes)];
-          return {
-            id: `loc-${loc.id}`,
-            label: loc.title.replace(`, ${country}`, ''),
-            sublabel: `${notes.length} trip${notes.length === 1 ? '' : 's'}`,
-            onSelect: {
-              kind: 'detail' as const,
-              view: 'textReader' as const,
-              payload: {
-                title: loc.title,
-                text: `Trips: ${notes.length}\n\n${trips.map((t) => `• ${t}`).join('\n')}`,
-              },
-            },
-          };
-        }),
-      },
-    }));
-}
-
 interface MugRow {
   id: number;
   title: string;
@@ -261,20 +214,6 @@ interface GalleryRow {
   title: string;
   description: string;
   imagePath: string;
-}
-
-async function gallery(): Promise<FrameItem[]> {
-  const { items } = await fetchJson<{ items: GalleryRow[] }>('/api/content/gallery');
-  return items.map((g) => ({
-    id: `gallery-${g.id}`,
-    label: g.title,
-    imagePath: g.imagePath,
-    onSelect: {
-      kind: 'detail',
-      view: 'photo',
-      payload: { title: g.title, imagePath: g.imagePath, text: g.description },
-    },
-  }));
 }
 
 async function photos(): Promise<FrameItem[]> {
@@ -421,9 +360,7 @@ const builders: Record<string, () => Promise<FrameItem[]>> = {
   guitars,
   ugg,
   soundcloud,
-  locations,
   mugs,
-  gallery,
   photos,
   kitchen,
   concerts,

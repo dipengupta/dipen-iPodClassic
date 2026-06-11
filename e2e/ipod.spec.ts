@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 test('boots to the main menu with a preview pane', async ({ page }) => {
   const rows = page.getByTestId('menu-row');
   await expect(rows).toHaveCount(5);
-  for (const [i, label] of ['Music', 'Articles', 'Collections', 'Professional', 'Misc'].entries()) {
+  for (const [i, label] of ['Music', 'Collections', 'Professional', 'Articles', 'Misc'].entries()) {
     await expect(rows.nth(i)).toContainText(label);
   }
   await expect(rows.first()).toHaveAttribute('data-selected', 'true');
@@ -41,7 +41,7 @@ test('plays a YouTube video and keeps playing after MENU (persistent player)', a
   await expect(page.getByTestId('menu-row').first()).toBeVisible();
 });
 
-test('UGG Chronicles: year list, episode list, local video + caption overlay', async ({ page }) => {
+test('Instagram (UGG Chronicles): year list, episode list, local video + caption overlay', async ({ page }) => {
   await page.keyboard.press('Enter'); // Music
   await page.keyboard.press('ArrowDown'); // YouTube
   await page.keyboard.press('ArrowDown'); // Instagram
@@ -90,6 +90,23 @@ test('photos cover flow shows profile pics and flips to captions', async ({ page
   await expect(coverflow).not.toHaveAttribute('data-flipped', 'true');
 });
 
+test('Collections: mug coverflow plus the static collection photos', async ({ page }) => {
+  await page.keyboard.press('ArrowDown'); // Collections
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('Collections');
+  const rows = page.getByTestId('menu-row');
+  for (const [i, label] of ['Mug Collection', 'Vinyls', 'Travel Mugs', 'Fridge Magnets'].entries()) {
+    await expect(rows.nth(i)).toContainText(label);
+  }
+  await page.keyboard.press('ArrowDown'); // Vinyls
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('Vinyls');
+  await expect(page.locator('img[alt="Vinyls"]')).toBeVisible();
+  await expect(page.getByText('The vinyl shelf.')).toBeVisible();
+  await page.keyboard.press('Escape'); // back to the Collections menu
+  await expect(rows.nth(1)).toContainText('Vinyls');
+});
+
 test('SoundCloud lists tracks (or the fallback link) as an iPod menu', async ({ page }) => {
   await page.keyboard.press('Enter'); // Music
   await page.keyboard.press('ArrowDown');
@@ -102,7 +119,7 @@ test('SoundCloud lists tracks (or the fallback link) as an iPod menu', async ({ 
 });
 
 test('reads an article: scroll with the wheel, View Original links out', async ({ page }) => {
-  await page.keyboard.press('ArrowDown'); // Articles
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown'); // Articles
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText("Reversing into learner's mindset");
   await page.keyboard.press('Enter');
@@ -142,7 +159,6 @@ test('guitar Cover Flow: browse covers and flip for the caption', async ({ page 
 
 test('professional timeline and links sections have content', async ({ page }) => {
   await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown'); // Professional
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('Software Developer');
@@ -151,7 +167,8 @@ test('professional timeline and links sections have content', async ({ page }) =
   await expect(page.getByTestId('reader-content')).toContainText('Took ownership of the commission system');
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  // Misc → Links
+  // Misc → Links (root selection is still on Professional, two below Misc)
+  await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Links

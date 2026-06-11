@@ -1,0 +1,122 @@
+[
+  {
+    "title": "Acadia",
+    "description": "Acadia National Park, Maine.",
+    "imagePath": "/images/home/acadia_profile.webp",
+    "category": "profile"
+  },
+  {
+    "title": "Acoustic",
+    "description": "With the acoustic.",
+    "imagePath": "/images/home/acoustic_profile.webp",
+    "category": "profile"
+  },
+  {
+    "title": "Buc-ee's",
+    "description": "Obligatory Buc-ee's stop.",
+    "imagePath": "/images/home/bucees.webp",
+    "category": "profile"
+  },
+  {
+    "title": "Costco Jacket",
+    "description": "The Costco jacket.",
+    "imagePath": "/images/home/costco-jacket.webp",
+    "category": "profile"
+  },
+  {
+    "title": "Doubleneck",
+    "description": "With the doubleneck.",
+    "imagePath": "/images/home/doubleneck_profile.webp",
+    "category": "profile"
+  },
+  {
+    "title": "Indianapolis Suit",
+    "description": "Suited up in Indianapolis.",
+    "imagePath": "/images/home/indianapolis-suit.webp",
+    "category": "profile"
+  },
+  {
+    "title": "Main",
+    "description": "The classic profile shot.",
+    "imagePath": "/images/home/main.webp",
+    "category": "profile"
+  },
+  {
+    "title": "New Orleans Mirror",
+    "description": "Mirror shot in New Orleans.",
+    "imagePath": "/images/home/new-orleans-mirror.webp",
+    "category": "profile"
+  },
+  {
+    "title": "Guitar",
+    "description": "With the guitar.",
+    "imagePath": "/images/home/prof_guitar.webp",
+    "category": "profile"
+  },
+  {
+    "title": "Tahoe Boat Flag",
+    "description": "On the boat at Lake Tahoe.",
+    "imagePath": "/images/home/tahoe-boat-flag.webp",
+    "category": "profile"
+  },
+  {
+    "title": "Homemade Pizza",
+    "description": "Homemade Pizza",
+    "imagePath": "/images/contact/pizza.webp",
+    "category": "kitchen"
+  },
+  {
+    "title": "Lasagna",
+    "description": "Lasagna",
+    "imagePath": "/images/contact/lasagna.webp",
+    "category": "kitchen"
+  },
+  {
+    "title": "Sourdough",
+    "description": "Sourdough",
+    "imagePath": "/images/contact/sourdough.webp",
+    "category": "kitchen"
+  },
+  {
+    "title": "Potato Gratin",
+    "description": "Potato Gratin",
+    "imagePath": "/images/contact/gretan.webp",
+    "category": "kitchen"
+  },
+  {
+    "title": "Muffins",
+    "description": "Muffins",
+    "imagePath": "/images/contact/muffins.webp",
+    "category": "kitchen"
+  },
+  {
+    "title": "Spanakopita",
+    "description": "Spanakopita",
+    "imagePath": "/images/contact/spanakopita.webp",
+    "category": "kitchen"
+  },
+  {
+    "title": "Cornbread",
+    "description": "Cornbread",
+    "imagePath": "/images/contact/cornbread.webp",
+    "category": "kitchen"
+  },
+  {
+    "title": "Gyoza",
+    "description": "Gyoza",
+    "imagePath": "/images/contact/gyoza.webp",
+    "category": "kitchen"
+  },
+  {
+    "title": "Brownies",
+    "description": "Brownies",
+    "imagePath": "/images/contact/brownies.webp",
+    "category": "kitchen"
+  },
+  {
+    "title": "Khao Soi",
+    "description": "Khao Soi",
+    "imagePath": "/images/contact/khao-soi.webp",
+    "category": "kitchen"
+  }
+]

@@ -1,0 +1,82 @@
+{
+  "youtubeChannelId": "UC6Luaw5wf-XpJMPbbkxbTZw",
+  "soundcloudUserUrl": "https://soundcloud.com/dipen-gupta/tracks",
+  "instagramProfileUrl": "https://www.instagram.com/dipengupta/reels/?hl=en",
+  "instagramReels": [
+    {
+      "shortcode": "DY6RhBgNm1l",
+      "title": "Ep. 214 | Radiohead - Fake Plastic Trees | Guitar Cover"
+    },
+    {
+      "shortcode": "DYlU8ZUROUt",
+      "title": "Ep. 213 | SOJA - Not Done Yet | Bass Cover"
+    },
+    {
+      "shortcode": "DX-mAvWR-Bz",
+      "title": "Ep. 212 | Green Day - Redundant | Guitar Cover"
+    },
+    {
+      "shortcode": "DWz_KeFEUdb",
+      "title": "Ep. 211 | Creedence Clearwater Revival - Have You Ever Seen The Rain | Bass Cover"
+    },
+    {
+      "shortcode": "DVPxuDeES8C",
+      "title": "Ep. 210 | G. Love & Special Sauce - Fatman | Guitar Cover"
+    },
+    {
+      "shortcode": "DUW1a95kZp-",
+      "title": "Ep. 209 | Elvis Presley - Jailhouse Rock | Guitar Cover"
+    },
+    {
+      "shortcode": "DS7XnOXkYXA",
+      "title": "Ep. 208 | Tere Bina | Guitar Cover"
+    },
+    {
+      "shortcode": "DSGlBJzEfHn",
+      "title": "Ep. 207 | Sleep Token - Gethsemane | Guitar Cover"
+    },
+    {
+      "shortcode": "DRH9mCdkXTH",
+      "title": "Ep. 206 | Wheatus - Teenage Dirtbag | Guitar Cover"
+    },
+    {
+      "shortcode": "DQIitObkUHi",
+      "title": "Ep. 205 | Audioslave - Cochise | Guitar Cover"
+    },
+    {
+      "shortcode": "DOkGsQqESeR",
+      "title": "Ep. 204 | Doubleneck Noodles"
+    },
+    {
+      "shortcode": "DOEovApkeho",
+      "title": "Ep. 203 | Kaisi Paheli Zindagani | Bass Cover"
+    }
+  ],
+  "youtubeFallbackVideos": [
+    {
+      "videoId": "J-4-zvuavh0",
+      "title": "Blues Jam at Champions Bar",
+      "description": ""
+    },
+    {
+      "videoId": "o5lLrQdkFfM",
+      "title": "Green Day - Good Riddance (Time of Your Life) Cover",
+      "description": ""
+    },
+    {
+      "videoId": "_gKMKV816_8",
+      "title": "Coke Studio - Afreen Afreen | Acoustic Guitar Cover",
+      "description": ""
+    },
+    {
+      "videoId": "-nHA7W6BdYk",
+      "title": "Guns N' Roses - November Rain | Piano Cover",
+      "description": ""
+    },
+    {
+      "videoId": "e-41SapC6PU",
+      "title": "John Mayer - In Your Atmosphere | Acoustic Guitar Cover",
+      "description": ""
+    }
+  ]
+}

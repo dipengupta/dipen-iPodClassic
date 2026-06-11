@@ -170,8 +170,10 @@ simpler, Docker-friendly, and predictable inside the scaled 320×240 screen).
 
 Two skins — `silver` (default) and `black` — are CSS custom property sets on
 `html[data-theme]` (`app/globals.css`). The device chrome is pure CSS
-gradients + inline SVG, so themes swap ~10 variables and stay retina-sharp.
-The screen content itself never themes (real iPods only varied the hardware
+gradients + inline SVG, so themes swap ~9 variables and stay retina-sharp.
+Only the device themes: the page backdrop and hint text (`--backdrop`,
+`--hint-color`) are defined once on `:root` and never overridden, and the
+screen content never themes either (real iPods only varied the hardware
 color). Persistence: `localStorage` + cookie; an inline script in
 `app/layout.tsx` applies the theme pre-hydration to avoid flashes.
 

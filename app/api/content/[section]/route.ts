@@ -1,4 +1,4 @@
-import { asc, desc, eq, inArray } from 'drizzle-orm';
+import { asc, desc, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
@@ -8,11 +8,6 @@ export const dynamic = 'force-dynamic';
 const sections = {
   guitars: () => getDb().select().from(schema.guitars).orderBy(asc(schema.guitars.sortOrder)).all(),
   mugs: () => getDb().select().from(schema.mugs).orderBy(asc(schema.mugs.sortOrder)).all(),
-  locations: () => getDb().select().from(schema.locations).orderBy(asc(schema.locations.title)).all(),
-  gallery: () =>
-    getDb().select().from(schema.galleryItems)
-      .where(inArray(schema.galleryItems.category, ['vinyl', 'mug', 'magnet', 'pin']))
-      .orderBy(asc(schema.galleryItems.sortOrder)).all(),
   photos: () =>
     getDb().select().from(schema.galleryItems)
       .where(eq(schema.galleryItems.category, 'profile'))

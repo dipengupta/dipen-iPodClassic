@@ -16,7 +16,7 @@ beforeAll(() => {
 
 describe('/api/content/[section]', () => {
   it('serves every registered section', async () => {
-    for (const section of ['guitars', 'mugs', 'locations', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi', 'timeline', 'links', 'ugg', 'tweets']) {
+    for (const section of ['guitars', 'mugs', 'photos', 'kitchen', 'concerts', 'wifi', 'timeline', 'links', 'ugg', 'tweets']) {
       const res = await getContent(req, params({ section }));
       expect(res.status, section).toBe(200);
       const { items } = await res.json();
@@ -24,7 +24,7 @@ describe('/api/content/[section]', () => {
     }
   });
 
-  it('splits profile photos and kitchen wins out of the gallery', async () => {
+  it('splits profile photos and kitchen wins out of the gallery items', async () => {
     const photos = await (await getContent(req, params({ section: 'photos' }))).json();
     expect(photos.items).toHaveLength(10);
     for (const item of photos.items) {
@@ -35,10 +35,9 @@ describe('/api/content/[section]', () => {
     for (const item of kitchen.items) {
       expect(item.category).toBe('kitchen');
     }
-    const gallery = await (await getContent(req, params({ section: 'gallery' }))).json();
-    expect(
-      gallery.items.every((g: { category: string }) => ['vinyl', 'mug', 'magnet', 'pin'].includes(g.category)),
-    ).toBe(true);
+    // The vinyl/mug/magnet rows moved into static tree nodes; the section is gone.
+    const gallery = await getContent(req, params({ section: 'gallery' }));
+    expect(gallery.status).toBe(404);
   });
 
   it('serves concerts in year groups and the wifi list', async () => {

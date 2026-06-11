@@ -1,0 +1,58 @@
+[
+  {
+    "role": "Software Developer",
+    "company": "URL Insurance Group",
+    "dates": "Feb '25 - Present",
+    "location": "Harrisburg, PA",
+    "description": "Took ownership of the commission system, and in charge of end-to-end value generation from gathering requirements, project management, scoping technical feasibility, front-end, back-end development, database management and code deployment."
+  },
+  {
+    "role": "Jr. Software Developer",
+    "company": "URL Insurance Group",
+    "dates": "Jun '23 - Feb '25",
+    "location": "Harrisburg, PA",
+    "description": "Member of Commissions team, overseeing the upkeep of our commission system, strategizing changes, and leading the system migration. Crucial in maintaining the commission system's vital role in ensuring our agents received their payments accurately and on time. Also working on the system's migration to Node.js from Laravel while leveraging Docker and other modern AI tools to improve the system's capabilities."
+  },
+  {
+    "role": "Digital Technology Intern - RPA",
+    "company": "Larsen & Toubro Infotech",
+    "dates": "May '22 - Aug '22",
+    "location": "Remote, office in Cleveland, OH",
+    "description": "Worked with remote team to learn Robotic Process Automation workflow. Studied RPA developer foundation training via UiPath Academy and programmed multiple scripts for \"shipment tracking\" and \"competitive analysis\" as part of Vitamix's (the client) process transformation to digital via RPA."
+  },
+  {
+    "role": "Global Ambassador Coordinator",
+    "company": "Penn State Harrisburg",
+    "dates": "Sept '21 - May '23",
+    "location": "Middletown, PA",
+    "description": "Assisted in executing events, creating media, and organizing social media of the Global Ambassador student organization at Penn State Harrisburg."
+  },
+  {
+    "role": "Math and Computer Science Grader",
+    "company": "Penn State Harrisburg",
+    "dates": "Sept '21 - May '23",
+    "location": "Middletown, PA",
+    "description": "Worked under Math and Computer Science faculty to grade assignments and proctor quizzes of Penn State Harrisburg undergraduate students."
+  },
+  {
+    "role": "Software Engineer - L1",
+    "company": "Amadeus",
+    "dates": "Jul '19 - Jun '21",
+    "location": "Bengaluru, Karnataka, India",
+    "description": "Member of Airlines Inventory Schedules team. Responsibilities include end-to-end software testing, automation efforts and maintenance tasks for the Amadeus' flagship product \"Altea\", which is used by 100+ major Airlines for their day-to-day operations. Revamped the automated testing framework with colleague, which in turn reduced the total execution time by 40%. Made the test cases more robust, stable, and easier to maintain, which in turn saved two man-days every sprint. Apart from this, I was also part of the product's security-assessment team."
+  },
+  {
+    "role": "Cybersecurity Research Project Intern",
+    "company": "VJTI, Mumbai",
+    "dates": "Jun '17 - Jul '17",
+    "location": "Mumbai, India",
+    "description": "Research for SCADA Intrusion Detection System using ELK Stack."
+  },
+  {
+    "role": "Mobility Department Intern",
+    "company": "Larsen & Toubro Infotech",
+    "dates": "Dec '16 - Jan '17",
+    "location": "Mumbai, India",
+    "description": "Developed and tested \"Mixed Reality\" apps for Microsoft Hololens using Unity3D."
+  }
+]

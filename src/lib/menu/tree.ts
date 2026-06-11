@@ -38,7 +38,7 @@ export const menuTree: MenuNode = {
         },
         {
           id: 'music.instagram',
-          label: 'Instagram/UGG Chronicles',
+          label: 'Instagram',
           view: 'list',
           dataSource: 'ugg',
           previewImage: '/images/music/2024_insta.webp',
@@ -64,24 +64,11 @@ export const menuTree: MenuNode = {
       ],
     },
     {
-      id: 'articles',
-      label: 'Articles',
-      view: 'list',
-      dataSource: 'articles',
-    },
-    {
       id: 'collections',
       label: 'Collections',
       view: 'splitMenu',
       previewImage: '/images/travel/mugs.webp',
       children: [
-        {
-          id: 'collections.places',
-          label: 'Places Visited',
-          view: 'list',
-          dataSource: 'locations',
-          groupBy: 'country',
-        },
         {
           id: 'collections.mugs',
           label: 'Mug Collection',
@@ -90,11 +77,37 @@ export const menuTree: MenuNode = {
           previewImage: '/images/travel/mugs.webp',
         },
         {
-          id: 'collections.gallery',
-          label: 'Vinyls & Magnets',
-          view: 'list',
-          dataSource: 'gallery',
+          id: 'collections.vinyls',
+          label: 'Vinyls',
+          view: 'photo',
           previewImage: '/images/travel/vinyls.webp',
+          payload: {
+            title: 'Vinyls',
+            imagePath: '/images/travel/vinyls.webp',
+            text: 'The vinyl shelf.',
+          },
+        },
+        {
+          id: 'collections.travelMugs',
+          label: 'Travel Mugs',
+          view: 'photo',
+          previewImage: '/images/travel/mugs.webp',
+          payload: {
+            title: 'Travel Mugs',
+            imagePath: '/images/travel/mugs.webp',
+            text: 'The mug wall.',
+          },
+        },
+        {
+          id: 'collections.magnets',
+          label: 'Fridge Magnets',
+          view: 'photo',
+          previewImage: '/images/travel/fridge-magnets.webp',
+          payload: {
+            title: 'Fridge Magnets',
+            imagePath: '/images/travel/fridge-magnets.webp',
+            text: 'Magnets from everywhere.',
+          },
         },
       ],
     },
@@ -103,6 +116,12 @@ export const menuTree: MenuNode = {
       label: 'Professional',
       view: 'list',
       dataSource: 'timeline',
+    },
+    {
+      id: 'articles',
+      label: 'Articles',
+      view: 'list',
+      dataSource: 'articles',
     },
     {
       id: 'extras',

@@ -1,0 +1,633 @@
+{
+  "visitedLocations": [
+    {
+      "title": "Texas, USA",
+      "lat": 31.0,
+      "lng": -99.0,
+      "subtitle": "Visited Places",
+      "notes": [
+        "TX Trip",
+        "TX Trip",
+        "TX Trip",
+        "Parents' Trip"
+      ],
+      "state": "Texas",
+      "country": "USA"
+    },
+    {
+      "title": "Connecticut, USA",
+      "lat": 41.6032,
+      "lng": -73.0877,
+      "subtitle": "Visited Places",
+      "notes": [
+        "CT Drive"
+      ],
+      "state": "Connecticut",
+      "country": "USA"
+    },
+    {
+      "title": "New York, USA",
+      "lat": 42.9,
+      "lng": -75.5,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Zaid comes over - NY, PA, Boston trips",
+        "Parents' Trip",
+        "CG NY Trip"
+      ],
+      "state": "New York",
+      "country": "USA"
+    },
+    {
+      "title": "Pennsylvania, USA",
+      "lat": 41.0,
+      "lng": -77.5,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Zaid comes over - NY, PA, Boston trips",
+        "PA Grand Canyon trip with Tapas and Kirti",
+        "Trips - Scranton",
+        "Parents' Trip",
+        "Car trips - Philly"
+      ],
+      "state": "Pennsylvania",
+      "country": "USA"
+    },
+    {
+      "title": "Boston, Massachusetts, USA",
+      "lat": 42.3601,
+      "lng": -71.0589,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Zaid comes over - NY, PA, Boston trips"
+      ],
+      "state": "Massachusetts",
+      "city": "Boston",
+      "country": "USA"
+    },
+    {
+      "title": "Indiana, USA",
+      "lat": 39.7684,
+      "lng": -86.1581,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Saad's Wedding - IN Trip with Octavium"
+      ],
+      "state": "Indiana",
+      "country": "USA"
+    },
+    {
+      "title": "Mammoth Cave National Park, Kentucky, USA",
+      "lat": 37.1869,
+      "lng": -86.1014,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Mammoth Caves trip with CG"
+      ],
+      "state": "Kentucky",
+      "country": "USA"
+    },
+    {
+      "title": "New Orleans, Louisiana, USA",
+      "lat": 29.9511,
+      "lng": -90.0715,
+      "subtitle": "Visited Places",
+      "notes": [
+        "New Orleans trip"
+      ],
+      "state": "Louisiana",
+      "city": "New Orleans",
+      "country": "USA"
+    },
+    {
+      "title": "Acadia National Park, Maine, USA",
+      "lat": 44.3386,
+      "lng": -68.2733,
+      "notes": [
+        "Acadia Trip"
+      ],
+      "state": "Maine",
+      "country": "USA",
+      "photos": [
+        {
+          "path": "images/travel/pins/acadia-profile.webp",
+          "alt": "Sunrise view at Acadia"
+        }
+      ]
+    },
+    {
+      "title": "Pennsylvania Grand Canyon (Pine Creek Gorge), USA",
+      "lat": 41.7098,
+      "lng": -77.4544,
+      "subtitle": "Visited Places",
+      "notes": [
+        "PA Grand Canyon trip with Tapas and Kirti"
+      ],
+      "state": "Pennsylvania",
+      "country": "USA"
+    },
+    {
+      "title": "Charlotte, North Carolina, USA",
+      "lat": 35.2271,
+      "lng": -80.8431,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Charlotte trip to visit Areej"
+      ],
+      "state": "North Carolina",
+      "city": "Charlotte",
+      "country": "USA"
+    },
+    {
+      "title": "California, USA",
+      "lat": 36.7783,
+      "lng": -119.4179,
+      "subtitle": "Visited Places",
+      "notes": [
+        "CA Trip - cousins / Tahoe / United layover + bag experience",
+        "Parents' Trip"
+      ],
+      "state": "California",
+      "country": "USA"
+    },
+    {
+      "title": "Lake Tahoe, USA",
+      "lat": 39.0968,
+      "lng": -120.0324,
+      "subtitle": "Visited Places",
+      "notes": [
+        "CA Trip - Tahoe"
+      ],
+      "state": "California",
+      "country": "USA"
+    },
+    {
+      "title": "Denver, Colorado, USA",
+      "lat": 39.7392,
+      "lng": -104.9903,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Trips - Denver"
+      ],
+      "state": "Colorado",
+      "city": "Denver",
+      "country": "USA"
+    },
+    {
+      "title": "Scranton, Pennsylvania, USA",
+      "lat": 41.4089,
+      "lng": -75.6624,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Trips - Scranton"
+      ],
+      "state": "Pennsylvania",
+      "city": "Scranton",
+      "country": "USA"
+    },
+    {
+      "title": "Shenandoah National Park, Virginia, USA",
+      "lat": 38.2928,
+      "lng": -78.6796,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Trips - Shenandoah"
+      ],
+      "state": "Virginia",
+      "country": "USA"
+    },
+    {
+      "title": "Delaware, USA",
+      "lat": 39.0,
+      "lng": -75.5,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Trips - DE",
+        "Parents' Trip"
+      ],
+      "state": "Delaware",
+      "country": "USA"
+    },
+    {
+      "title": "New Jersey, USA",
+      "lat": 40.0583,
+      "lng": -74.4057,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Parents' Trip",
+        "Car trips - NJ"
+      ],
+      "state": "New Jersey",
+      "country": "USA"
+    },
+    {
+      "title": "Tennessee, USA",
+      "lat": 35.5175,
+      "lng": -86.5804,
+      "subtitle": "Visited Places",
+      "notes": [
+        "TN Trip with CG"
+      ],
+      "state": "Tennessee",
+      "country": "USA"
+    },
+    {
+      "title": "Maryland, USA",
+      "lat": 39.0458,
+      "lng": -76.6413,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Visiting Tapas / Maryland Trip",
+        "Car trips - MD",
+        "Car trips - Baltimore"
+      ],
+      "state": "Maryland",
+      "country": "USA"
+    },
+    {
+      "title": "Philadelphia, Pennsylvania, USA",
+      "lat": 39.9526,
+      "lng": -75.1652,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Car trips - Philly"
+      ],
+      "state": "Pennsylvania",
+      "city": "Philadelphia",
+      "country": "USA"
+    },
+    {
+      "title": "Baltimore, Maryland, USA",
+      "lat": 39.2904,
+      "lng": -76.6122,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Car trips - Baltimore"
+      ],
+      "state": "Maryland",
+      "city": "Baltimore",
+      "country": "USA"
+    },
+    {
+      "title": "Upper Peninsula, Michigan, USA",
+      "lat": 46.5453,
+      "lng": -87.3954,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Car trips - UP"
+      ],
+      "state": "Michigan",
+      "country": "USA"
+    },
+    {
+      "title": "Atlanta, Georgia, USA",
+      "lat": 33.749,
+      "lng": -84.388,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Atlanta trip with Octavium"
+      ],
+      "state": "Georgia",
+      "city": "Atlanta",
+      "country": "USA"
+    },
+    {
+      "title": "Hartford, Connecticut, USA",
+      "lat": 41.7637,
+      "lng": -72.6851,
+      "subtitle": "Visited Places",
+      "notes": [
+        "Visiting Kaliappan"
+      ],
+      "state": "Connecticut",
+      "city": "Hartford",
+      "country": "USA"
+    }
+  ],
+  "mugStates": [
+    [
+      "Alaska",
+      "Viraj"
+    ],
+    [
+      "Maine",
+      ""
+    ],
+    [
+      "Louisiana",
+      "Tapas"
+    ],
+    [
+      "Indiana",
+      ""
+    ],
+    [
+      "Kentucky",
+      ""
+    ],
+    [
+      "Rhode Island",
+      ""
+    ],
+    [
+      "Massachusetts",
+      ""
+    ],
+    [
+      "Connecticut",
+      ""
+    ],
+    [
+      "West Virginia",
+      ""
+    ],
+    [
+      "Tennessee",
+      ""
+    ],
+    [
+      "Virginia",
+      ""
+    ],
+    [
+      "New Mexico",
+      "CG"
+    ],
+    [
+      "Delaware",
+      ""
+    ],
+    [
+      "Colorado",
+      ""
+    ],
+    [
+      "Illinois",
+      ""
+    ],
+    [
+      "Ohio",
+      "Puneeth"
+    ],
+    [
+      "Maryland",
+      ""
+    ],
+    [
+      "Florida",
+      "Hannah"
+    ],
+    [
+      "Nevada",
+      "Viraj"
+    ],
+    [
+      "South Carolina",
+      "Nishita"
+    ],
+    [
+      "Texas",
+      "Tathagat Uncle"
+    ],
+    [
+      "Washington",
+      "Advait"
+    ],
+    [
+      "Minnesota",
+      "Anthony"
+    ],
+    [
+      "New York",
+      ""
+    ],
+    [
+      "California",
+      ""
+    ],
+    [
+      "Oregon",
+      "Shreeansh"
+    ],
+    [
+      "North Carolina",
+      "Sanika"
+    ],
+    [
+      "New Jersey",
+      "Advait"
+    ],
+    [
+      "Pennsylvania",
+      ""
+    ],
+    [
+      "Georgia",
+      ""
+    ],
+    [
+      "Iowa",
+      "Michael"
+    ]
+  ],
+  "mugCities": [
+    [
+      "Pittsburgh",
+      "Shamitha",
+      "USA",
+      "Pennsylvania"
+    ],
+    [
+      "Chicago",
+      "Rishabh",
+      "USA",
+      "Illinois"
+    ],
+    [
+      "Miami",
+      "Hamdi",
+      "USA",
+      "Florida"
+    ],
+    [
+      "Mumbai",
+      "Shantnu",
+      "India",
+      ""
+    ],
+    [
+      "Washington DC",
+      "Sara",
+      "USA",
+      "District of Columbia"
+    ],
+    [
+      "Seoul",
+      "Roshnee's Sister",
+      "South Korea",
+      ""
+    ],
+    [
+      "Dublin",
+      "Michael",
+      "Ireland",
+      ""
+    ],
+    [
+      "Venezia",
+      "Michael",
+      "Italy",
+      ""
+    ],
+    [
+      "Barcelona",
+      "Michael",
+      "Spain",
+      ""
+    ],
+    [
+      "Dubai",
+      "Areej",
+      "UAE",
+      ""
+    ],
+    [
+      "Oslo",
+      "Michael",
+      "Norway",
+      ""
+    ],
+    [
+      "Stockholm",
+      "Michael",
+      "Sweden",
+      ""
+    ],
+    [
+      "Savannah",
+      "Lohith",
+      "USA",
+      "Georgia"
+    ],
+    [
+      "Athens",
+      "Michael",
+      "Greece",
+      ""
+    ],
+    [
+      "Myrtle Beach",
+      "Tapas and Kirti",
+      "USA",
+      "South Carolina"
+    ],
+    [
+      "Indianapolis",
+      "Michael",
+      "USA",
+      "Indiana"
+    ]
+  ],
+  "mugCountries": [
+    [
+      "France",
+      "Zaid"
+    ],
+    [
+      "England",
+      "Puneeth's Sister"
+    ]
+  ],
+  "mugSpecials": [
+    {
+      "title": "Madrid, Spain",
+      "gifted_by": "Parents",
+      "lat": 40.4168,
+      "lng": -3.7038
+    },
+    {
+      "title": "Brussels, Belgium",
+      "gifted_by": "Parents",
+      "lat": 50.8503,
+      "lng": 4.3517
+    },
+    {
+      "title": "Italy",
+      "gifted_by": "Parents",
+      "lat": 41.8719,
+      "lng": 12.5674
+    },
+    {
+      "title": "Rome",
+      "gifted_by": "Parents",
+      "lat": 41.9028,
+      "lng": 12.4964
+    },
+    {
+      "title": "Germany",
+      "gifted_by": "Parents",
+      "lat": 51.1657,
+      "lng": 10.4515
+    },
+    {
+      "title": "Jungfrauregion, Switzerland",
+      "gifted_by": "Parents",
+      "lat": 46.5389,
+      "lng": 7.9812
+    },
+    {
+      "title": "Google",
+      "gifted_by": "Shreya",
+      "lat": 37.422,
+      "lng": -122.0841
+    },
+    {
+      "title": "Arizona State University",
+      "gifted_by": "CG",
+      "lat": 33.4255,
+      "lng": -111.94
+    },
+    {
+      "title": "Johns Hopkins University",
+      "gifted_by": "Aavesh",
+      "lat": 39.3299,
+      "lng": -76.6205
+    },
+    {
+      "title": "Tiny PA Mug",
+      "gifted_by": "Emily",
+      "lat": 40.2732,
+      "lng": -76.8867
+    },
+    {
+      "title": "Times Square, NYC",
+      "gifted_by": "",
+      "lat": 40.758,
+      "lng": -73.9855
+    },
+    {
+      "title": "Penn State University",
+      "gifted_by": "Devang",
+      "lat": 40.7982,
+      "lng": -77.8599
+    },
+    {
+      "title": "2023 Graduation Mug",
+      "gifted_by": "Puneeth and Roshnee",
+      "lat": 40.2095,
+      "lng": -76.7492
+    },
+    {
+      "title": "NY Starbucks Reserve",
+      "gifted_by": "",
+      "lat": 40.72,
+      "lng": -74.006
+    },
+    {
+      "title": "Stateless Holiday Special",
+      "gifted_by": "Tapas",
+      "lat": 38.9784,
+      "lng": -76.4922
+    }
+  ]
+}

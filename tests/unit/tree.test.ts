@@ -9,7 +9,7 @@ const VALID_VIEWS: ViewType[] = [
 
 const DATA_SOURCES = [
   'articles', 'youtube', 'guitars', 'ugg', 'soundcloud',
-  'locations', 'mugs', 'gallery', 'photos', 'kitchen', 'concerts', 'wifi',
+  'mugs', 'photos', 'kitchen', 'concerts', 'wifi',
   'timeline', 'links', 'tweets',
 ];
 
@@ -47,7 +47,13 @@ describe('menu tree integrity', () => {
 
   it('contains the five top-level sections in order', () => {
     expect(menuTree.children!.map((c: MenuNode) => c.label)).toEqual([
-      'Music', 'Articles', 'Collections', 'Professional', 'Misc',
+      'Music', 'Collections', 'Professional', 'Articles', 'Misc',
+    ]);
+  });
+
+  it('Collections holds the mug coverflow and the static collection photos', () => {
+    expect(findNode('collections')?.children?.map((c) => c.label)).toEqual([
+      'Mug Collection', 'Vinyls', 'Travel Mugs', 'Fridge Magnets',
     ]);
   });
 

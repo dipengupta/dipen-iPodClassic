@@ -1,0 +1,80 @@
+[
+  {
+    "name": "The Collection",
+    "year": "",
+    "imagePath": "/images/music/0_GuitarRack.webp",
+    "description": "The whole family, all together on the rack."
+  },
+  {
+    "name": "Homber Acoustic",
+    "year": "2009",
+    "imagePath": "/images/music/1_Hobmer.webp",
+    "description": "The Homber, my first ever guitar!"
+  },
+  {
+    "name": "Ibanez SA220FM",
+    "year": "2010",
+    "imagePath": "/images/music/2_Ibanez.webp",
+    "description": "Ibanez SA220FM, the first electric guitar."
+  },
+  {
+    "name": "Epiphone Les Paul Goldtop",
+    "year": "2016",
+    "imagePath": "/images/music/3_Goldtop.webp",
+    "description": "The Epiphone Les Paul Standard, Goldtop. Was a dream come true for me back then!"
+  },
+  {
+    "name": "Squier Jazz V Bass",
+    "year": "2016",
+    "imagePath": "/images/music/4_Jazz.webp",
+    "description": "Fender Squier Jazz V Bass, played it throughout my undergrad."
+  },
+  {
+    "name": "Soprano Ukulele",
+    "year": "2018",
+    "imagePath": "/images/music/5_Uke.webp",
+    "description": "Soprano Ukulele, this was something I got on a whim from Amazon."
+  },
+  {
+    "name": "Fender Telecaster",
+    "year": "2019",
+    "imagePath": "/images/music/6_Tele.webp",
+    "description": "Fender Player Series Telecaster, I saved up for months during my first job to get this. Really opened up a lot of avenues."
+  },
+  {
+    "name": "Martin Custom X Dreadnought",
+    "year": "2022",
+    "imagePath": "/images/music/7_Martin.webp",
+    "description": "Martin Custom X Series Acoustic Dreadnought, has to be my first proper acoustic. Got a great deal on this!"
+  },
+  {
+    "name": "Sterling StingRay 5",
+    "year": "2022",
+    "imagePath": "/images/music/8_Stingray.webp",
+    "description": "Music Man Sterling StingRay 5."
+  },
+  {
+    "name": "PRS SE Paul's Guitar",
+    "year": "2023",
+    "imagePath": "/images/music/9_PRS.webp",
+    "description": "PRS SE Paul's Guitar. Had my eye on this ever since I came to the states. Got it for my graduation!"
+  },
+  {
+    "name": "Ibanez RGIXL7",
+    "year": "2024",
+    "imagePath": "/images/music/10_7Stringer.webp",
+    "description": "Ibanez RGIXL7, finally got a 7 string!"
+  },
+  {
+    "name": "Epiphone EDS-1275 Doubleneck",
+    "year": "2025",
+    "imagePath": "/images/music/11_Doubleneck.webp",
+    "description": "Epiphone EDS-1275 Doubleneck SG. This truly was an impulse buy, and definitely a pipeline dream come true!"
+  },
+  {
+    "name": "Gibson Les Paul Slash Signature",
+    "year": "2026",
+    "imagePath": "/images/music/12_Slash_LP.webp",
+    "description": "Gibson Les Paul Slash Signature. Legit a childhood dream come true!"
+  }
+]

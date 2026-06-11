@@ -14,7 +14,6 @@ body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   background: var(--backdrop);
-  transition: background 300ms ease;
 }
 
 /* ---- Device themes: silver (default) and black iPod Classic ---- */
@@ -38,9 +37,9 @@ body {
   --hint-color: #6b6d73;
 }
 
+/* The page backdrop (and the hint text on it) is theme-invariant: switching
+   themes recolors the device only. */
 [data-theme='black'] {
-  --backdrop: radial-gradient(ellipse at 50% 35%, #3a3b40 0%, #232428 70%, #151619 100%);
-
   --shell-face: linear-gradient(160deg, #3d3e43 0%, #2a2b2f 45%, #232428 55%, #34353a 100%);
   --shell-edge: #0c0d0f;
   --shell-shadow: rgba(0, 0, 0, 0.75);
@@ -52,6 +51,4 @@ body {
   --wheel-label: #8e9096;
   --center-bg: radial-gradient(circle at 40% 35%, #38393e 0%, #232428 70%, #1a1b1f 100%);
   --center-edge: rgba(255, 255, 255, 0.1);
-
-  --hint-color: #9b9da3;
 }
