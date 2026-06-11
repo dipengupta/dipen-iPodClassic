@@ -31,3 +31,15 @@ export function uggToggle(): void {
 export function uggPause(): void {
   el?.pause();
 }
+
+export function uggProgress(): { position: number; duration: number } | null {
+  if (!el) return null;
+  return { position: el.currentTime, duration: Number.isFinite(el.duration) ? el.duration : 0 };
+}
+
+export function uggSeekBy(seconds: number): void {
+  if (!el) return;
+  const duration = Number.isFinite(el.duration) ? el.duration : 0;
+  const target = el.currentTime + seconds;
+  el.currentTime = Math.max(0, duration > 0 ? Math.min(duration, target) : target);
+}

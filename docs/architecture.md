@@ -68,9 +68,23 @@ now-playing frame, `skipTrack` moves through the queue, and starting one
 source pauses the others (there are three: `youtube`, `soundcloud`, `ugg` —
 the local-video stage below). While media is loaded, the **prev/next wheel
 buttons are transport controls** (selection-stepping otherwise), and the
-status bar shows a ▶ flag. `NowPlayingView` is a passive card (EQ bars) over
-the hidden SoundCloud audio; `VideoView` is just a backdrop under the raised
-stages.
+status bar shows a ▶ flag. `NowPlayingView` is the SoundCloud card — track
+counter, title (sliding in from the skip direction), a simulated EQ
+visualizer (`scaleY`-only; real spectrum data is unreachable across the
+iframe origin) and the progress bar; `VideoView` is just a backdrop under
+the raised stages.
+
+**Progress & scrubbing**: each player wrapper exposes `…SeekBy(seconds)` and
+reports position/duration into the store's `progress` slice (SoundCloud via
+the widget's `PLAY_PROGRESS` event, YouTube via a 500 ms poll while playing,
+the local video via `timeupdate`). Like the real iPod, **a center press on a
+playback frame toggles scrub mode** (`scrubbing` + `scrubNonce` in the
+store) — the wheel then seeks ±5 s (`SEEK_STEP_SEC`) with an optimistic
+progress nudge, MENU dismisses the scrubber before popping, and play/pause
+lives on Space / the wheel's bottom zone. `ScrubOsd` (PlayersLayer) overlays
+the video stages with the bar and `m:ss` / `-m:ss` times, and dozes off
+(exiting the mode) after 3 s idle; the Now Playing card draws its own bar
+and shares the same store state.
 
 ## Local video: UGG Chronicles (the Instagram section)
 
@@ -133,6 +147,11 @@ Misc) is the full data-driven shape: the builder groups rows into category
 sub-lists (Food/Baking/Drinks/Tips & Tricks), and each recipe opens a
 scrollable `textReader` detail whose optional `sourceUrl` renders the
 "View Original" footer for recipes saved from the web.
+
+Split-menu preview pane: a node's static `previewImage` is the default, but
+for the image-backed coverflow sections (guitars/photos/kitchen)
+`SplitMenuView` lazily loads the section's images once per session and shows
+a random one on every highlight (static image as the fallback while loading).
 
 **To add a new section:**
 

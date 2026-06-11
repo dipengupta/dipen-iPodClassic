@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { registerUggVideo } from '@/lib/players/uggVideo';
+import { registerUggVideo, uggProgress } from '@/lib/players/uggVideo';
 import { useIpodStore } from '@/lib/store/ipodStore';
 import styles from './UggStage.module.css';
 
@@ -22,6 +22,7 @@ export default function UggStage() {
   const playback = useIpodStore((s) => s.playback);
   const top = useIpodStore((s) => s.stack[s.stack.length - 1]);
   const setPlaying = useIpodStore((s) => s.setPlaying);
+  const setProgress = useIpodStore((s) => s.setProgress);
   const skipTrack = useIpodStore((s) => s.skipTrack);
   const setMaxScroll = useIpodStore((s) => s.setMaxScroll);
   const captionNonce = useIpodStore((s) => s.captionNonce);
@@ -91,6 +92,12 @@ export default function UggStage() {
         playsInline
         onPlay={() => reportPlaying(true)}
         onPause={() => reportPlaying(false)}
+        onTimeUpdate={() => {
+          const p = uggProgress();
+          if (p && useIpodStore.getState().playback.source === 'ugg') {
+            setProgress(p.position, p.duration);
+          }
+        }}
         onEnded={() => skipTrack(1)}
         onError={() => {
           if (track) setFailed(true);

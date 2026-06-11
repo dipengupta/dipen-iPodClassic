@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { FrameItem, PlayTrack } from '@/lib/menu/types';
 import { findNode, menuTree } from '@/lib/menu/tree';
-import { SCROLL_STEP, useIpodStore } from '@/lib/store/ipodStore';
+import { SCROLL_STEP, SEEK_STEP_SEC, useIpodStore } from '@/lib/store/ipodStore';
 
 const store = () => useIpodStore.getState();
 
@@ -89,11 +89,32 @@ describe('coverflow', () => {
 });
 
 describe('media inputs', () => {
-  it('select on a video frame toggles play/pause instead of selecting', () => {
+  it('select on a video frame toggles the scrubber, not play/pause', () => {
     store().pushDetail('video', { videoId: 'x' });
     const before = store().playPauseNonce;
     store().handleInput({ type: 'select' });
+    expect(store().scrubbing).toBe(true);
+    expect(store().playPauseNonce).toBe(before);
+    store().handleInput({ type: 'select' });
+    expect(store().scrubbing).toBe(false);
+  });
+
+  it('the play/pause input still bumps the nonce on playback frames', () => {
+    store().pushDetail('video', { videoId: 'x' });
+    const before = store().playPauseNonce;
+    store().handleInput({ type: 'playPause' });
     expect(store().playPauseNonce).toBe(before + 1);
+  });
+
+  it('MENU exits scrub mode before popping', () => {
+    store().pushDetail('video', { videoId: 'x' });
+    const depth = store().stack.length;
+    store().handleInput({ type: 'select' }); // scrubber up
+    store().handleInput({ type: 'menu' });
+    expect(store().scrubbing).toBe(false);
+    expect(store().stack).toHaveLength(depth); // still on the video
+    store().handleInput({ type: 'menu' });
+    expect(store().stack).toHaveLength(depth - 1);
   });
 });
 
@@ -204,6 +225,37 @@ describe('local (ugg) video playback', () => {
     expect(top().key).toBe(key); // same frame, no slide
     expect(top().payload?.videoSrc).toBe('/api/video/ugg-203.mp4');
     expect(top().scrollOffset).toBe(0);
+  });
+
+  it('wheel ticks seek instead of scrolling the caption while scrubbing', () => {
+    store().playTrack('ugg', uggQueue, 0);
+    const top = () => store().stack[store().stack.length - 1];
+    store().setMaxScroll(top().key, SCROLL_STEP);
+    store().setProgress(30, 100);
+    store().handleInput({ type: 'select' }); // scrubber up
+    const captionNonce = store().captionNonce;
+    const scrubNonce = store().scrubNonce;
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(store().progress.position).toBe(30 + SEEK_STEP_SEC);
+    expect(store().scrubNonce).toBe(scrubNonce + 1);
+    expect(store().captionNonce).toBe(captionNonce); // caption stayed asleep
+    expect(top().scrollOffset).toBe(0);
+    // Optimistic position clamps to the known duration.
+    store().setProgress(98, 100);
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(store().progress.position).toBe(100);
+    store().setProgress(2, 100);
+    store().handleInput({ type: 'scroll', dir: -1 });
+    expect(store().progress.position).toBe(0);
+  });
+
+  it('playTrack and skips reset progress and scrub mode', () => {
+    store().playTrack('ugg', uggQueue, 0);
+    store().setProgress(42, 100);
+    store().handleInput({ type: 'select' }); // scrubber up
+    store().skipTrack(1);
+    expect(store().scrubbing).toBe(false);
+    expect(store().progress).toEqual({ position: 0, duration: 0 });
   });
 });
 

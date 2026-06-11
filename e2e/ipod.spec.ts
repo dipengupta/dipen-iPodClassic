@@ -59,8 +59,19 @@ test('Instagram (UGG Chronicles): year list, episode list, local video + caption
   // Decoded playback needs the gitignored video files, so assert the wiring
   // (src), not frames.
   await expect(player).toHaveAttribute('src', /\/api\/video\/ugg-\d+\.mp4$/);
-  // A wheel tick summons the caption overlay (opacity-only, so check the
-  // aria state rather than visibility).
+  // Center press summons the scrub bar; wheel ticks then seek, NOT the
+  // caption (opacity-only overlays, so check aria state).
+  await page.keyboard.press('Enter');
+  const scrubOsd = page.getByTestId('scrub-osd');
+  await expect(scrubOsd).toHaveAttribute('aria-hidden', 'false');
+  await expect(scrubOsd).toContainText(/\d+:\d{2}/);
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByTestId('ugg-caption')).toHaveAttribute('aria-hidden', 'true');
+  // MENU dismisses the scrubber first — we are still on the video.
+  await page.keyboard.press('Escape');
+  await expect(scrubOsd).toHaveAttribute('aria-hidden', 'true');
+  await expect(stage).toHaveAttribute('data-watching', 'true');
+  // Outside scrub mode a wheel tick summons the caption overlay.
   await page.keyboard.press('ArrowDown');
   await expect(page.getByTestId('ugg-caption')).toHaveAttribute('aria-hidden', 'false');
   // MENU backs out to the episode list, but the persistent player STAYS

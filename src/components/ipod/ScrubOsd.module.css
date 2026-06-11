@@ -1,0 +1,61 @@
+/* Sits above both video stages (their visible z-index is 30). */
+.osd {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.68);
+  border-radius: 999px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 240ms ease, transform 240ms ease;
+  pointer-events: none;
+}
+
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.time {
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  min-width: 30px;
+  text-align: center;
+}
+
+.track {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  overflow: visible;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #4f9cf0;
+  transform-origin: left;
+}
+
+/* Position snaps per update on purpose — no layout animation. */
+.handle {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+}

@@ -25,6 +25,10 @@ interface ScWidget {
   play: () => void;
   pause: () => void;
   toggle: () => void;
+  /** Both report milliseconds, callback-style (the widget is an iframe RPC). */
+  getPosition: (cb: (ms: number) => void) => void;
+  getDuration: (cb: (ms: number) => void) => void;
+  seekTo: (ms: number) => void;
 }
 
 interface ScSound {
@@ -37,7 +41,13 @@ declare global {
   interface Window {
     SC?: {
       Widget: ((iframe: HTMLIFrameElement) => ScWidget) & {
-        Events: { READY: string; PLAY: string; PAUSE: string; FINISH: string };
+        Events: {
+          READY: string;
+          PLAY: string;
+          PAUSE: string;
+          FINISH: string;
+          PLAY_PROGRESS: string;
+        };
       };
     };
   }
@@ -72,6 +82,7 @@ function loadWidgetApi(): Promise<void> {
 export async function initSoundcloud(
   iframe: HTMLIFrameElement,
   onPlaying: (playing: boolean) => void,
+  onProgress?: (positionSec: number, durationSec: number) => void,
 ): Promise<void> {
   await loadWidgetApi();
   if (!window.SC || widget) return;
@@ -94,6 +105,14 @@ export async function initSoundcloud(
     widget!.bind(sc.Widget.Events.PLAY, () => onPlaying(true));
     widget!.bind(sc.Widget.Events.PAUSE, () => onPlaying(false));
     widget!.bind(sc.Widget.Events.FINISH, () => onPlaying(false));
+    if (onProgress) {
+      widget!.bind(sc.Widget.Events.PLAY_PROGRESS, (event) => {
+        const positionMs = (event as { currentPosition?: number })?.currentPosition ?? 0;
+        widget!.getDuration((durationMs) => {
+          onProgress(positionMs / 1000, durationMs / 1000);
+        });
+      });
+    }
   });
 }
 
@@ -117,4 +136,15 @@ export function soundcloudToggle(): void {
 
 export function soundcloudPause(): void {
   widget?.pause();
+}
+
+export function soundcloudSeekBy(seconds: number): void {
+  const w = widget;
+  if (!w) return;
+  w.getDuration((durationMs) => {
+    w.getPosition((positionMs) => {
+      const target = Math.max(0, Math.min(durationMs, positionMs + seconds * 1000));
+      w.seekTo(target);
+    });
+  });
 }

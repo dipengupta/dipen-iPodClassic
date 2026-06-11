@@ -10,6 +10,9 @@ interface YtPlayer {
   playVideo: () => void;
   pauseVideo: () => void;
   getPlayerState: () => number;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
 }
 
 declare global {
@@ -107,4 +110,16 @@ export function youtubeToggle(): void {
 
 export function youtubePause(): void {
   if (ready && player) player.pauseVideo();
+}
+
+export function youtubeProgress(): { position: number; duration: number } | null {
+  if (!ready || !player) return null;
+  return { position: player.getCurrentTime() || 0, duration: player.getDuration() || 0 };
+}
+
+export function youtubeSeekBy(seconds: number): void {
+  if (!ready || !player) return;
+  const duration = player.getDuration() || 0;
+  const target = Math.max(0, Math.min(duration, (player.getCurrentTime() || 0) + seconds));
+  player.seekTo(target, true);
 }

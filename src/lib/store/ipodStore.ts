@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import * as clicker from '../audio/clicker';
 import type { IpodInput } from '../input/keyboard';
-import { uggLoad } from '../players/uggVideo';
+import { soundcloudSeekBy } from '../players/soundcloud';
+import { uggLoad, uggSeekBy } from '../players/uggVideo';
+import { youtubeSeekBy } from '../players/youtube';
 import { menuTree } from '../menu/tree';
 import type {
   DetailPayload,
@@ -32,6 +34,15 @@ export type Theme = 'silver' | 'black';
 
 /** Logical pixels one wheel tick scrolls in text views (≈ one text line). */
 export const SCROLL_STEP = 16;
+
+/** Seconds one wheel tick seeks while the scrubber is up. */
+export const SEEK_STEP_SEC = 5;
+
+function seekBy(source: PlaybackSource, seconds: number): void {
+  if (source === 'youtube') youtubeSeekBy(seconds);
+  else if (source === 'soundcloud') soundcloudSeekBy(seconds);
+  else uggSeekBy(seconds);
+}
 
 let frameKey = 0;
 
@@ -80,16 +91,27 @@ export interface PlaybackState {
   queue: PlayTrack[];
 }
 
+/** Seconds into / total length of the active track, reported by the players. */
+export interface PlaybackProgress {
+  position: number;
+  duration: number;
+}
+
 export interface IpodState {
   stack: Frame[];
   theme: Theme;
   /** Settings: present the pennguytweets list in a random order. */
   tweetShuffle: boolean;
   playback: PlaybackState;
+  progress: PlaybackProgress;
+  /** Scrub mode: center press on a playback screen; the wheel then seeks. */
+  scrubbing: boolean;
   /** Bumped on play/pause press; PlayersLayer toggles the active source. */
   playPauseNonce: number;
   /** Bumped on every wheel tick over a local video; shows the caption overlay. */
   captionNonce: number;
+  /** Bumped on scrub-mode activity; keeps the video scrub OSD awake. */
+  scrubNonce: number;
   loadItems?: (node: MenuNode) => Promise<FrameItem[]>;
 
   setLoadItems: (fn: (node: MenuNode) => Promise<FrameItem[]>) => void;
@@ -101,6 +123,8 @@ export interface IpodState {
   playTrack: (source: PlaybackSource, queue: PlayTrack[], index: number) => void;
   skipTrack: (delta: 1 | -1) => void;
   setPlaying: (playing: boolean) => void;
+  setProgress: (position: number, duration: number) => void;
+  setScrubbing: (on: boolean) => void;
   pop: () => void;
   setFrameItems: (key: number, items: FrameItem[]) => void;
   setMaxScroll: (key: number, maxScroll: number) => void;
@@ -124,8 +148,11 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   theme: 'silver',
   tweetShuffle: false,
   playback: { source: null, index: -1, playing: false, queue: [] },
+  progress: { position: 0, duration: 0 },
+  scrubbing: false,
   playPauseNonce: 0,
   captionNonce: 0,
+  scrubNonce: 0,
 
   setLoadItems: (fn) => set({ loadItems: fn }),
 
@@ -187,7 +214,11 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   playTrack: (source, queue, index) => {
     const track = queue[index];
     if (!track) return;
-    set({ playback: { source, queue, index, playing: true } });
+    set({
+      playback: { source, queue, index, playing: true },
+      progress: { position: 0, duration: 0 },
+      scrubbing: false,
+    });
     if (source === 'ugg' && track.videoSrc) {
       // Start the persistent element NOW, while still inside the user's
       // click/keypress — Safari refuses unmuted play() from a later effect.
@@ -231,8 +262,18 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     );
   },
 
+  setProgress: (position, duration) => {
+    set({ progress: { position, duration } });
+  },
+
+  setScrubbing: (on) => {
+    set((s) => (s.scrubbing === on ? s : { scrubbing: on }));
+  },
+
   pop: () => {
-    set((s) => (s.stack.length > 1 ? { stack: s.stack.slice(0, -1) } : s));
+    set((s) =>
+      s.stack.length > 1 ? { stack: s.stack.slice(0, -1), scrubbing: false } : s,
+    );
   },
 
   setFrameItems: (key, items) => {
@@ -262,6 +303,25 @@ export const useIpodStore = create<IpodState>((set, get) => ({
 
     switch (input.type) {
       case 'scroll': {
+        if ((top.view === 'video' || top.view === 'nowPlaying') && get().scrubbing) {
+          // Scrub mode: the wheel seeks the active player. Progress is also
+          // nudged optimistically so the bar tracks the ticks instantly.
+          const { playback, progress } = get();
+          if (playback.source) {
+            seekBy(playback.source, input.dir * SEEK_STEP_SEC);
+            const target = progress.position + input.dir * SEEK_STEP_SEC;
+            const position = Math.max(
+              0,
+              progress.duration > 0 ? Math.min(progress.duration, target) : target,
+            );
+            set((s) => ({
+              progress: { ...s.progress, position },
+              scrubNonce: s.scrubNonce + 1,
+            }));
+            clicker.tick();
+          }
+          break;
+        }
         if (top.view === 'video' && top.payload?.videoSrc) {
           // Local video: the wheel reveals/scrolls the caption overlay. The
           // nonce fires on every tick so the overlay wakes even when the
@@ -312,7 +372,9 @@ export const useIpodStore = create<IpodState>((set, get) => ({
           break;
         }
         if (top.view === 'video' || top.view === 'nowPlaying') {
-          set((s) => ({ playPauseNonce: s.playPauseNonce + 1 }));
+          // Like the real iPod: center summons the scrubber; the dedicated
+          // play/pause control (Space / bottom wheel zone) pauses.
+          set((s) => ({ scrubbing: !s.scrubbing, scrubNonce: s.scrubNonce + 1 }));
           break;
         }
         const item = top.items?.[top.selectedIndex];
@@ -327,7 +389,9 @@ export const useIpodStore = create<IpodState>((set, get) => ({
 
       case 'menu': {
         clicker.vibrate(10);
-        if (top.flipped) {
+        if (get().scrubbing) {
+          set({ scrubbing: false });
+        } else if (top.flipped) {
           updateTop({ flipped: false, scrollOffset: 0 });
         } else {
           get().pop();
@@ -346,6 +410,8 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     set({
       stack: initialStack(),
       playback: { source: null, index: -1, playing: false, queue: [] },
+      progress: { position: 0, duration: 0 },
+      scrubbing: false,
     }),
 }));
 

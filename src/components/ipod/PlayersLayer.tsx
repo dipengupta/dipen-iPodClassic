@@ -9,9 +9,16 @@ import {
   soundcloudToggle,
 } from '@/lib/players/soundcloud';
 import { uggPause, uggToggle } from '@/lib/players/uggVideo';
-import { initYoutube, youtubeLoad, youtubePause, youtubeToggle } from '@/lib/players/youtube';
+import {
+  initYoutube,
+  youtubeLoad,
+  youtubePause,
+  youtubeProgress,
+  youtubeToggle,
+} from '@/lib/players/youtube';
 import { useIpodStore } from '@/lib/store/ipodStore';
 import styles from './PlayersLayer.module.css';
+import ScrubOsd from './ScrubOsd';
 import UggStage from './UggStage';
 
 const YT_ELEMENT_ID = 'ipod-yt-player';
@@ -26,6 +33,7 @@ export default function PlayersLayer() {
   const playPauseNonce = useIpodStore((s) => s.playPauseNonce);
   const top = useIpodStore((s) => s.stack[s.stack.length - 1]);
   const setPlaying = useIpodStore((s) => s.setPlaying);
+  const setProgress = useIpodStore((s) => s.setProgress);
   const skipTrack = useIpodStore((s) => s.skipTrack);
 
   const scIframeRef = useRef<HTMLIFrameElement>(null);
@@ -35,9 +43,23 @@ export default function PlayersLayer() {
   useEffect(() => {
     initYoutube(YT_ELEMENT_ID, { onPlaying: setPlaying, onEnded: () => skipTrack(1) });
     if (scIframeRef.current) {
-      void initSoundcloud(scIframeRef.current, setPlaying);
+      void initSoundcloud(scIframeRef.current, setPlaying, (position, duration) => {
+        if (useIpodStore.getState().playback.source === 'soundcloud') {
+          setProgress(position, duration);
+        }
+      });
     }
-  }, [setPlaying, skipTrack]);
+  }, [setPlaying, setProgress, skipTrack]);
+
+  // The IFrame API has no progress event; poll while a YouTube video plays.
+  useEffect(() => {
+    if (playback.source !== 'youtube' || !playback.playing) return;
+    const poll = setInterval(() => {
+      const p = youtubeProgress();
+      if (p) setProgress(p.position, p.duration);
+    }, 500);
+    return () => clearInterval(poll);
+  }, [playback.source, playback.playing, setProgress]);
 
   // Start/refresh playback whenever the selected source+track changes.
   useEffect(() => {
@@ -89,6 +111,7 @@ export default function PlayersLayer() {
         <div id={YT_ELEMENT_ID} />
       </div>
       <UggStage />
+      <ScrubOsd />
       <div className={styles.hiddenPlayers} aria-hidden="true">
         <iframe
           ref={scIframeRef}
