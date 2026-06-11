@@ -27,6 +27,8 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/drizzle ./drizzle
 COPY --from=build /app/src/data/seed ./src/data/seed
 COPY docker-entrypoint.sh ./
+# Strip CRLF in case the build context was checked out on Windows.
+RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh
 
 RUN useradd -r -u 1001 ipod && mkdir -p /data && chown ipod /data
 USER ipod
