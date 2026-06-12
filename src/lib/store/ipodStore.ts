@@ -27,6 +27,9 @@ export interface Frame {
   scrollOffset: number;
   /** textReader/photo: content height beyond the screen, set by the view. */
   maxScroll: number;
+  /** video + fullscreen: current/total vertical crop travel, set by UggStage. */
+  panOffset: number;
+  maxPan: number;
   flipped: boolean;
 }
 
@@ -37,6 +40,9 @@ export const SCROLL_STEP = 16;
 
 /** Seconds one wheel tick seeks while the scrubber is up. */
 export const SEEK_STEP_SEC = 5;
+
+/** Logical pixels one wheel tick pans a fullscreen portrait video. */
+export const PAN_STEP = 24;
 
 function seekBy(source: PlaybackSource, seconds: number): void {
   if (source === 'youtube') youtubeSeekBy(seconds);
@@ -55,7 +61,7 @@ function itemsFromChildren(node: MenuNode): FrameItem[] {
   }));
 }
 
-function settingsItems(theme: Theme, tweetShuffle: boolean): FrameItem[] {
+function settingsItems(theme: Theme, tweetShuffle: boolean, videoFullscreen: boolean): FrameItem[] {
   return [
     {
       id: 'settings.theme',
@@ -69,15 +75,23 @@ function settingsItems(theme: Theme, tweetShuffle: boolean): FrameItem[] {
       sublabel: tweetShuffle ? 'Shuffled' : 'Newest First',
       onSelect: { kind: 'action', action: 'toggleTweetShuffle' },
     },
+    {
+      id: 'settings.videoFullscreen',
+      label: 'Video Fullscreen',
+      sublabel: videoFullscreen ? 'On' : 'Off',
+      onSelect: { kind: 'action', action: 'toggleVideoFullscreen' },
+    },
   ];
 }
 
-function makeFrame(partial: Omit<Frame, 'key' | 'selectedIndex' | 'scrollOffset' | 'maxScroll' | 'flipped'>): Frame {
+function makeFrame(partial: Omit<Frame, 'key' | 'selectedIndex' | 'scrollOffset' | 'maxScroll' | 'panOffset' | 'maxPan' | 'flipped'>): Frame {
   return {
     key: ++frameKey,
     selectedIndex: 0,
     scrollOffset: 0,
     maxScroll: 0,
+    panOffset: 0,
+    maxPan: 0,
     flipped: false,
     ...partial,
   };
@@ -102,6 +116,8 @@ export interface IpodState {
   theme: Theme;
   /** Settings: present the pennguytweets list in a random order. */
   tweetShuffle: boolean;
+  /** Settings: crop portrait videos to fill the screen; the wheel then pans. */
+  videoFullscreen: boolean;
   playback: PlaybackState;
   progress: PlaybackProgress;
   /** Scrub mode: center press on a playback screen; the wheel then seeks. */
@@ -117,6 +133,7 @@ export interface IpodState {
   setLoadItems: (fn: (node: MenuNode) => Promise<FrameItem[]>) => void;
   setTheme: (theme: Theme) => void;
   setTweetShuffle: (on: boolean) => void;
+  setVideoFullscreen: (on: boolean) => void;
   pushNode: (node: MenuNode) => void;
   pushItems: (title: string, view: ViewType, items: FrameItem[]) => void;
   pushDetail: (view: ViewType, payload: DetailPayload) => void;
@@ -128,6 +145,7 @@ export interface IpodState {
   pop: () => void;
   setFrameItems: (key: number, items: FrameItem[]) => void;
   setMaxScroll: (key: number, maxScroll: number) => void;
+  setMaxPan: (key: number, maxPan: number) => void;
   handleInput: (input: IpodInput) => void;
   reset: () => void;
 }
@@ -147,6 +165,7 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   stack: initialStack(),
   theme: 'silver',
   tweetShuffle: false,
+  videoFullscreen: false,
   playback: { source: null, index: -1, playing: false, queue: [] },
   progress: { position: 0, duration: 0 },
   scrubbing: false,
@@ -180,11 +199,22 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     }
   },
 
+  setVideoFullscreen: (on) => {
+    set({ videoFullscreen: on });
+    if (typeof document !== 'undefined') {
+      try {
+        localStorage.setItem('ipod-video-fullscreen', on ? '1' : '0');
+      } catch {
+        // Storage can be unavailable (private mode); the setting just won't persist.
+      }
+    }
+  },
+
   pushNode: (node) => {
-    const { loadItems, theme, tweetShuffle } = get();
+    const { loadItems, theme, tweetShuffle, videoFullscreen } = get();
     let frame: Frame;
     if (node.view === 'settings') {
-      frame = makeFrame({ title: node.label, view: 'settings', node, items: settingsItems(theme, tweetShuffle) });
+      frame = makeFrame({ title: node.label, view: 'settings', node, items: settingsItems(theme, tweetShuffle, videoFullscreen) });
     } else if (node.children?.length) {
       frame = makeFrame({ title: node.label, view: node.view, node, items: itemsFromChildren(node) });
     } else if (node.dataSource) {
@@ -235,11 +265,11 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     const top = stack[stack.length - 1];
     if (top.view === view) {
       // Track-to-track skip: swap content in place, no slide animation.
-      // Scroll state belongs to the previous track's caption — reset it.
+      // Scroll/pan state belongs to the previous track — reset it.
       set((s) => ({
         stack: s.stack.map((f, i) =>
           i === s.stack.length - 1
-            ? { ...f, title: payload.title ?? '', payload, scrollOffset: 0, maxScroll: 0 }
+            ? { ...f, title: payload.title ?? '', payload, scrollOffset: 0, maxScroll: 0, panOffset: 0, maxPan: 0 }
             : f,
         ),
       }));
@@ -279,6 +309,21 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   setFrameItems: (key, items) => {
     set((s) => ({
       stack: s.stack.map((f) => (f.key === key ? { ...f, items } : f)),
+    }));
+  },
+
+  setMaxPan: (key, maxPan) => {
+    set((s) => ({
+      stack: s.stack.map((f) =>
+        f.key === key
+          ? {
+              ...f,
+              maxPan,
+              // Re-measure (or first measure) recenters the crop.
+              panOffset: f.maxPan === maxPan ? Math.min(f.panOffset, maxPan) : Math.round(maxPan / 2),
+            }
+          : f,
+      ),
     }));
   },
 
@@ -323,6 +368,16 @@ export const useIpodStore = create<IpodState>((set, get) => ({
           break;
         }
         if (top.view === 'video' && top.payload?.videoSrc) {
+          if (get().videoFullscreen && top.maxPan > 0) {
+            // Fullscreen portrait video: the wheel pans the crop. The caption
+            // stays asleep — toggle Fullscreen off to read it.
+            const next = Math.max(0, Math.min(top.maxPan, top.panOffset + input.dir * PAN_STEP));
+            if (next !== top.panOffset) {
+              updateTop({ panOffset: next });
+              clicker.tick();
+            }
+            break;
+          }
           // Local video: the wheel reveals/scrolls the caption overlay. The
           // nonce fires on every tick so the overlay wakes even when the
           // caption is too short to scroll.
@@ -437,12 +492,14 @@ function executeSelect(state: IpodState, spec: SelectSpec): void {
         state.setTheme(state.theme === 'silver' ? 'black' : 'silver');
       } else if (spec.action === 'toggleTweetShuffle') {
         state.setTweetShuffle(!state.tweetShuffle);
+      } else if (spec.action === 'toggleVideoFullscreen') {
+        state.setVideoFullscreen(!state.videoFullscreen);
       }
       // Refresh the visible settings rows' sublabels.
-      const { stack, theme, tweetShuffle } = useIpodStore.getState();
+      const { stack, theme, tweetShuffle, videoFullscreen } = useIpodStore.getState();
       const top = stack[stack.length - 1];
       if (top.view === 'settings') {
-        useIpodStore.getState().setFrameItems(top.key, settingsItems(theme, tweetShuffle));
+        useIpodStore.getState().setFrameItems(top.key, settingsItems(theme, tweetShuffle, videoFullscreen));
       }
       break;
     }

@@ -120,11 +120,23 @@ files** instead of embeds. The pieces:
   translucent panel with the original Instagram caption; further ticks
   scroll it (the video frame's `scrollOffset`/`maxScroll`, one text line per
   tick) and ~3 s of idle fades it out. All animation is transform/opacity.
+- **Video Fullscreen** (Settings toggle, like the real iPod's Videos →
+  Settings → Fullscreen): most episodes are portrait phone videos that
+  letterbox tiny under `object-fit: contain`. With the setting on, a
+  portrait episode fills the stage width (`height: auto`, clipped by the
+  stage) and the **wheel pans the crop** instead of scrolling the caption
+  (the frame's `panOffset`/`maxPan`, `PAN_STEP` px per tick; toggle off to
+  read long captions). `UggStage` measures `videoWidth/videoHeight` on
+  `loadedmetadata` and reports `setMaxPan` (0 for landscape — those keep
+  caption scrolling); a fresh measurement starts the crop centered. Scrub
+  mode still wins the wheel, and panning is `translateY` only. YouTube
+  videos are untouched (the iframe can't be cropped).
 
 ## Navigation: the frame stack
 
 `ipodStore` holds `stack: Frame[]`. A `Frame` is `{ key, title, view, items,
-payload, selectedIndex, scrollOffset, maxScroll, flipped }`. Pushing happens
+payload, selectedIndex, scrollOffset, maxScroll, panOffset, maxPan,
+flipped }`. Pushing happens
 via `pushNode` (menu tree), `pushItems` (pre-built lists, e.g. a year of
 videos), or `pushDetail` (article/video/photo payloads). MENU pops (after
 unflipping a flipped cover). `ScreenRouter` watches the top frame's `key` and
@@ -206,7 +218,10 @@ color). Persistence: `localStorage` + cookie; an inline script in
 The Settings menu (`settingsItems` in `ipodStore.ts`) also holds the
 pennguytweets order toggle (newest-first vs shuffled) — a `tweetShuffle`
 store flag persisted in `localStorage` and re-read by the `tweets()` builder
-on every visit to the list, so each shuffled visit deals a fresh order.
+on every visit to the list, so each shuffled visit deals a fresh order —
+and the **Video Fullscreen** toggle (`videoFullscreen`, also
+`localStorage`-persisted), which crops portrait UGG episodes to fill the
+screen with wheel panning (see the UGG section).
 
 ## Responsive
 

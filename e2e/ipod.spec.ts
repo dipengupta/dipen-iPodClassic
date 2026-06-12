@@ -256,6 +256,28 @@ test('tweet shuffle setting toggles and the list still renders', async ({ page }
   await expect(rows.first()).not.toBeEmpty();
 });
 
+test('video fullscreen setting toggles and persists across reload', async ({ page }) => {
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
+  await page.keyboard.press('Enter');
+  const rows = page.getByTestId('menu-row');
+  await expect(rows.nth(2)).toContainText('Video Fullscreen');
+  await expect(rows.nth(2)).toContainText('Off');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown'); // the fullscreen row
+  await page.keyboard.press('Enter');
+  await expect(rows.nth(2)).toContainText('On');
+  // Persists via localStorage.
+  await page.reload();
+  await expect(page.getByTestId('ipod')).toBeVisible();
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
+  await page.keyboard.press('Enter');
+  await expect(rows.nth(2)).toContainText('On');
+});
+
 test('About on the home menu shows the contact email', async ({ page }) => {
   for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // About
   await page.keyboard.press('Enter');

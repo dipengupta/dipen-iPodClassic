@@ -28,6 +28,14 @@
   display: block;
 }
 
+/* Fullscreen setting, portrait episode: the element takes its natural
+   width-filling height (taller than the stage, which clips it) and the
+   wheel pans it via translateY. */
+.videoZoomed {
+  height: auto;
+  transition: transform 120ms ease-out;
+}
+
 /* Episode title / play-state OSD, iPod style. */
 .osd {
   position: absolute;

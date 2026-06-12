@@ -10,6 +10,9 @@ const CAPTION_IDLE_MS = 3000;
 const OSD_MS = 2000;
 /** Visible caption text window (panel height minus padding), logical px. */
 const CAPTION_WINDOW = 80;
+/** The stage in logical px (320×240 screen minus the 20px status bar). */
+const STAGE_WIDTH = 320;
+const STAGE_HEIGHT = 220;
 
 /**
  * The persistent local-video player for UGG Chronicles episodes. Like the
@@ -25,8 +28,11 @@ export default function UggStage() {
   const setProgress = useIpodStore((s) => s.setProgress);
   const skipTrack = useIpodStore((s) => s.skipTrack);
   const setMaxScroll = useIpodStore((s) => s.setMaxScroll);
+  const setMaxPan = useIpodStore((s) => s.setMaxPan);
   const captionNonce = useIpodStore((s) => s.captionNonce);
+  const videoFullscreen = useIpodStore((s) => s.videoFullscreen);
 
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const captionTextRef = useRef<HTMLDivElement>(null);
   const captionMounted = useRef(false);
   const [failed, setFailed] = useState(false);
@@ -71,10 +77,33 @@ export default function UggStage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-measure per episode
   }, [watching, top.key, setMaxScroll, track?.videoSrc]);
 
+  // Tell the store how much taller than the stage a width-filling crop of
+  // this episode would be (0 for landscape). The persistent element may
+  // already hold the metadata (same src re-opened), so measure immediately
+  // too, not just on the event.
+  useEffect(() => {
+    if (!watching) return;
+    const video = videoRef.current;
+    if (!video) return;
+    const measure = () => {
+      const { videoWidth, videoHeight } = video;
+      if (!videoWidth || !videoHeight) return;
+      const renderedHeight = (STAGE_WIDTH * videoHeight) / videoWidth;
+      setMaxPan(top.key, Math.max(0, Math.round(renderedHeight - STAGE_HEIGHT)));
+    };
+    if (video.readyState >= 1) measure();
+    video.addEventListener('loadedmetadata', measure);
+    return () => video.removeEventListener('loadedmetadata', measure);
+  }, [watching, top.key, setMaxPan, track?.videoSrc]);
+
   // The store only reflects this source's state while it is the active one.
   const reportPlaying = (playing: boolean) => {
     if (useIpodStore.getState().playback.source === 'ugg') setPlaying(playing);
   };
+
+  // Fullscreen setting + portrait episode: fill the width and crop; the wheel
+  // pans the crop through frame.panOffset.
+  const zoomed = videoFullscreen && watching && top.maxPan > 0;
 
   return (
     <div
@@ -85,8 +114,12 @@ export default function UggStage() {
       {/* src is managed imperatively (uggVideo.ts) so the gesture-time load
           and React renders never fight over the attribute. */}
       <video
-        ref={registerUggVideo}
-        className={styles.video}
+        ref={(video) => {
+          videoRef.current = video;
+          registerUggVideo(video);
+        }}
+        className={`${styles.video} ${zoomed ? styles.videoZoomed : ''}`}
+        style={zoomed ? { transform: `translateY(${-top.panOffset}px)` } : undefined}
         data-testid="ugg-player"
         preload="auto"
         playsInline

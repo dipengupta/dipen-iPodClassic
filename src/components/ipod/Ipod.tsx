@@ -14,6 +14,7 @@ export default function Ipod() {
   const setLoadItems = useIpodStore((s) => s.setLoadItems);
   const setTheme = useIpodStore((s) => s.setTheme);
   const setTweetShuffle = useIpodStore((s) => s.setTweetShuffle);
+  const setVideoFullscreen = useIpodStore((s) => s.setVideoFullscreen);
 
   useEffect(() => {
     setLoadItems(loadItems);
@@ -24,10 +25,11 @@ export default function Ipod() {
     }
     try {
       if (localStorage.getItem('ipod-tweet-shuffle') === '1') setTweetShuffle(true);
+      if (localStorage.getItem('ipod-video-fullscreen') === '1') setVideoFullscreen(true);
     } catch {
-      // Storage can be unavailable (private mode); the setting just won't restore.
+      // Storage can be unavailable (private mode); the settings just won't restore.
     }
-  }, [setLoadItems, setTheme, setTweetShuffle]);
+  }, [setLoadItems, setTheme, setTweetShuffle, setVideoFullscreen]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

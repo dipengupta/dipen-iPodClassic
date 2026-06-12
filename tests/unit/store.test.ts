@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { FrameItem, PlayTrack } from '@/lib/menu/types';
 import { findNode, menuTree } from '@/lib/menu/tree';
-import { SCROLL_STEP, SEEK_STEP_SEC, useIpodStore } from '@/lib/store/ipodStore';
+import { PAN_STEP, SCROLL_STEP, SEEK_STEP_SEC, useIpodStore } from '@/lib/store/ipodStore';
 
 const store = () => useIpodStore.getState();
 
@@ -259,6 +259,87 @@ describe('local (ugg) video playback', () => {
   });
 });
 
+describe('fullscreen video panning', () => {
+  const uggQueue: PlayTrack[] = [
+    { id: '204', title: 'Ep. 204 · A', videoSrc: '/api/video/ugg-204.mp4', caption: 'latest' },
+    { id: '203', title: 'Ep. 203 · B', videoSrc: '/api/video/ugg-203.mp4', caption: 'older' },
+  ];
+  const top = () => store().stack[store().stack.length - 1];
+
+  it('setMaxPan starts the crop centered and clamps on re-measure', () => {
+    store().playTrack('ugg', uggQueue, 0);
+    store().setMaxPan(top().key, 200);
+    expect(top().panOffset).toBe(100);
+    store().setMaxPan(top().key, 40); // new measurement recenters
+    expect(top().panOffset).toBe(20);
+  });
+
+  it('wheel pans the crop instead of the caption while fullscreen', () => {
+    store().setVideoFullscreen(true);
+    store().playTrack('ugg', uggQueue, 0);
+    store().setMaxScroll(top().key, SCROLL_STEP);
+    store().setMaxPan(top().key, PAN_STEP * 2);
+    const nonce = store().captionNonce;
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(top().panOffset).toBe(PAN_STEP * 2); // centered + one step
+    expect(top().scrollOffset).toBe(0); // caption untouched
+    expect(store().captionNonce).toBe(nonce); // caption stays asleep
+    // Clamped at both ends.
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(top().panOffset).toBe(PAN_STEP * 2);
+    for (let i = 0; i < 4; i++) store().handleInput({ type: 'scroll', dir: -1 });
+    expect(top().panOffset).toBe(0);
+    store().setVideoFullscreen(false);
+  });
+
+  it('scrub mode still wins over panning', () => {
+    store().setVideoFullscreen(true);
+    store().playTrack('ugg', uggQueue, 0);
+    store().setMaxPan(top().key, 200);
+    store().setProgress(30, 100);
+    store().handleInput({ type: 'select' }); // scrubber up
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(store().progress.position).toBe(30 + SEEK_STEP_SEC);
+    expect(top().panOffset).toBe(100); // crop did not move
+    store().setVideoFullscreen(false);
+  });
+
+  it('landscape episodes (maxPan 0) keep caption scrolling even when fullscreen', () => {
+    store().setVideoFullscreen(true);
+    store().playTrack('ugg', uggQueue, 0);
+    store().setMaxScroll(top().key, SCROLL_STEP);
+    const nonce = store().captionNonce;
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(store().captionNonce).toBe(nonce + 1);
+    expect(top().scrollOffset).toBe(SCROLL_STEP);
+    store().setVideoFullscreen(false);
+  });
+
+  it('fullscreen off leaves caption scrolling untouched on portrait episodes', () => {
+    store().setVideoFullscreen(false);
+    store().playTrack('ugg', uggQueue, 0);
+    store().setMaxScroll(top().key, SCROLL_STEP);
+    store().setMaxPan(top().key, 200);
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(top().scrollOffset).toBe(SCROLL_STEP);
+    expect(top().panOffset).toBe(100); // crop stays centered
+  });
+
+  it('episode skips reset the pan in place', () => {
+    store().setVideoFullscreen(true);
+    store().playTrack('ugg', uggQueue, 0);
+    const key = top().key;
+    store().setMaxPan(key, 200);
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(top().panOffset).toBe(100 + PAN_STEP);
+    store().skipTrack(1);
+    expect(top().key).toBe(key); // same frame, no slide
+    expect(top().maxPan).toBe(0);
+    expect(top().panOffset).toBe(0);
+    store().setVideoFullscreen(false);
+  });
+});
+
 describe('settings', () => {
   it('toggles the theme and updates the row sublabel', () => {
     store().pushNode(findNode('extras.settings')!);
@@ -281,5 +362,20 @@ describe('settings', () => {
     store().handleInput({ type: 'select' });
     expect(store().tweetShuffle).toBe(false);
     expect(store().stack[1].items?.[1].sublabel).toBe('Newest First');
+  });
+
+  it('toggles video fullscreen and updates the row sublabel', () => {
+    store().pushNode(findNode('extras.settings')!);
+    expect(store().videoFullscreen).toBe(false);
+    expect(store().stack[1].items?.[2].label).toBe('Video Fullscreen');
+    expect(store().stack[1].items?.[2].sublabel).toBe('Off');
+    store().handleInput({ type: 'scroll', dir: 1 });
+    store().handleInput({ type: 'scroll', dir: 1 }); // down to the fullscreen row
+    store().handleInput({ type: 'select' });
+    expect(store().videoFullscreen).toBe(true);
+    expect(store().stack[1].items?.[2].sublabel).toBe('On');
+    store().handleInput({ type: 'select' });
+    expect(store().videoFullscreen).toBe(false);
+    expect(store().stack[1].items?.[2].sublabel).toBe('Off');
   });
 });
