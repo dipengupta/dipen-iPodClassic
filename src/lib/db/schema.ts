@@ -133,6 +133,14 @@ export const wifiNames = sqliteTable('wifi_names', {
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
+// The running "List": deadpan entries split into two groups.
+export const listItems = sqliteTable('list_items', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  category: text('category', { enum: ['ruining', 'right'] }).notNull(),
+  name: text('name').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
 // Tracks when each live fetcher last succeeded, for staleness checks.
 export const fetchMeta = sqliteTable('fetch_meta', {
   key: text('key').primaryKey(),

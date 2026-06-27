@@ -105,6 +105,23 @@ test('photos cover flow shows profile pics and flips to captions', async ({ page
   await expect(coverflow).not.toHaveAttribute('data-flipped', 'true');
 });
 
+test('Misc > List: two groups, each a scrollable list of entries', async ({ page }) => {
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('Misc');
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // List (just below Concerts)
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('List');
+  const rows = page.getByTestId('menu-row');
+  await expect(rows.nth(0)).toContainText('Americans taking a good thing and ruining it');
+  await expect(rows.nth(1)).toContainText('Americans doing things right');
+  await page.keyboard.press('Enter'); // open the "ruining it" group
+  await expect(page.getByTestId('status-bar')).toContainText('ruining it');
+  await expect(rows.first()).toContainText('Garlic ice cream'); // each entry is its own row
+  await page.keyboard.press('Escape'); // back to the List menu
+  await expect(rows.first()).toContainText('Americans taking a good thing and ruining it');
+});
+
 test('Collections: mug coverflow plus the static collection photos', async ({ page }) => {
   await page.keyboard.press('ArrowDown'); // Collections
   await page.keyboard.press('Enter');
@@ -197,7 +214,7 @@ test('theme toggle switches to the black iPod and persists across reload', async
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'silver');
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
+  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('Theme');
   await page.keyboard.press('Enter');
@@ -229,8 +246,8 @@ test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) =
   await expect(page.getByTestId('menu-row').first()).toContainText('Buckethead');
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
-  // Wi-Fi names list
-  await page.keyboard.press('ArrowDown'); // Wi-Fi Names
+  // Wi-Fi names list (selection is on Concerts; Wi-Fi now sits just above Settings)
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // List, pennguytweets, Links, Wi-Fi Names
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('Martin Router King');
   await expect(page.getByTestId('menu-row')).toHaveCount(25);
@@ -239,7 +256,7 @@ test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) =
 test('tweet shuffle setting toggles and the list still renders', async ({ page }) => {
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
+  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
   const rows = page.getByTestId('menu-row');
   await expect(rows.nth(1)).toContainText('pennguytweets');
@@ -249,7 +266,8 @@ test('tweet shuffle setting toggles and the list still renders', async ({ page }
   await expect(rows.nth(1)).toContainText('Shuffled');
   // The shuffled list still serves every tweet (order is random by design).
   await page.keyboard.press('Escape'); // back to Misc, selection on Settings
-  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp'); // Wi-Fi Names
+  await page.keyboard.press('ArrowUp'); // Links
   await page.keyboard.press('ArrowUp'); // pennguytweets
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('status-bar')).toContainText('pennguytweets');
@@ -259,7 +277,7 @@ test('tweet shuffle setting toggles and the list still renders', async ({ page }
 test('video fullscreen setting toggles and persists across reload', async ({ page }) => {
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
+  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
   const rows = page.getByTestId('menu-row');
   await expect(rows.nth(2)).toContainText('Video Fullscreen');
@@ -273,7 +291,7 @@ test('video fullscreen setting toggles and persists across reload', async ({ pag
   await expect(page.getByTestId('ipod')).toBeVisible();
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
+  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
   await expect(rows.nth(2)).toContainText('On');
 });

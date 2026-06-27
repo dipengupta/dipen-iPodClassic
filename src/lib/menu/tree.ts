@@ -2,13 +2,15 @@ import type { MenuNode } from './types';
 
 const ABOUT_TEXT = `Hi, I'm Dipen. This is my personal website, built as a 1:1 replica of the iPod Classic.
 
-Use the click wheel (or your arrow keys) to browse around: my music and guitars, articles I've written, my work history, recipes, photos, and a few other collections.
+New to one of these? Spin the click wheel (or use your arrow keys) to move up and down. Press the center button (or Enter) to open whatever's highlighted, and press Menu (the top of the wheel, or Esc/Backspace) to go back. That's the whole thing.
 
-Everything in here is real — built with Next.js, SQLite and a lot of CSS!
+So go explore: my music and guitars, articles I've written, my work history, recipes, photos, and a pile of other odds and ends under Misc. Poke around, there's more in here than it looks.
+
+Everything in here is real, built with Next.js, SQLite and a lot of CSS!
 
 Want to say hi? I'm at dipenrgupta@icloud.com.
 
-— Dipen :)`;
+Dipen :)`;
 
 const OCTAVIUM_TEXT = `Octavium was my college band, where I played the bass. It was quite a ride, from playing in and winning band competitions, to writing original songs, to even performing at the Hard Rock Cafe!`;
 
@@ -164,10 +166,10 @@ export const menuTree: MenuNode = {
           groupBy: 'year',
         },
         {
-          id: 'extras.wifi',
-          label: 'Wi-Fi Names',
+          id: 'extras.list',
+          label: 'List',
           view: 'list',
-          dataSource: 'wifi',
+          dataSource: 'list',
         },
         {
           id: 'extras.tweets',
@@ -180,6 +182,12 @@ export const menuTree: MenuNode = {
           label: 'Links',
           view: 'list',
           dataSource: 'links',
+        },
+        {
+          id: 'extras.wifi',
+          label: 'Wi-Fi Names',
+          view: 'list',
+          dataSource: 'wifi',
         },
         {
           id: 'extras.settings',

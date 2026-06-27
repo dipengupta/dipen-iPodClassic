@@ -22,6 +22,8 @@ const sections = {
     getDb().select().from(schema.concerts).orderBy(asc(schema.concerts.sortOrder)).all(),
   wifi: () =>
     getDb().select().from(schema.wifiNames).orderBy(asc(schema.wifiNames.sortOrder)).all(),
+  list: () =>
+    getDb().select().from(schema.listItems).orderBy(asc(schema.listItems.sortOrder)).all(),
   timeline: () => getDb().select().from(schema.timelineEntries).orderBy(asc(schema.timelineEntries.sortOrder)).all(),
   links: () => getDb().select().from(schema.links).orderBy(asc(schema.links.sortOrder)).all(),
   // Most recent episode first; the menu groups these into year sub-lists.

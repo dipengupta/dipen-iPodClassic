@@ -20,6 +20,7 @@ export type DataSourceKey =
   | 'recipes'
   | 'concerts'
   | 'wifi'
+  | 'list'
   | 'timeline'
   | 'links'
   | 'tweets';

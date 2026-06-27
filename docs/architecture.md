@@ -160,6 +160,12 @@ sub-lists (Food/Baking/Drinks/Tips & Tricks), and each recipe opens a
 scrollable `textReader` detail whose optional `sourceUrl` renders the
 "View Original" footer for recipes saved from the web.
 
+The simplest data-driven shape is the **group-then-scroll list** shared by
+**Concerts** (years → shows) and **List** (two headed groups → entries): the
+builder buckets `(category, name, sortOrder)` rows into a fixed set of groups,
+and each group `onSelect`s a `kind: 'items'` `list` of plain label rows. Copy
+that when a section is just headed lists of one-liners.
+
 Split-menu preview pane: a node's static `previewImage` is the default, but
 for the image-backed coverflow sections (guitars/photos/kitchen)
 `SplitMenuView` lazily loads the section's images once per session and shows

@@ -321,6 +321,46 @@ async function concerts(): Promise<FrameItem[]> {
   }));
 }
 
+interface ListRow {
+  id: number;
+  category: 'ruining' | 'right';
+  name: string;
+}
+
+// Fixed group order. The full headings double as both the menu row and the
+// sub-list title; no item-count sublabel, so the long labels get the whole
+// row width (they'd otherwise truncate next to the count).
+const LIST_GROUP: Record<ListRow['category'], string> = {
+  ruining: 'Americans taking a good thing and ruining it',
+  right: 'Americans doing things right',
+};
+
+async function list(): Promise<FrameItem[]> {
+  const { items } = await fetchJson<{ items: ListRow[] }>('/api/content/list');
+  // Two groups in fixed order; each opens a scrollable list of its entries.
+  const byGroup = new Map<ListRow['category'], ListRow[]>();
+  for (const row of items) {
+    if (!byGroup.has(row.category)) byGroup.set(row.category, []);
+    byGroup.get(row.category)!.push(row);
+  }
+  return (Object.keys(LIST_GROUP) as ListRow['category'][])
+    .filter((category) => byGroup.has(category))
+    .map((category) => {
+      const group = byGroup.get(category)!;
+      const heading = LIST_GROUP[category];
+      return {
+        id: `list-${category}`,
+        label: heading,
+        onSelect: {
+          kind: 'items',
+          title: heading,
+          view: 'list',
+          items: group.map((row) => ({ id: `list-item-${row.id}`, label: row.name })),
+        },
+      };
+    });
+}
+
 interface WifiRow {
   id: number;
   name: string;
@@ -435,6 +475,7 @@ const builders: Record<string, () => Promise<FrameItem[]>> = {
   recipes,
   concerts,
   wifi,
+  list,
   timeline,
   links,
   tweets,

@@ -9,7 +9,7 @@ const VALID_VIEWS: ViewType[] = [
 
 const DATA_SOURCES = [
   'articles', 'youtube', 'guitars', 'ugg', 'soundcloud',
-  'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi',
+  'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi', 'list',
   'timeline', 'links', 'tweets',
 ];
 
@@ -51,8 +51,10 @@ describe('menu tree integrity', () => {
     ]);
   });
 
-  it('About sits on the home menu and shows the contact email', () => {
-    expect(findNode('about')?.payload?.text).toContain('dipenrgupta@icloud.com');
+  it('About sits on the home menu, shows the contact email, and explains the controls', () => {
+    const about = findNode('about')?.payload?.text;
+    expect(about).toContain('dipenrgupta@icloud.com');
+    expect(about).toContain('center button');
   });
 
   it('Collections holds the mug coverflow and the static collection photos', () => {
@@ -67,8 +69,8 @@ describe('menu tree integrity', () => {
 
   it('the Misc section holds the fun sections in order', () => {
     expect(findNode('extras')?.children?.map((c) => c.label)).toEqual([
-      'Photos', 'Kitchen Wins', 'Recipes', 'Concerts', 'Wi-Fi Names',
-      'pennguytweets', 'Links', 'Settings',
+      'Photos', 'Kitchen Wins', 'Recipes', 'Concerts', 'List',
+      'pennguytweets', 'Links', 'Wi-Fi Names', 'Settings',
     ]);
   });
 

@@ -16,7 +16,7 @@ beforeAll(() => {
 
 describe('/api/content/[section]', () => {
   it('serves every registered section', async () => {
-    for (const section of ['guitars', 'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi', 'timeline', 'links', 'ugg', 'tweets']) {
+    for (const section of ['guitars', 'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi', 'list', 'timeline', 'links', 'ugg', 'tweets']) {
       const res = await getContent(req, params({ section }));
       expect(res.status, section).toBe(200);
       const { items } = await res.json();
@@ -48,6 +48,15 @@ describe('/api/content/[section]', () => {
     const wifi = await (await getContent(req, params({ section: 'wifi' }))).json();
     expect(wifi.items).toHaveLength(25);
     expect(wifi.items[0].name).toBe('Martin Router King');
+  });
+
+  it('serves the List split into its two groups', async () => {
+    const { items } = await (await getContent(req, params({ section: 'list' }))).json();
+    const categories = new Set(items.map((r: { category: string }) => r.category));
+    expect([...categories].sort()).toEqual(['right', 'ruining']);
+    expect(items[0]).toMatchObject({ category: 'ruining', name: 'Garlic ice cream' });
+    expect(items.some((r: { name: string }) => r.name === "Buc-ee's")).toBe(true);
+    expect(items.some((r: { name: string }) => r.name === 'Costco')).toBe(true);
   });
 
   it('serves recipes across the four categories with bodies and source links', async () => {
