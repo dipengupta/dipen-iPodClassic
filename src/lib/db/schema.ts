@@ -146,3 +146,10 @@ export const fetchMeta = sqliteTable('fetch_meta', {
   key: text('key').primaryKey(),
   lastFetchedAt: integer('last_fetched_at', { mode: 'timestamp' }),
 });
+
+// Per-table seed fingerprints so deploys re-seed only the tables whose
+// committed seed source changed (see syncSeed in src/lib/seed/seedDb.ts).
+export const seedMeta = sqliteTable('seed_meta', {
+  name: text('name').primaryKey(),
+  fingerprint: text('fingerprint').notNull(),
+});

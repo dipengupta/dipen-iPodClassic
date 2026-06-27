@@ -57,6 +57,13 @@
       "when": 1782584036029,
       "tag": "0007_pretty_leper_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1782585465420,
+      "tag": "0008_spooky_tattoo",
+      "breakpoints": true
     }
   ]
 }

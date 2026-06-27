@@ -174,18 +174,28 @@ a random one on every highlight (static image as the fallback while loading).
 **To add a new section:**
 
 1. Add a table to `src/lib/db/schema.ts`, run `npm run db:generate`.
-2. Add seed data in `src/data/seed/` and wire it in `src/lib/seed/seedDb.ts`.
+2. Add seed data in `src/data/seed/` and a `SeedUnit` in `src/lib/seed/seedDb.ts`.
 3. Expose it in `app/api/content/[section]/route.ts` (one line in `sections`).
 4. Add a builder in `dataSources.ts` and a `MenuNode` in `tree.ts`.
 5. Update the tree integrity test and add an e2e check; update this doc.
+
+No manual reseed is needed after deploy — the new `SeedUnit` carries its own
+fingerprint, so the deploy-time sync fills the new table on the next boot (see
+Data layer below).
 
 ## Data layer
 
 - **better-sqlite3 + Drizzle** (`src/lib/db/`). Synchronous, no engine binary;
   migrations are plain SQL in `drizzle/`, applied by `scripts/migrate.ts` /
   the Docker entrypoint.
-- **Seeding** (`scripts/seed.ts` → `src/lib/seed/seedDb.ts`): idempotent;
-  `--force` wipes first. Sources are committed under `src/data/seed/` —
+- **Seeding** (`scripts/seed.ts` → `src/lib/seed/seedDb.ts`): per-table and
+  self-syncing. Each table is a `SeedUnit` with a `fingerprint` (sha256 of its
+  committed seed source); `syncSeed` runs on every boot and re-seeds only the
+  units whose fingerprint changed — recorded in the `seed_meta` table — so a
+  new section or edited seed file lands on the next deploy with **no manual
+  reseed**. A unit whose source file is absent (partial checkout) is left
+  untouched, never wiped. `--force` clears everything (fingerprints included)
+  and rebuilds from scratch. Sources are committed under `src/data/seed/` —
   including the 10 saved article HTML files parsed by `parseArticle.ts`
   (handles both Django `{% filter linebreaks %}` plain text and raw HTML).
   The old Django repo is **not** needed at build or runtime.
