@@ -41,7 +41,9 @@ export default function NowPlayingView(_props: { frame: Frame }) {
         <span className={styles.counter}>
           {playback.index + 1} of {playback.queue.length}
         </span>
-        <span className={styles.source}>SoundCloud</span>
+        <span className={styles.source}>
+          {playback.source === 'spotify' ? 'Spotify' : 'SoundCloud'}
+        </span>
       </div>
 
       <div key={track?.id ?? playback.index} className={`${styles.trackBlock} ${slideClass}`}>

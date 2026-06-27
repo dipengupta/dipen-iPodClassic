@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { eq } from 'drizzle-orm';
 import * as schema from '@/lib/db/schema';
 import { refreshArticlesIfStale } from '@/lib/fetchers/substack';
+import { refreshSpotifyIfStale } from '@/lib/fetchers/spotify';
 import { isStale, markFetched, refreshYoutubeIfStale } from '@/lib/fetchers/youtubeRss';
 import { failingFetch, makeTestDb, okResponse } from './helpers';
 
@@ -102,5 +103,66 @@ describe('refreshArticlesIfStale', () => {
     const db = makeTestDb({ seed: true });
     await refreshArticlesIfStale(db, failingFetch);
     expect(db.select().from(schema.articles).all()).toHaveLength(10);
+  });
+});
+
+function spotifyEmbed(tracks: Array<{ uri: string; title: string; artist: string; preview?: string }>): string {
+  const trackList = tracks.map((t) => ({
+    uri: t.uri,
+    title: t.title,
+    subtitle: t.artist,
+    ...(t.preview ? { audioPreview: { url: t.preview } } : {}),
+  }));
+  const payload = JSON.stringify({ props: { pageProps: { state: { data: { entity: { trackList } } } } } });
+  return `<script id="__NEXT_DATA__" type="application/json">${payload}</script>`;
+}
+
+describe('refreshSpotifyIfStale', () => {
+  it('replaces a playlist\'s tracks from the keyless embed feed', async () => {
+    const db = makeTestDb({ seed: true });
+    const playlistCount = db
+      .select()
+      .from(schema.recommendations)
+      .where(eq(schema.recommendations.service, 'spotify'))
+      .all().length;
+    const fetchMock = vi.fn(async () =>
+      okResponse(spotifyEmbed([
+        { uri: 'spotify:track:x', title: 'Fresh Song', artist: 'Fresh Artist', preview: 'https://p.scdn.co/mp3-preview/x' },
+      ])),
+    );
+    await refreshSpotifyIfStale(db, fetchMock as unknown as typeof fetch);
+    const tracks = db.select().from(schema.recommendationTracks).all();
+    // Each seeded Spotify playlist is refreshed to the single fixture track.
+    expect(fetchMock).toHaveBeenCalledTimes(playlistCount);
+    expect(tracks).toHaveLength(playlistCount);
+    expect(tracks.every((t) => t.title === 'Fresh Song')).toBe(true);
+  });
+
+  it('keeps the seeded tracks intact when the network fails', async () => {
+    const db = makeTestDb({ seed: true });
+    const before = db.select().from(schema.recommendationTracks).all().length;
+    expect(before).toBeGreaterThan(0);
+    await refreshSpotifyIfStale(db, failingFetch);
+    expect(db.select().from(schema.recommendationTracks).all()).toHaveLength(before);
+    // A full failure must not mark the feed fetched, so it retries next time.
+    expect(isStale(db, 'spotify', 6 * 3600 * 1000)).toBe(true);
+  });
+
+  it('skips the network while fresh', async () => {
+    const db = makeTestDb({ seed: true });
+    const playlistCount = db
+      .select()
+      .from(schema.recommendations)
+      .where(eq(schema.recommendations.service, 'spotify'))
+      .all().length;
+    const fetchMock = vi.fn(async () =>
+      okResponse(spotifyEmbed([
+        { uri: 'spotify:track:x', title: 'S', artist: 'A', preview: 'https://p.scdn.co/mp3-preview/x' },
+      ])),
+    );
+    await refreshSpotifyIfStale(db, fetchMock as unknown as typeof fetch);
+    await refreshSpotifyIfStale(db, fetchMock as unknown as typeof fetch);
+    // Once per playlist on the first pass only; the second pass is fresh.
+    expect(fetchMock).toHaveBeenCalledTimes(playlistCount);
   });
 });

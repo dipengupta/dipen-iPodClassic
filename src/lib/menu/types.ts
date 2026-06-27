@@ -23,7 +23,8 @@ export type DataSourceKey =
   | 'list'
   | 'timeline'
   | 'links'
-  | 'tweets';
+  | 'tweets'
+  | 'recommendations';
 
 export interface MenuNode {
   id: string;
@@ -73,18 +74,21 @@ export interface FrameItem {
 
 /** One entry in a playback queue: a YouTube/local video or a SoundCloud track. */
 export interface PlayTrack {
-  /** videoId for YouTube; widget index for SoundCloud; episode no. for ugg. */
+  /** videoId for YouTube; widget index for SoundCloud; episode no. for ugg;
+   *  Spotify track URI (spotify:track:…) for spotify. */
   id: string;
   title: string;
   description?: string;
   date?: string;
   /** Local video URL (ugg only). */
   videoSrc?: string;
+  /** 30s preview MP3 streamed by the hidden <audio> player (spotify only). */
+  audioSrc?: string;
   /** Caption overlay text (ugg only). */
   caption?: string;
 }
 
-export type PlaybackSource = 'youtube' | 'soundcloud' | 'ugg';
+export type PlaybackSource = 'youtube' | 'soundcloud' | 'ugg' | 'spotify';
 
 export type SelectSpec =
   | { kind: 'node'; node: MenuNode }

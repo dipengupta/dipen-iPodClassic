@@ -16,7 +16,7 @@ beforeAll(() => {
 
 describe('/api/content/[section]', () => {
   it('serves every registered section', async () => {
-    for (const section of ['guitars', 'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi', 'list', 'timeline', 'links', 'ugg', 'tweets']) {
+    for (const section of ['guitars', 'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi', 'list', 'timeline', 'links', 'ugg', 'tweets', 'recommendations']) {
       const res = await getContent(req, params({ section }));
       expect(res.status, section).toBe(200);
       const { items } = await res.json();
@@ -90,6 +90,25 @@ describe('/api/content/[section]', () => {
     expect(items[0].isSample).toBe(false);
     // The last few scraped tweets have no URL; everything still serves.
     expect(items.every((t: { text: string }) => t.text.length > 0)).toBe(true);
+  });
+
+  it('serves recommendations with Spotify tracks nested', async () => {
+    // The offline fetch stub makes the live Spotify refresh a no-op, so this
+    // exercises the seeded fallback — nothing blanks.
+    const { items } = await (await getContent(req, params({ section: 'recommendations' }))).json();
+    expect(items.length).toBeGreaterThan(0);
+    // Every Spotify playlist carries playable tracks with a preview MP3.
+    const spotify = items.filter((r: { service: string }) => r.service === 'spotify');
+    expect(spotify.length).toBe(items.length);
+    for (const rec of spotify) {
+      expect(rec.tracks.length).toBeGreaterThan(0);
+      expect(rec.tracks[0].previewUrl).toMatch(/^https?:\/\//);
+    }
+    // Any Apple Music playlist (none seeded today) deep-links out with no tracks.
+    for (const rec of items.filter((r: { service: string }) => r.service === 'apple')) {
+      expect(rec.tracks).toHaveLength(0);
+      expect(rec.playlistUrl).toContain('music.apple.com');
+    }
   });
 
   it('404s unknown sections', async () => {

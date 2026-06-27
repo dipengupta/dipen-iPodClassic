@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core';
 import type { Db } from '../db/client';
 import * as schema from '../db/schema';
+import { playlistIdFromUrl } from '../fetchers/spotify';
 import { parseArticleTemplate } from './parseArticle';
 
 const SEED_DIR = path.join(process.cwd(), 'src', 'data', 'seed');
@@ -252,6 +253,38 @@ const SEED_UNITS: SeedUnit[] = [
           .onConflictDoNothing()
           .run();
       }
+    },
+  },
+  {
+    // Music recommendations: playlists + their Spotify tracks (keyless preview
+    // MP3s). The committed tracks are the never-blank fallback; the app
+    // additively refreshes them at runtime. Regenerate with `npm run import:spotify`.
+    name: 'recommendations',
+    tables: [schema.recommendations, schema.recommendationTracks],
+    fingerprint(seedDir) {
+      const a = fileFingerprint(seedDir, 'recommendations.json');
+      if (a === null) return null;
+      const b = fileFingerprint(seedDir, 'recommendation-tracks.json') ?? '';
+      return crypto.createHash('sha256').update(a).update(b).digest('hex');
+    },
+    seed(db, seedDir) {
+      const playlists = readJsonOptional<Array<{ title: string; service: 'spotify' | 'apple'; playlistUrl: string; note?: string }>>(seedDir, 'recommendations.json') ?? [];
+      const tracksByPlaylist = readJsonOptional<Record<string, Array<{ trackUri: string; title: string; artist: string; previewUrl: string }>>>(seedDir, 'recommendation-tracks.json') ?? {};
+      playlists.forEach((p, i) => {
+        const [row] = db
+          .insert(schema.recommendations)
+          .values({ title: p.title, service: p.service, playlistUrl: p.playlistUrl, note: p.note ?? '', sortOrder: i })
+          .returning({ id: schema.recommendations.id })
+          .all();
+        if (p.service !== 'spotify') return;
+        const id = playlistIdFromUrl(p.playlistUrl);
+        const tracks = id ? tracksByPlaylist[id] ?? [] : [];
+        tracks.forEach((t, j) => {
+          db.insert(schema.recommendationTracks)
+            .values({ recId: row.id, trackUri: t.trackUri, title: t.title, artist: t.artist, previewUrl: t.previewUrl, sortOrder: j })
+            .run();
+        });
+      });
     },
   },
   {

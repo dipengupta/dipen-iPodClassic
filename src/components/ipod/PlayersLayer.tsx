@@ -8,6 +8,11 @@ import {
   soundcloudPlayerSrc,
   soundcloudToggle,
 } from '@/lib/players/soundcloud';
+import {
+  initSpotify,
+  spotifyPause,
+  spotifyToggle,
+} from '@/lib/players/spotify';
 import { uggPause, uggToggle } from '@/lib/players/uggVideo';
 import {
   initYoutube,
@@ -37,6 +42,7 @@ export default function PlayersLayer() {
   const skipTrack = useIpodStore((s) => s.skipTrack);
 
   const scIframeRef = useRef<HTMLIFrameElement>(null);
+  const spotifyAudioRef = useRef<HTMLAudioElement>(null);
   const nonceMounted = useRef(false);
   const lastStarted = useRef<string>('');
 
@@ -49,6 +55,16 @@ export default function PlayersLayer() {
         }
       });
     }
+    initSpotify(
+      spotifyAudioRef.current,
+      setPlaying,
+      (position, duration) => {
+        if (useIpodStore.getState().playback.source === 'spotify') {
+          setProgress(position, duration);
+        }
+      },
+      () => skipTrack(1),
+    );
   }, [setPlaying, setProgress, skipTrack]);
 
   // The IFrame API has no progress event; poll while a YouTube video plays.
@@ -71,17 +87,26 @@ export default function PlayersLayer() {
     lastStarted.current = startKey;
     if (playback.source === 'youtube') {
       soundcloudPause();
+      spotifyPause();
       uggPause();
       youtubeLoad(track.id);
     } else if (playback.source === 'soundcloud') {
       youtubePause();
+      spotifyPause();
       uggPause();
       soundcloudPlay(Number(track.id));
+    } else if (playback.source === 'spotify') {
+      // Spotify preview: the store already started the hidden <audio> inside
+      // the user's gesture (spotifyLoad); just silence the other sources.
+      youtubePause();
+      soundcloudPause();
+      uggPause();
     } else {
       // Local (ugg) video: the store already started it inside the user's
       // gesture (uggLoad); just silence the other sources.
       youtubePause();
       soundcloudPause();
+      spotifyPause();
     }
   }, [playback.source, playback.index, playback.queue]);
 
@@ -94,6 +119,7 @@ export default function PlayersLayer() {
     const { source } = useIpodStore.getState().playback;
     if (source === 'youtube') youtubeToggle();
     else if (source === 'soundcloud') soundcloudToggle();
+    else if (source === 'spotify') spotifyToggle();
     else if (source === 'ugg') uggToggle();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fire only on the press
   }, [playPauseNonce]);
@@ -120,6 +146,8 @@ export default function PlayersLayer() {
           allow="autoplay"
           data-testid="sc-widget"
         />
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption -- audio-only preview engine */}
+        <audio ref={spotifyAudioRef} preload="none" data-testid="spotify-audio" />
       </div>
     </>
   );

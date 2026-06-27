@@ -2,10 +2,34 @@ import { asc, desc, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
+import { refreshSpotifyIfStale } from '@/lib/fetchers/spotify';
 
 export const dynamic = 'force-dynamic';
 
+/** Playlists with their (Spotify) tracks nested, ordered by sortOrder. */
+function recommendations() {
+  const db = getDb();
+  const playlists = db
+    .select()
+    .from(schema.recommendations)
+    .orderBy(asc(schema.recommendations.sortOrder))
+    .all();
+  return playlists.map((playlist) => ({
+    ...playlist,
+    tracks:
+      playlist.service === 'spotify'
+        ? db
+            .select()
+            .from(schema.recommendationTracks)
+            .where(eq(schema.recommendationTracks.recId, playlist.id))
+            .orderBy(asc(schema.recommendationTracks.sortOrder))
+            .all()
+        : [],
+  }));
+}
+
 const sections = {
+  recommendations,
   guitars: () => getDb().select().from(schema.guitars).orderBy(asc(schema.guitars.sortOrder)).all(),
   mugs: () => getDb().select().from(schema.mugs).orderBy(asc(schema.mugs.sortOrder)).all(),
   photos: () =>
@@ -46,5 +70,7 @@ export async function GET(
   if (!query) {
     return NextResponse.json({ error: `unknown section: ${section}` }, { status: 404 });
   }
+  // Additive, keyless Spotify track refresh — failures fall back to the seed.
+  if (section === 'recommendations') await refreshSpotifyIfStale(getDb());
   return NextResponse.json({ items: query() });
 }

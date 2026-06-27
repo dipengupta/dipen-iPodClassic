@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as clicker from '../audio/clicker';
 import type { IpodInput } from '../input/keyboard';
 import { soundcloudSeekBy } from '../players/soundcloud';
+import { spotifyLoad, spotifySeekBy } from '../players/spotify';
 import { uggLoad, uggSeekBy } from '../players/uggVideo';
 import { youtubeSeekBy } from '../players/youtube';
 import { menuTree } from '../menu/tree';
@@ -47,6 +48,7 @@ export const PAN_STEP = 24;
 function seekBy(source: PlaybackSource, seconds: number): void {
   if (source === 'youtube') youtubeSeekBy(seconds);
   else if (source === 'soundcloud') soundcloudSeekBy(seconds);
+  else if (source === 'spotify') spotifySeekBy(seconds);
   else uggSeekBy(seconds);
 }
 
@@ -253,8 +255,12 @@ export const useIpodStore = create<IpodState>((set, get) => ({
       // Start the persistent element NOW, while still inside the user's
       // click/keypress — Safari refuses unmuted play() from a later effect.
       uggLoad(track.videoSrc);
+    } else if (source === 'spotify' && track.audioSrc) {
+      // Same gesture rule as ugg: start the hidden <audio> here, not in an effect.
+      spotifyLoad(track.audioSrc);
     }
-    const view: ViewType = source === 'soundcloud' ? 'nowPlaying' : 'video';
+    const view: ViewType =
+      source === 'soundcloud' || source === 'spotify' ? 'nowPlaying' : 'video';
     const payload: DetailPayload =
       source === 'youtube'
         ? { title: track.title, videoId: track.id }

@@ -55,6 +55,13 @@ export const menuTree: MenuNode = {
           previewImage: '/images/music/soundcloud.webp',
         },
         {
+          id: 'music.recommendations',
+          label: 'Recommendations',
+          view: 'list',
+          dataSource: 'recommendations',
+          previewImage: '/images/music/soundcloud.webp',
+        },
+        {
           id: 'music.octavium',
           label: 'Octavium',
           view: 'photo',

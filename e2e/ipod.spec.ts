@@ -150,6 +150,39 @@ test('SoundCloud lists tracks (or the fallback link) as an iPod menu', async ({ 
   await expect(page.getByTestId('menu-row').first()).toBeVisible({ timeout: 15000 });
 });
 
+test('Recommendations: Spotify playlist plays through the native Now Playing card', async ({ page }) => {
+  await page.keyboard.press('Enter'); // Music
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Recommendations
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('Recommendations');
+  const rows = page.getByTestId('menu-row');
+  // Curated Spotify playlists.
+  await expect(rows.nth(0)).toContainText("Today's Top Hits");
+  // Open the first Spotify playlist → a native track list.
+  await page.keyboard.press('Enter');
+  await expect(rows.first()).toBeVisible();
+  // Play the first track → the same Now Playing card as SoundCloud, but Spotify.
+  await page.keyboard.press('Enter');
+  const card = page.getByTestId('now-playing');
+  await expect(card).toBeVisible();
+  await expect(card).toContainText('Spotify');
+  await expect(card).toContainText(/1 of \d+/);
+  // The hidden <audio> engine is wired to a keyless preview MP3.
+  await expect(page.getByTestId('spotify-audio')).toHaveAttribute('src', /^https?:\/\//);
+  // prev/next are transport controls while audio is loaded (real iPod behavior).
+  await page.keyboard.press('ArrowRight');
+  await expect(card).toContainText(/2 of \d+/);
+  // Center press summons the in-card scrubber.
+  await page.keyboard.press('Enter');
+  await expect(card).toHaveAttribute('data-scrubbing', 'true');
+  // MENU dismisses the scrubber first, then backs out — audio element persists.
+  await page.keyboard.press('Escape');
+  await expect(card).not.toHaveAttribute('data-scrubbing', 'true');
+  await page.keyboard.press('Escape');
+  await expect(rows.first()).toBeVisible();
+  await expect(page.getByTestId('spotify-audio')).toBeAttached();
+});
+
 test('reads an article: scroll with the wheel, View Original links out', async ({ page }) => {
   for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown'); // Articles
   await page.keyboard.press('Enter');

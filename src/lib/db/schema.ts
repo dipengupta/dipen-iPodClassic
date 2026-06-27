@@ -112,6 +112,32 @@ export const soundcloudTracks = sqliteTable('soundcloud_tracks', {
   isSample: integer('is_sample', { mode: 'boolean' }).notNull().default(false),
 });
 
+// Music recommendations shown above Octavium. Spotify playlists open a native
+// track list (recommendationTracks) that plays through the Now Playing card;
+// Apple Music playlists deep-link out (no keyless control path).
+export const recommendations = sqliteTable('recommendations', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  service: text('service', { enum: ['spotify', 'apple'] }).notNull(),
+  // Canonical open.spotify.com / music.apple.com playlist URL.
+  playlistUrl: text('playlist_url').notNull(),
+  note: text('note').notNull().default(''),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
+// Tracks of a Spotify recommendation playlist. Seeded as the never-blank
+// fallback and additively refreshed from the keyless embed feed. previewUrl is
+// the 30s MP3 the hidden <audio> player streams.
+export const recommendationTracks = sqliteTable('recommendation_tracks', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  recId: integer('rec_id').notNull(),
+  trackUri: text('track_uri').notNull(),
+  title: text('title').notNull(),
+  artist: text('artist').notNull().default(''),
+  previewUrl: text('preview_url').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
 export const links = sqliteTable('links', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   label: text('label').notNull(),

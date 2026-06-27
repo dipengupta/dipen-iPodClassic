@@ -1,0 +1,38 @@
+[
+  {
+    "title": "Today's Top Hits",
+    "service": "spotify",
+    "playlistUrl": "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M",
+    "note": "What's on heavy rotation"
+  },
+  {
+    "title": "Ballroom & Slow Dancing",
+    "service": "spotify",
+    "playlistUrl": "https://open.spotify.com/playlist/1gx25dNRrrMjSukhTKOSiu",
+    "note": "Tunes to dance to"
+  },
+  {
+    "title": "Bolero Essentials",
+    "service": "spotify",
+    "playlistUrl": "https://open.spotify.com/playlist/3qhysiuSAA3JqBZmAhWSlQ",
+    "note": "Slow-burn romantics"
+  },
+  {
+    "title": "The Popwave Drive",
+    "service": "spotify",
+    "playlistUrl": "https://open.spotify.com/playlist/0yWQos046EZdgPRbCVu6Uh",
+    "note": "Windows-down pop"
+  },
+  {
+    "title": "Coffee Shop Essentials",
+    "service": "spotify",
+    "playlistUrl": "https://open.spotify.com/playlist/1XQ6SqUXCr1kx8mkdvQod6",
+    "note": "Easy acoustic mornings"
+  },
+  {
+    "title": "All Out 2010s",
+    "service": "spotify",
+    "playlistUrl": "https://open.spotify.com/playlist/37i9dQZF1DX5Ejj0EkURtP",
+    "note": "The decade on shuffle"
+  }
+]

@@ -463,7 +463,65 @@ async function tweets(): Promise<FrameItem[]> {
   });
 }
 
+interface RecTrackRow {
+  trackUri: string;
+  title: string;
+  artist: string;
+  previewUrl: string;
+}
+
+interface RecommendationRow {
+  id: number;
+  title: string;
+  service: 'spotify' | 'apple';
+  playlistUrl: string;
+  note: string;
+  tracks: RecTrackRow[];
+}
+
+async function recommendations(): Promise<FrameItem[]> {
+  const { items } = await fetchJson<{ items: RecommendationRow[] }>(
+    '/api/content/recommendations',
+  );
+  return items.map((rec) => {
+    // Apple Music has no keyless control path, so its rows deep-link out.
+    // A Spotify playlist with no resolvable tracks degrades to the same.
+    if (rec.service === 'apple' || rec.tracks.length === 0) {
+      return {
+        id: `rec-${rec.id}`,
+        label: rec.title,
+        sublabel: rec.service === 'apple' ? 'Apple Music ↗' : rec.note || 'Open ↗',
+        onSelect: { kind: 'external', href: rec.playlistUrl },
+      };
+    }
+    // Spotify: a native track list that plays through the Now Playing card,
+    // exactly like SoundCloud — wheel-skip, scrubber and all.
+    const queue: PlayTrack[] = rec.tracks.map((t) => ({
+      id: t.trackUri,
+      title: t.artist ? `${t.title} — ${t.artist}` : t.title,
+      audioSrc: t.previewUrl,
+    }));
+    return {
+      id: `rec-${rec.id}`,
+      label: rec.title,
+      sublabel: rec.note || `${rec.tracks.length} tracks`,
+      onSelect: {
+        kind: 'items',
+        title: rec.title,
+        view: 'list',
+        items: rec.tracks.map((t, i) => ({
+          id: `${rec.id}-${i}`,
+          label: t.title,
+          sublabel: t.artist || undefined,
+          onSelect: { kind: 'play' as const, source: 'spotify' as const, index: i, queue },
+        })),
+      },
+    };
+  });
+}
+
 const builders: Record<string, () => Promise<FrameItem[]>> = {
+  recommendations,
   articles,
   youtube,
   guitars,

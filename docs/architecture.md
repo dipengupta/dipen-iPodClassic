@@ -61,18 +61,24 @@ playback. `src/components/ipod/PlayersLayer.tsx` (mounted once in
   to ascending — track ids keep the widget's index for `skip()`), which the
   `soundcloud` dataSource awaits (6 s timeout → seeded fallback rows that
   link out). `PLAY/PAUSE/FINISH` events report state back.
+- **Spotify** (`src/lib/players/spotify.ts`): a hidden `<audio>` element that
+  streams Spotify's keyless 30 s preview MP3s (the `audioPreview.url` shipped
+  in each playlist's embed feed — no API keys). It reuses the same Now Playing
+  card as SoundCloud, so a Music → Recommendations playlist gets the full
+  native transport (per-track queue, wheel-skip, real scrubber). Like ugg, the
+  store starts it *inside the user's gesture* (`spotifyLoad` in `playTrack`).
 
 The store's `playback` slice (`{ source, index, playing, queue }`) is the
 single source of truth: `playTrack` pushes (or in-place updates) the
 now-playing frame, `skipTrack` moves through the queue, and starting one
-source pauses the others (there are three: `youtube`, `soundcloud`, `ugg` —
-the local-video stage below). While media is loaded, the **prev/next wheel
-buttons are transport controls** (selection-stepping otherwise), and the
-status bar shows a ▶ flag. `NowPlayingView` is the SoundCloud card — track
-counter, title (sliding in from the skip direction), a simulated EQ
-visualizer (`scaleY`-only; real spectrum data is unreachable across the
-iframe origin) and the progress bar; `VideoView` is just a backdrop under
-the raised stages.
+source pauses the others (there are four: `youtube`, `soundcloud`, `spotify`,
+`ugg` — the local-video stage below). While media is loaded, the **prev/next
+wheel buttons are transport controls** (selection-stepping otherwise), and the
+status bar shows a ▶ flag. `NowPlayingView` is the audio card (SoundCloud and
+Spotify, labeled by source) — track counter, title (sliding in from the skip
+direction), a simulated EQ visualizer (`scaleY`-only; real spectrum data is
+unreachable across the iframe origin) and the progress bar; `VideoView` is
+just a backdrop under the raised stages.
 
 **Progress & scrubbing**: each player wrapper exposes `…SeekBy(seconds)` and
 reports position/duration into the store's `progress` slice (SoundCloud via
@@ -160,6 +166,12 @@ sub-lists (Food/Baking/Drinks/Tips & Tricks), and each recipe opens a
 scrollable `textReader` detail whose optional `sourceUrl` renders the
 "View Original" footer for recipes saved from the web.
 
+**Recommendations** (Music, just above Octavium) shows the mixed-source pattern:
+each `recommendations` row is a playlist. Spotify rows open a native track list
+(`kind: 'items'`) whose rows `kind: 'play'` through the Spotify Now Playing
+card; Apple Music rows (no keyless control path) `kind: 'external'` and
+deep-link out. Tracks are committed seed + a keyless additive refresh (below).
+
 The simplest data-driven shape is the **group-then-scroll list** shared by
 **Concerts** (years → shows) and **List** (two headed groups → entries): the
 builder buckets `(category, name, sortOrder)` rows into a fixed set of groups,
@@ -199,12 +211,16 @@ Data layer below).
   including the 10 saved article HTML files parsed by `parseArticle.ts`
   (handles both Django `{% filter linebreaks %}` plain text and raw HTML).
   The old Django repo is **not** needed at build or runtime.
-- **Live fetchers** (`src/lib/fetchers/`): YouTube channel RSS (6 h staleness)
-  and Substack RSS (24 h), tracked in the `fetch_meta` table. Both are
-  strictly additive upserts with network failures swallowed — the seeded data
-  is always a complete fallback. Substack dedup matches slug, URL, *and*
-  normalized title (cross-posts), and excludes Substack's default
-  "coming-soon" post.
+- **Live fetchers** (`src/lib/fetchers/`): YouTube channel RSS (6 h staleness),
+  Substack RSS (24 h), and Spotify recommendations (6 h), tracked in the
+  `fetch_meta` table. All are best-effort with network failures swallowed — the
+  seeded data is always a complete fallback. Substack dedup matches slug, URL,
+  *and* normalized title (cross-posts), and excludes Substack's default
+  "coming-soon" post. Spotify is **keyless**: it parses each playlist's public
+  embed page (`__NEXT_DATA__` → track URI, title, artist, 30 s preview MP3) and
+  replaces that playlist's tracks only on a successful fetch. Regenerate the
+  committed seed (`recommendation-tracks.json`) any time with
+  `npm run import:spotify`.
 
 ## Images
 

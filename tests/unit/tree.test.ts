@@ -10,7 +10,7 @@ const VALID_VIEWS: ViewType[] = [
 const DATA_SOURCES = [
   'articles', 'youtube', 'guitars', 'ugg', 'soundcloud',
   'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi', 'list',
-  'timeline', 'links', 'tweets',
+  'timeline', 'links', 'tweets', 'recommendations',
 ];
 
 describe('menu tree integrity', () => {
@@ -71,6 +71,12 @@ describe('menu tree integrity', () => {
     expect(findNode('extras')?.children?.map((c) => c.label)).toEqual([
       'Photos', 'Kitchen Wins', 'Recipes', 'Concerts', 'List',
       'pennguytweets', 'Links', 'Wi-Fi Names', 'Settings',
+    ]);
+  });
+
+  it('Music holds the playlists, with Recommendations just above Octavium', () => {
+    expect(findNode('music')?.children?.map((c) => c.label)).toEqual([
+      'Guitars', 'YouTube', 'Instagram', 'SoundCloud', 'Recommendations', 'Octavium',
     ]);
   });
 
