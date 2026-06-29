@@ -6,7 +6,7 @@
  * deliberately iTunes-specific (the iPod has its own click-wheel version).
  */
 
-export const ABOUT_TEXT = `Hi, I'm Dipen — welcome to Dipen's iTunes.
+export const ABOUT_TEXT = `Hi, I'm Dipen! Welcome to Dipen's iTunes.
 
 This is the desktop companion to my personal website, which is built as a 1:1 replica of the iPod Classic. Same content, just laid out the iTunes way: pick a section from the source list on the left.
 

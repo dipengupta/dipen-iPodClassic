@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { loadSection } from '@/lib/itunes/loaders';
+import { loadPlaylist, loadPlaylists, loadSection } from '@/lib/itunes/loaders';
 import type {
   CoverflowData,
-  EmbedData,
   ExternalData,
   ReadingData,
   TracksData,
+  TweetsData,
   VideoData,
 } from '@/lib/itunes/types';
 
@@ -68,6 +68,15 @@ const responses: Record<string, unknown> = {
   '/api/content/links': {
     items: [{ id: 1, label: 'GitHub', url: 'https://github.com/dipeng' }],
   },
+  '/api/content/tweets': {
+    items: [
+      { id: 10, number: 5, text: 'first tweet', postedAt: '2021-01-05', url: 'https://x.com/p/5' },
+      { id: 11, number: 4, text: 'second tweet', postedAt: null, url: null },
+    ],
+  },
+  '/api/soundcloud': {
+    items: [{ id: 1, title: 'Demo Track', url: 'https://soundcloud.com/dipen-gupta/demo' }],
+  },
 };
 
 beforeEach(() => {
@@ -93,13 +102,22 @@ describe('iTunes loaders', () => {
     expect(data.items[1].flipText).toBe('Trail'); // empty description falls back to the title
   });
 
-  it('recommendations groups by playlist; Apple rows link out', async () => {
-    const data = (await loadSection('recommendations')) as TracksData;
-    expect(data.groups.map((g) => g.heading)).toEqual(['Indie Mix', 'Apple Picks']);
-    expect(data.groups[0].rows[0].playIndex).toBe(0); // spotify is playable
-    const appleRow = data.groups[1].rows[0];
-    expect(appleRow.href).toBe('https://music.apple.com/playlist/2');
-    expect(appleRow.playIndex).toBeUndefined();
+  it('loadPlaylists returns one entry per playlist for the PLAYLISTS section', async () => {
+    const playlists = await loadPlaylists();
+    expect(playlists).toEqual([
+      { id: 1, title: 'Indie Mix', service: 'spotify', playlistUrl: 'https://open.spotify.com/playlist/1' },
+      { id: 2, title: 'Apple Picks', service: 'apple', playlistUrl: 'https://music.apple.com/playlist/2' },
+    ]);
+  });
+
+  it('loadPlaylist returns one Spotify playlist as a playable table', async () => {
+    const data = (await loadPlaylist(1)) as TracksData;
+    expect(data.kind).toBe('tracks');
+    expect(data.groups).toHaveLength(1);
+    expect(data.queue).toHaveLength(2);
+    expect(data.groups[0].rows[0].playIndex).toBe(0);
+    expect(data.queue?.[0].title).toBe('Song A — Artist A');
+    expect(data.queue?.[1].title).toBe('Song B'); // no artist → bare title
   });
 
   it('mugs are grouped by category with the gifter as secondary', async () => {
@@ -109,10 +127,21 @@ describe('iTunes loaders', () => {
     expect(data.groups[1].rows[0].secondary).toBeUndefined(); // empty gifter
   });
 
-  it('YouTube groups videos by year, newest first', async () => {
+  it('YouTube groups videos by year (newest first) and carries the description', async () => {
     const data = (await loadSection('youtube')) as VideoData;
     expect(data.groups.map((g) => g.heading)).toEqual(['YouTube · 2024', 'YouTube · 2023']);
-    expect(data.groups[0].videos[0]).toMatchObject({ source: 'youtube', youtubeId: 'yt1' });
+    expect(data.groups[0].videos[0]).toMatchObject({
+      source: 'youtube',
+      youtubeId: 'yt1',
+      caption: 'desc', // shown beneath the player, like the UGG caption
+    });
+  });
+
+  it('tweets become a Twitter-style feed', async () => {
+    const data = (await loadSection('tweets')) as TweetsData;
+    expect(data.kind).toBe('tweets');
+    expect(data.handle).toBe('20swithepennguy');
+    expect(data.tweets[0]).toMatchObject({ number: 5, text: 'first tweet', url: 'https://x.com/p/5' });
   });
 
   it('Instagram maps UGG episodes to the local video stream', async () => {
@@ -140,10 +169,13 @@ describe('iTunes loaders', () => {
     expect(data.rows[0].sublabel).toBe('github.com/dipeng');
   });
 
-  it('soundcloud is a self-playing embed (no fetch needed)', async () => {
-    const data = (await loadSection('soundcloud')) as EmbedData;
-    expect(data.kind).toBe('embed');
-    expect(data.src).toContain('w.soundcloud.com/player');
+  it('soundcloud loader is the link-out fallback (live widget is preferred)', async () => {
+    const data = (await loadSection('soundcloud')) as TracksData;
+    expect(data.kind).toBe('tracks');
+    expect(data.groups[0].rows[0]).toMatchObject({
+      name: 'Demo Track',
+      href: 'https://soundcloud.com/dipen-gupta/demo',
+    });
   });
 
   it('about renders the static text without hitting the network', async () => {

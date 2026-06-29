@@ -3,13 +3,15 @@ import { catalog, DEFAULT_ENTRY_ID, entryById, SIDEBAR_GROUPS } from '@/lib/itun
 import type { LoaderKey, ViewKind } from '@/lib/itunes/types';
 
 const VIEW_KINDS: ViewKind[] = [
-  'coverflow', 'tracks', 'video', 'reading', 'staticPhoto', 'external', 'embed',
+  'coverflow', 'tracks', 'video', 'reading', 'tweets', 'staticPhoto', 'external',
 ];
 
 /**
  * Every piece of iPod content must be reachable from the iTunes sidebar. This
  * maps each iPod dataSource / static section to the loader(s) that surface it;
  * the guard below fails if a future iPod section is added without an iTunes home.
+ * (recommendations is surfaced dynamically by the PLAYLISTS section — see the
+ * loadPlaylists/loadPlaylist tests in itunesLoaders.test.ts.)
  */
 const IPOD_CONTENT_TO_LOADER: Record<string, LoaderKey> = {
   // dataSource-backed sections
@@ -28,7 +30,6 @@ const IPOD_CONTENT_TO_LOADER: Record<string, LoaderKey> = {
   timeline: 'professional',
   links: 'links',
   tweets: 'tweets',
-  recommendations: 'recommendations',
   // static (tree.ts payload) sections
   about: 'about',
   octavium: 'octavium',
@@ -71,13 +72,21 @@ describe('iTunes catalog integrity', () => {
 
   it('groups items into the themed sections', () => {
     const music = catalog.filter((e) => e.group === 'MUSIC').map((e) => e.label);
-    expect(music).toEqual([
-      'Guitars', 'YouTube', 'Instagram', 'SoundCloud',
-      'Recommendations', 'Concerts Seen', 'Octavium',
-    ]);
+    expect(music).toEqual(['Guitars', 'YouTube', 'Instagram', 'SoundCloud', 'Octavium']);
     expect(catalog.filter((e) => e.group === 'COLLECTIONS').map((e) => e.label)).toEqual([
       'Mug Collection', 'Vinyls', 'Fridge Magnets', 'Recipes',
     ]);
+    // Concerts Seen now lives under Odds & Ends (moved out of Music).
+    expect(catalog.filter((e) => e.group === 'ODDS & ENDS').map((e) => e.label)).toEqual([
+      'Concerts Seen', 'List', 'Amusing Wi-Fi Names', 'Links',
+    ]);
+  });
+
+  it('PLAYLISTS sits directly above ODDS & ENDS and is filled dynamically', () => {
+    expect(SIDEBAR_GROUPS).toContain('PLAYLISTS');
+    expect(SIDEBAR_GROUPS.indexOf('PLAYLISTS')).toBe(SIDEBAR_GROUPS.indexOf('ODDS & ENDS') - 1);
+    // No static catalog rows — playlists are injected at runtime from the feed.
+    expect(catalog.some((e) => e.group === 'PLAYLISTS')).toBe(false);
   });
 
   it('surfaces every iPod content section (regression guard)', () => {
@@ -97,8 +106,9 @@ describe('iTunes catalog integrity', () => {
     const firstIndex = (g: string) => catalog.findIndex((e) => e.group === g);
     expect(SIDEBAR_GROUPS[0]).toBe('MUSIC');
     expect(SIDEBAR_GROUPS[SIDEBAR_GROUPS.length - 1]).toBe('DEVICES');
-    // Entries are laid out in the declared group order.
-    const groupFirsts = SIDEBAR_GROUPS.map(firstIndex);
+    // Static rows are laid out in the declared group order (PLAYLISTS is dynamic,
+    // so it has no static rows to position).
+    const groupFirsts = SIDEBAR_GROUPS.map(firstIndex).filter((i) => i >= 0);
     expect(groupFirsts).toEqual([...groupFirsts].sort((a, b) => a - b));
   });
 });

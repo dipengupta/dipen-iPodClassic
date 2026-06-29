@@ -5,11 +5,11 @@ import type { CoverItem } from '@/lib/itunes/types';
 import styles from './GridView.module.css';
 
 /** iTunes "grid" / album view: a wall of artwork with flip-to-read backs. */
-export default function GridView({ items }: { items: CoverItem[] }) {
+export default function GridView({ items, scale = 1 }: { items: CoverItem[]; scale?: number }) {
   const [flipped, setFlipped] = useState<string | null>(null);
   return (
     <div className={styles.wrap} data-testid="itunes-grid">
-      <div className={styles.grid}>
+      <div className={styles.grid} style={{ ['--tile' as string]: `${Math.round(150 * scale)}px` }}>
         {items.map((item) => (
           <button
             key={item.id}

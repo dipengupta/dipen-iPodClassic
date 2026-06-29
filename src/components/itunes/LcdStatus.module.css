@@ -1,8 +1,6 @@
 .lcd {
-  flex: 1;
-  width: 100%;
-  min-width: 240px;
-  max-width: 720px;
+  flex: 0 0 auto;
+  width: clamp(240px, 34vw, 460px);
   height: 46px;
   display: flex;
   flex-direction: column;

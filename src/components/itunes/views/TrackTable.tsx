@@ -1,6 +1,6 @@
 'use client';
 
-import type { AudioTrack, TracksData } from '@/lib/itunes/types';
+import type { AudioTrack, PlaybackSource, TracksData } from '@/lib/itunes/types';
 import styles from './TrackTable.module.css';
 
 interface TrackTableProps {
@@ -8,11 +8,12 @@ interface TrackTableProps {
   /** id of the AudioTrack currently loaded in the player, for highlighting. */
   currentTrackId?: string;
   playing: boolean;
-  onPlay: (queue: AudioTrack[], index: number) => void;
+  onPlay: (queue: AudioTrack[], index: number, source: PlaybackSource) => void;
 }
 
 export default function TrackTable({ data, currentTrackId, playing, onPlay }: TrackTableProps) {
   const { columns, groups, queue } = data;
+  const source: PlaybackSource = data.source ?? 'spotify';
   const hasSecondary = Boolean(columns.secondary);
   const hasTime = Boolean(columns.time);
 
@@ -37,6 +38,7 @@ export default function TrackTable({ data, currentTrackId, playing, onPlay }: Tr
               hasSecondary={hasSecondary}
               hasTime={hasTime}
               queue={queue}
+              source={source}
               currentTrackId={currentTrackId}
               playing={playing}
               onPlay={onPlay}
@@ -55,6 +57,7 @@ function GroupRows({
   hasSecondary,
   hasTime,
   queue,
+  source,
   currentTrackId,
   playing,
   onPlay,
@@ -65,9 +68,10 @@ function GroupRows({
   hasSecondary: boolean;
   hasTime: boolean;
   queue?: AudioTrack[];
+  source: PlaybackSource;
   currentTrackId?: string;
   playing: boolean;
-  onPlay: (queue: AudioTrack[], index: number) => void;
+  onPlay: (queue: AudioTrack[], index: number, source: PlaybackSource) => void;
 }) {
   return (
     <>
@@ -83,7 +87,7 @@ function GroupRows({
         const isCurrent = Boolean(track && track.id === currentTrackId);
         const playable = Boolean(track);
         const onActivate = () => {
-          if (track && queue) onPlay(queue, row.playIndex!);
+          if (track && queue) onPlay(queue, row.playIndex!, source);
           else if (row.href) window.open(row.href, '_blank', 'noopener,noreferrer');
         };
         return (

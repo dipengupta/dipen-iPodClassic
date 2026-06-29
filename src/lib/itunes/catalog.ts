@@ -14,10 +14,10 @@ export const catalog: CatalogEntry[] = [
   { id: 'mus-guitars', label: 'Guitars', icon: '🎸', group: 'MUSIC', view: 'coverflow', loader: 'guitars', unit: 'guitar' },
   { id: 'mus-youtube', label: 'YouTube', icon: '📺', group: 'MUSIC', view: 'video', loader: 'youtube', unit: 'video' },
   { id: 'mus-instagram', label: 'Instagram', icon: '📸', group: 'MUSIC', view: 'video', loader: 'instagram', unit: 'episode' },
-  { id: 'mus-soundcloud', label: 'SoundCloud', icon: '🎧', group: 'MUSIC', view: 'embed', loader: 'soundcloud' },
-  { id: 'mus-recommendations', label: 'Recommendations', icon: '🎶', group: 'MUSIC', view: 'tracks', loader: 'recommendations', unit: 'song' },
-  { id: 'mus-concerts', label: 'Concerts Seen', icon: '🎤', group: 'MUSIC', view: 'tracks', loader: 'concerts', unit: 'show' },
+  { id: 'mus-soundcloud', label: 'SoundCloud', icon: '🎧', group: 'MUSIC', view: 'tracks', loader: 'soundcloud', unit: 'song' },
   { id: 'mus-octavium', label: 'Octavium', icon: '🎵', group: 'MUSIC', view: 'staticPhoto', loader: 'octavium' },
+
+  // --- PLAYLISTS (rows added dynamically from the Recommendations feed) -----
 
   // --- PHOTOS --------------------------------------------------------------
   { id: 'pho-photos', label: 'Photos', icon: '📷', group: 'PHOTOS', view: 'coverflow', loader: 'photos', unit: 'photo' },
@@ -31,13 +31,14 @@ export const catalog: CatalogEntry[] = [
 
   // --- WRITING -------------------------------------------------------------
   { id: 'wri-articles', label: 'Articles', icon: '📖', group: 'WRITING', view: 'reading', loader: 'articles', unit: 'article' },
-  { id: 'wri-tweets', label: 'pennguytweets', icon: '🐧', group: 'WRITING', view: 'reading', loader: 'tweets', unit: 'tweet' },
+  { id: 'wri-tweets', label: 'pennguytweets', icon: '🐧', group: 'WRITING', view: 'tweets', loader: 'tweets', unit: 'tweet' },
 
   // --- ABOUT ---------------------------------------------------------------
   { id: 'abt-professional', label: 'Professional', icon: '💼', group: 'ABOUT', view: 'reading', loader: 'professional', unit: 'role' },
   { id: 'abt-about', label: 'About', icon: 'ℹ️', group: 'ABOUT', view: 'reading', loader: 'about' },
 
   // --- ODDS & ENDS ---------------------------------------------------------
+  { id: 'odd-concerts', label: 'Concerts Seen', icon: '🎤', group: 'ODDS & ENDS', view: 'tracks', loader: 'concerts', unit: 'show' },
   { id: 'odd-list', label: 'List', icon: '📝', group: 'ODDS & ENDS', view: 'tracks', loader: 'list', unit: 'entry' },
   { id: 'odd-wifi', label: 'Amusing Wi-Fi Names', icon: '📶', group: 'ODDS & ENDS', view: 'tracks', loader: 'wifi', unit: 'network' },
   { id: 'odd-links', label: 'Links', icon: '🔗', group: 'ODDS & ENDS', view: 'external', loader: 'links', unit: 'link' },
@@ -52,6 +53,7 @@ export const SIDEBAR_GROUPS: Array<CatalogEntry['group']> = [
   'COLLECTIONS',
   'WRITING',
   'ABOUT',
+  'PLAYLISTS',
   'ODDS & ENDS',
   'DEVICES',
 ];

@@ -12,6 +12,7 @@ import type {
   AudioTrack,
   CoverItem,
   LoaderKey,
+  Playlist,
   ReadingEntry,
   SectionData,
   TrackGroup,
@@ -146,17 +147,6 @@ const LIST_GROUP: Record<ListRow['category'], string> = {
   right: 'Americans doing things right',
 };
 
-/** SoundCloud HTML5 widget embed (iTunes-local copy of the player URL builder). */
-const SOUNDCLOUD_TRACKS_URL = 'https://soundcloud.com/dipen-gupta/tracks';
-function soundcloudEmbedSrc(): string {
-  return (
-    'https://w.soundcloud.com/player/?url=' +
-    encodeURIComponent(SOUNDCLOUD_TRACKS_URL) +
-    '&color=%232f6fc4&auto_play=false&hide_related=true' +
-    '&show_comments=false&show_user=true&show_reposts=false&visual=true'
-  );
-}
-
 function youtubeGroups(items: VideoRow[], headingPrefix: string): VideoGroup[] {
   const byYear = new Map<string, VideoRow[]>();
   for (const v of items) {
@@ -174,6 +164,8 @@ function youtubeGroups(items: VideoRow[], headingPrefix: string): VideoGroup[] {
         sublabel: v.publishedAt.slice(0, 10),
         source: 'youtube' as const,
         youtubeId: v.videoId,
+        // Shown beneath the player, like the UGG caption.
+        caption: v.description || undefined,
       })),
     }));
 }
@@ -234,40 +226,55 @@ async function photos(): Promise<SectionData> {
   return { kind: 'coverflow', items: galleryCovers(items, 'photo') };
 }
 
-/** Recommendations grouped by playlist; Spotify rows play, Apple rows link out. */
-async function recommendations(): Promise<SectionData> {
+/** Playlist metadata for the dynamic PLAYLISTS sidebar section. */
+export async function loadPlaylists(): Promise<Playlist[]> {
   const { items } = await fetchJson<{ items: RecommendationRow[] }>(
     '/api/content/recommendations',
   );
-  const queue: AudioTrack[] = [];
-  const groups: TrackGroup[] = items.map((rec) => {
-    if (rec.service === 'apple' || rec.tracks.length === 0) {
-      return {
-        heading: rec.title,
-        rows: [
-          {
-            id: `rec-${rec.id}`,
-            name: rec.service === 'apple' ? 'Open in Apple Music ↗' : 'Open playlist ↗',
-            secondary: rec.note || undefined,
-            href: rec.playlistUrl,
-          },
-        ],
-      };
-    }
-    return {
-      heading: rec.title,
-      rows: rec.tracks.map((t) => {
-        const playIndex = queue.length;
-        queue.push({ id: t.trackUri, title: t.artist ? `${t.title} — ${t.artist}` : t.title, audioSrc: t.previewUrl });
-        return { id: `${rec.id}-${playIndex}`, name: t.title, secondary: t.artist || undefined, playIndex };
-      }),
-    };
-  });
-  return { kind: 'tracks', columns: { name: 'Name', secondary: 'Artist' }, groups, queue };
+  return items.map((rec) => ({
+    id: rec.id,
+    title: rec.title,
+    service: rec.service,
+    playlistUrl: rec.playlistUrl,
+  }));
 }
 
+/** One Spotify playlist's tracks as a playable table (selected from PLAYLISTS). */
+export async function loadPlaylist(recId: number): Promise<SectionData> {
+  const { items } = await fetchJson<{ items: RecommendationRow[] }>(
+    '/api/content/recommendations',
+  );
+  const rec = items.find((r) => r.id === recId);
+  if (!rec || rec.tracks.length === 0) {
+    return {
+      kind: 'tracks',
+      columns: { name: 'Name', secondary: 'Artist' },
+      groups: [{ rows: [{ id: `rec-${recId}`, name: 'Open playlist ↗', href: rec?.playlistUrl ?? '#' }] }],
+    };
+  }
+  const queue: AudioTrack[] = [];
+  const rows: TrackRow[] = rec.tracks.map((t) => {
+    const playIndex = queue.length;
+    queue.push({ id: t.trackUri, title: t.artist ? `${t.title} — ${t.artist}` : t.title, audioSrc: t.previewUrl });
+    return { id: `${rec.id}-${playIndex}`, name: t.title, secondary: t.artist || undefined, playIndex };
+  });
+  return { kind: 'tracks', columns: { name: 'Name', secondary: 'Artist' }, groups: [{ rows }], queue };
+}
+
+interface SoundcloudFallbackRow {
+  id: number;
+  title: string;
+  url: string;
+}
+
+/** Fallback only — the live widget (ItunesApp) is preferred. Link-out rows. */
 async function soundcloud(): Promise<SectionData> {
-  return { kind: 'embed', title: 'SoundCloud', src: soundcloudEmbedSrc() };
+  const { items } = await fetchJson<{ items: SoundcloudFallbackRow[] }>('/api/soundcloud');
+  return {
+    kind: 'tracks',
+    columns: { name: 'Track' },
+    groups: [{ rows: items.map((t) => ({ id: `sc-${t.id}`, name: t.title, href: t.url })) }],
+  };
 }
 
 async function mugs(): Promise<SectionData> {
@@ -370,14 +377,15 @@ async function professional(): Promise<SectionData> {
 async function tweets(): Promise<SectionData> {
   const { items } = await fetchJson<{ items: TweetRow[] }>('/api/content/tweets');
   return {
-    kind: 'reading',
-    entries: items.map((t) => ({
+    kind: 'tweets',
+    handle: '20swithepennguy',
+    displayName: 'pennguy',
+    tweets: items.map((t) => ({
       id: `tweet-${t.number ?? t.id}`,
-      title: t.number !== null ? `#${t.number}` : 'pennguytweet',
-      subtitle: t.postedAt ? t.postedAt.slice(0, 10) : undefined,
+      number: t.number,
       text: t.text,
-      sourceUrl: t.url ?? undefined,
-      sourceLabel: 'X',
+      date: t.postedAt ?? undefined,
+      url: t.url ?? undefined,
     })),
   };
 }
@@ -437,7 +445,6 @@ const loaders: Record<LoaderKey, () => Promise<SectionData>> = {
   articles,
   guitars,
   photos,
-  recommendations,
   soundcloud,
   mugs,
   vinyls,

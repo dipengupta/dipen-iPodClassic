@@ -89,11 +89,6 @@ export default function Toolbar({
         <button type="button" className={styles.btn} onClick={onNext} disabled={!hasNext} aria-label="Next">
           <NextIcon />
         </button>
-      </div>
-      <div className={styles.center}>
-        <LcdStatus nowPlaying={nowPlaying} onSeek={onSeek} />
-      </div>
-      <div className={styles.right}>
         <div className={styles.volume}>
           <span className={styles.speaker}>
             <SpeakerIcon />
@@ -109,6 +104,11 @@ export default function Toolbar({
             aria-label="Volume"
           />
         </div>
+      </div>
+      <div className={styles.center}>
+        <LcdStatus nowPlaying={nowPlaying} onSeek={onSeek} />
+      </div>
+      <div className={styles.right}>
         {showGalleryToggle && (
           <div className={styles.toggle} role="group" aria-label="View mode">
             <button

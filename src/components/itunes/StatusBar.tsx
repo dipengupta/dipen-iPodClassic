@@ -33,6 +33,9 @@ function summarize(data: SectionData, label: string, unit?: string): string {
     case 'reading':
       n = data.entries.length;
       break;
+    case 'tweets':
+      n = data.tweets.length;
+      break;
     case 'external':
       n = data.rows.length;
       break;
@@ -43,21 +46,52 @@ function summarize(data: SectionData, label: string, unit?: string): string {
   return `${n} ${unit ? plural(unit, n) : 'item' + (n === 1 ? '' : 's')}`;
 }
 
+interface StatusBarProps {
+  data: SectionData | null;
+  label: string;
+  unit?: string;
+  loading: boolean;
+  showImageSlider?: boolean;
+  imageScale?: number;
+  onImageScale?: (scale: number) => void;
+}
+
 export default function StatusBar({
   data,
   label,
   unit,
   loading,
-}: {
-  data: SectionData | null;
-  label: string;
-  unit?: string;
-  loading: boolean;
-}) {
+  showImageSlider,
+  imageScale = 1,
+  onImageScale,
+}: StatusBarProps) {
   const text = loading || !data ? '' : summarize(data, label, unit);
   return (
     <div className={styles.statusBar} data-testid="itunes-statusbar">
+      <span className={styles.spacer} />
       <span className={styles.count}>{text}</span>
+      <span className={styles.spacer}>
+        {showImageSlider && onImageScale && (
+          <span className={styles.zoom} data-testid="itunes-imageslider">
+            <span className={styles.zoomGlyph} aria-hidden="true">
+              ▪
+            </span>
+            <input
+              type="range"
+              className={styles.zoomRange}
+              min={0.6}
+              max={1.6}
+              step={0.05}
+              value={imageScale}
+              onChange={(e) => onImageScale(Number(e.target.value))}
+              aria-label="Image size"
+            />
+            <span className={styles.zoomGlyphLg} aria-hidden="true">
+              ◼
+            </span>
+          </span>
+        )}
+      </span>
     </div>
   );
 }

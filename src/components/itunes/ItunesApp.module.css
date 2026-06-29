@@ -24,6 +24,29 @@
   border-top: 1px solid var(--it-hairline);
 }
 
+/* Drag handle between the sidebar and the main pane. */
+.divider {
+  flex: 0 0 auto;
+  width: 5px;
+  cursor: col-resize;
+  background: var(--it-hairline);
+  touch-action: none;
+}
+
+.divider:hover {
+  background: #8aa0bd;
+}
+
+/* The SoundCloud widget must stay in the DOM to play, but is never shown. */
+.scHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  left: -9999px;
+  top: -9999px;
+  border: 0;
+}
+
 .main {
   flex: 1;
   min-width: 0;

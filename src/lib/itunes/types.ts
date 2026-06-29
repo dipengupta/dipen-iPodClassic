@@ -7,15 +7,16 @@
 /** Which main-pane component renders a sidebar entry's content. */
 export type ViewKind =
   | 'coverflow' // image gallery with a Grid toggle
-  | 'tracks' // song/list table (spotify previews + plain grouped lists)
+  | 'tracks' // song/list table (spotify previews, soundcloud, plain grouped lists)
   | 'video' // YouTube + local UGG videos
-  | 'reading' // text entries (articles/recipes/timeline/tweets/about)
+  | 'reading' // text entries (articles/recipes/timeline/about)
+  | 'tweets' // Twitter-style pennguytweets feed
   | 'staticPhoto' // single photo + blurb (octavium/vinyls/magnets)
-  | 'external' // link-out rows
-  | 'embed'; // a third-party widget iframe (SoundCloud)
+  | 'external'; // link-out rows
 
 export type SidebarGroup =
   | 'MUSIC'
+  | 'PLAYLISTS'
   | 'PHOTOS'
   | 'COLLECTIONS'
   | 'WRITING'
@@ -40,7 +41,6 @@ export type LoaderKey =
   | 'articles'
   | 'guitars'
   | 'photos'
-  | 'recommendations'
   | 'soundcloud'
   | 'mugs'
   | 'vinyls'
@@ -76,11 +76,17 @@ export interface CoverflowData {
 
 // --- Track table ------------------------------------------------------------
 
-/** A playable 30s preview (Spotify) streamed by the iTunes toolbar player. */
+/** Playback source for a tracks queue. Spotify uses the <audio> 30s previews;
+ *  SoundCloud uses the hidden iTunes SoundCloud widget. */
+export type PlaybackSource = 'spotify' | 'soundcloud';
+
+/** One playable track. Spotify rows carry `audioSrc`; SoundCloud rows `scIndex`. */
 export interface AudioTrack {
   id: string;
   title: string;
-  audioSrc: string;
+  audioSrc?: string;
+  /** SoundCloud widget index (source === 'soundcloud'). */
+  scIndex?: number;
 }
 
 export interface TrackRow {
@@ -105,6 +111,8 @@ export interface TracksData {
   groups: TrackGroup[];
   /** Shared audio queue; rows reference it by `playIndex`. */
   queue?: AudioTrack[];
+  /** Which player the queue uses (defaults to spotify). */
+  source?: PlaybackSource;
 }
 
 // --- Video ------------------------------------------------------------------
@@ -152,6 +160,23 @@ export interface ReadingData {
   entries: ReadingEntry[];
 }
 
+// --- Tweets -----------------------------------------------------------------
+
+export interface TweetCard {
+  id: string;
+  number: number | null;
+  text: string;
+  date?: string;
+  url?: string;
+}
+
+export interface TweetsData {
+  kind: 'tweets';
+  handle: string;
+  displayName: string;
+  tweets: TweetCard[];
+}
+
 // --- Static photo / external / embed ---------------------------------------
 
 export interface StaticPhotoData {
@@ -173,17 +198,19 @@ export interface ExternalData {
   rows: ExternalRow[];
 }
 
-export interface EmbedData {
-  kind: 'embed';
-  title: string;
-  src: string;
-}
-
 export type SectionData =
   | CoverflowData
   | TracksData
   | VideoData
   | ReadingData
+  | TweetsData
   | StaticPhotoData
-  | ExternalData
-  | EmbedData;
+  | ExternalData;
+
+/** Sidebar metadata for one Recommendations playlist (dynamic PLAYLISTS group). */
+export interface Playlist {
+  id: number;
+  title: string;
+  service: 'spotify' | 'apple';
+  playlistUrl: string;
+}

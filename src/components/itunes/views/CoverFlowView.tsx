@@ -8,26 +8,22 @@ import styles from './CoverFlowView.module.css';
 /**
  * Desktop Cover Flow — a fork of the iPod's CoverFlowView. The pure transform
  * math lives in ./coverflowMath (scaled up for the larger canvas); focus is
- * driven by local React state (click / arrow keys / wheel) instead of the iPod
- * store.
+ * driven by local React state (click / arrow keys / wheel). The focused item's
+ * caption + description fill the space below the covers; the whole 3-D scene
+ * zooms with the image-size slider.
  */
 
-export default function CoverFlowView({ items }: { items: CoverItem[] }) {
+export default function CoverFlowView({ items, scale = 1 }: { items: CoverItem[]; scale?: number }) {
   const [focused, setFocused] = useState(0);
-  const [flipped, setFlipped] = useState(false);
   const wheelAt = useRef(0);
   const stageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setFocused(0);
-    setFlipped(false);
   }, [items]);
 
   const move = useCallback(
-    (delta: number) => {
-      setFlipped(false);
-      setFocused((f) => Math.max(0, Math.min(items.length - 1, f + delta)));
-    },
+    (delta: number) => setFocused((f) => Math.max(0, Math.min(items.length - 1, f + delta))),
     [items.length],
   );
 
@@ -38,9 +34,6 @@ export default function CoverFlowView({ items }: { items: CoverItem[] }) {
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
       move(-1);
-    } else if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      setFlipped((v) => !v);
     }
   };
 
@@ -68,7 +61,7 @@ export default function CoverFlowView({ items }: { items: CoverItem[] }) {
       onKeyDown={onKeyDown}
       onWheel={onWheel}
     >
-      <div className={styles.flow}>
+      <div className={styles.flow} style={{ ['--cf-scale' as string]: scale }}>
         {items.map((item, i) => {
           const offset = i - focused;
           if (Math.abs(offset) > RENDER_WINDOW) return null;
@@ -85,33 +78,25 @@ export default function CoverFlowView({ items }: { items: CoverItem[] }) {
                 height: COVER,
                 marginLeft: -COVER / 2,
               }}
-              onClick={() => (isFocused ? setFlipped((v) => !v) : (setFlipped(false), setFocused(i)))}
+              onClick={() => !isFocused && setFocused(i)}
             >
-              <div
-                className={`${styles.card} ${isFocused && flipped ? styles.flippedCard : ''}`}
-                data-testid={isFocused ? 'itunes-focused-cover' : undefined}
-              >
-                <div className={styles.cardFront}>
-                  {item.imagePath ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- committed pre-optimized WebP
-                    <img src={item.imagePath} alt={item.label} className={styles.coverImage} loading="lazy" />
-                  ) : (
-                    <div className={styles.coverPlaceholder}>
-                      <span className={styles.placeholderGlyph}>☕</span>
-                      <span className={styles.placeholderLabel}>{item.label}</span>
-                    </div>
-                  )}
-                  <div className={styles.reflection} aria-hidden="true">
-                    {item.imagePath ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- decorative reflection
-                      <img src={item.imagePath} alt="" className={styles.coverImage} loading="lazy" />
-                    ) : (
-                      <div className={styles.coverPlaceholder} />
-                    )}
+              <div className={styles.card} data-testid={isFocused ? 'itunes-focused-cover' : undefined}>
+                {item.imagePath ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- committed pre-optimized WebP
+                  <img src={item.imagePath} alt={item.label} className={styles.coverImage} loading="lazy" />
+                ) : (
+                  <div className={styles.coverPlaceholder}>
+                    <span className={styles.placeholderGlyph}>☕</span>
+                    <span className={styles.placeholderLabel}>{item.label}</span>
                   </div>
-                </div>
-                <div className={styles.cardBack}>
-                  <div className={styles.backText}>{item.flipText ?? item.label}</div>
+                )}
+                <div className={styles.reflection} aria-hidden="true">
+                  {item.imagePath ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- decorative reflection
+                    <img src={item.imagePath} alt="" className={styles.coverImage} loading="lazy" />
+                  ) : (
+                    <div className={styles.coverPlaceholder} />
+                  )}
                 </div>
               </div>
               <div className={styles.dim} style={{ opacity: coverDim(offset) }} aria-hidden="true" />
@@ -119,8 +104,9 @@ export default function CoverFlowView({ items }: { items: CoverItem[] }) {
           );
         })}
       </div>
-      <div className={styles.caption}>
+      <div className={styles.caption} data-testid="itunes-coverflow-caption">
         <span className={styles.captionTitle}>{current?.label}</span>
+        {current?.flipText && <p className={styles.captionDesc}>{current.flipText}</p>}
         <span className={styles.captionIndex}>
           {focused + 1} of {items.length}
         </span>

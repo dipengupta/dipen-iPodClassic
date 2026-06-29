@@ -4,11 +4,23 @@ import CoverFlowView from './CoverFlowView';
 import GridView from './GridView';
 import styles from './GalleryPane.module.css';
 
-/** Image sections. The Grid ⇄ Cover Flow mode is controlled by the toolbar. */
-export default function GalleryPane({ data, mode }: { data: CoverflowData; mode: GalleryMode }) {
+/** Image sections. Mode + image scale are controlled by the toolbar/status bar. */
+export default function GalleryPane({
+  data,
+  mode,
+  scale,
+}: {
+  data: CoverflowData;
+  mode: GalleryMode;
+  scale: number;
+}) {
   return (
     <div className={styles.wrap}>
-      {mode === 'coverflow' ? <CoverFlowView items={data.items} /> : <GridView items={data.items} />}
+      {mode === 'coverflow' ? (
+        <CoverFlowView items={data.items} scale={scale} />
+      ) : (
+        <GridView items={data.items} scale={scale} />
+      )}
     </div>
   );
 }

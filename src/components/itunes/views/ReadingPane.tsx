@@ -41,27 +41,32 @@ export default function ReadingPane({ data }: { data: ReadingData }) {
 
   const grouped = useMemo(() => groupByHeading(entries), [entries]);
 
+  // A single-entry section (e.g. About) needs no list tier — just the reader.
+  const showList = entries.length > 1;
+
   return (
     <div className={styles.wrap}>
-      <nav className={styles.list} aria-label="Entries">
-        {grouped.map((group) => (
-          <div key={group.heading ?? '_'} className={styles.group}>
-            {group.heading && <p className={styles.groupHeading}>{group.heading}</p>}
-            {group.entries.map((entry) => (
-              <button
-                key={entry.id}
-                type="button"
-                className={`${styles.item} ${entry.id === selectedId ? styles.selected : ''}`}
-                aria-current={entry.id === selectedId || undefined}
-                onClick={() => setSelectedId(entry.id)}
-              >
-                <span className={styles.itemTitle}>{entry.title}</span>
-                {entry.subtitle && <span className={styles.itemSub}>{entry.subtitle}</span>}
-              </button>
-            ))}
-          </div>
-        ))}
-      </nav>
+      {showList && (
+        <nav className={styles.list} aria-label="Entries">
+          {grouped.map((group) => (
+            <div key={group.heading ?? '_'} className={styles.group}>
+              {group.heading && <p className={styles.groupHeading}>{group.heading}</p>}
+              {group.entries.map((entry) => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className={`${styles.item} ${entry.id === selectedId ? styles.selected : ''}`}
+                  aria-current={entry.id === selectedId || undefined}
+                  onClick={() => setSelectedId(entry.id)}
+                >
+                  <span className={styles.itemTitle}>{entry.title}</span>
+                  {entry.subtitle && <span className={styles.itemSub}>{entry.subtitle}</span>}
+                </button>
+              ))}
+            </div>
+          ))}
+        </nav>
+      )}
       <article className={styles.reader}>
         {selected ? (
           <ReaderBody entry={selected} html={bodies[selected.id]} loading={loading} />

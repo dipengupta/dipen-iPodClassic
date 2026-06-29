@@ -14,31 +14,74 @@ test.describe('desktop iTunes view', () => {
       await expect(sidebar.getByText(group, { exact: true })).toBeVisible();
     }
     await expect(sidebar.getByRole('button', { name: 'Guitars', exact: true })).toBeVisible();
+    // Concerts Seen moved out of Music into Odds & Ends.
+    await expect(sidebar.getByRole('button', { name: 'Concerts Seen', exact: true })).toBeVisible();
     await expect(sidebar.getByRole('link', { name: "Dipen's iPod" })).toBeVisible();
     // Transport lives in the top toolbar; there is no bottom player bar.
     await expect(page.getByTestId('itunes-toolbar')).toBeVisible();
     await expect(page.getByTestId('itunes-audiobar')).toHaveCount(0);
   });
 
-  test('the bottom status bar shows a section count', async ({ page }) => {
-    // Default landing is Guitars (a gallery).
-    await expect(page.getByTestId('itunes-statusbar')).toContainText(/\d+\s+guitars?/);
-    await page.getByTestId('itunes-sidebar').getByRole('button', { name: 'Recommendations', exact: true }).click();
+  test('PLAYLISTS section lists playlists and opens one', async ({ page }) => {
+    const sidebar = page.getByTestId('itunes-sidebar');
+    await expect(sidebar.getByText('PLAYLISTS', { exact: true })).toBeVisible();
+    const firstPlaylist = page.getByTestId('itunes-playlist').first();
+    await expect(firstPlaylist).toBeVisible();
+    await firstPlaylist.click();
+    // A Spotify playlist opens a track table; the status bar counts songs.
     await expect(page.getByTestId('itunes-statusbar')).toContainText(/\d+\s+songs?/);
   });
 
-  test('images open in Grid by default, with a Cover Flow toggle that flips a cover', async ({ page }) => {
+  test('images: Grid by default, status-bar size slider, Cover Flow shows the caption below', async ({ page }) => {
     await page.getByTestId('itunes-sidebar').getByRole('button', { name: 'Guitars', exact: true }).click();
-    // Grid is the default; Cover Flow is not mounted yet.
     await expect(page.getByTestId('itunes-grid')).toBeVisible();
     await expect(page.getByTestId('itunes-coverflow')).toHaveCount(0);
-    // Toggle (top-right of the toolbar) switches to Cover Flow.
+    // The artwork-size slider lives in the status bar for galleries.
+    const slider = page.getByTestId('itunes-imageslider').getByLabel('Image size');
+    await expect(slider).toBeVisible();
+    await slider.fill('1.4');
+    // Switch to Cover Flow; the caption (title + description) shows beneath.
     await page.getByTestId('itunes-toolbar').getByRole('button', { name: 'Cover Flow' }).click();
-    const flow = page.getByTestId('itunes-coverflow');
-    await expect(flow).toBeVisible();
-    const focused = page.getByTestId('itunes-focused-cover');
-    await focused.click();
-    await expect(focused).toHaveClass(/flippedCard/);
+    await expect(page.getByTestId('itunes-coverflow')).toBeVisible();
+    await expect(page.getByTestId('itunes-coverflow-caption')).not.toBeEmpty();
+  });
+
+  test('pennguytweets renders a Twitter-style feed with a Shuffle toggle', async ({ page }) => {
+    await page.getByTestId('itunes-sidebar').getByRole('button', { name: 'pennguytweets', exact: true }).click();
+    const feed = page.getByTestId('itunes-tweets');
+    await expect(feed).toBeVisible();
+    await expect(feed.locator('article').first()).toBeVisible();
+    await page.getByRole('button', { name: 'Shuffle' }).click();
+    await expect(feed.locator('article').first()).toBeVisible();
+  });
+
+  test('About opens straight to the text (no entry-list tier)', async ({ page }) => {
+    await page.getByTestId('itunes-sidebar').getByRole('button', { name: 'About', exact: true }).click();
+    const main = page.getByTestId('itunes-main');
+    await expect(main.getByRole('heading', { name: 'About' })).toBeVisible();
+    // Single-entry reading sections drop the in-pane list.
+    await expect(main.getByRole('navigation', { name: 'Entries' })).toHaveCount(0);
+  });
+
+  test('the sidebar can be dragged wider', async ({ page }) => {
+    const sidebar = page.getByTestId('itunes-sidebar');
+    const before = (await sidebar.boundingBox())!.width;
+    const divider = page.getByTestId('itunes-sidebar-divider');
+    const box = (await divider.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 120, box.y + box.height / 2, { steps: 8 });
+    await page.mouse.up();
+    const after = (await sidebar.boundingBox())!.width;
+    expect(after).toBeGreaterThan(before + 60);
+  });
+
+  test('SoundCloud shows a library-style track list', async ({ page }) => {
+    await page.getByTestId('itunes-sidebar').getByRole('button', { name: 'SoundCloud', exact: true }).click();
+    // Live widget tracks (or the seeded link-out fallback) render as a table.
+    await expect(page.getByTestId('itunes-main').locator('table tbody tr').first()).toBeVisible({
+      timeout: 12000,
+    });
   });
 
   test('YouTube mounts a video player', async ({ page }) => {

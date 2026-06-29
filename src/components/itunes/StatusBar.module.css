@@ -2,17 +2,47 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 26px;
+  height: 28px;
   padding: 0 14px;
   background: var(--it-chrome);
   border-top: 1px solid var(--it-hairline);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
+.spacer {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .count {
+  flex: 0 0 auto;
+  text-align: center;
   font-size: 11px;
   font-weight: 600;
   color: #5a6472;
   font-variant-numeric: tabular-nums;
+}
+
+.zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #7a828f;
+}
+
+.zoomGlyph {
+  font-size: 8px;
+}
+
+.zoomGlyphLg {
+  font-size: 13px;
+}
+
+.zoomRange {
+  width: 96px;
+  height: 4px;
+  accent-color: #2f6fc4;
+  cursor: pointer;
 }

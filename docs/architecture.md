@@ -302,38 +302,48 @@ thing: the JSON served by the `/api/...` routes.
   handlers applies identically — and maps rows into the `SectionData`
   view-models in `types.ts`. `catalog.ts` is the single source of truth for the
   sidebar.
-- **Sidebar IA** (`catalog.ts`): themed sections, each item listed once —
-  **MUSIC** (Guitars / YouTube / Instagram / SoundCloud / Recommendations /
-  Concerts Seen / Octavium), **PHOTOS** (Photos / Kitchen Wins), **COLLECTIONS**
-  (Mug Collection / Vinyls / Fridge Magnets / Recipes), **WRITING** (Articles /
-  pennguytweets), **ABOUT** (Professional / About), **ODDS & ENDS** (List /
-  Wi-Fi Names / Links), and **DEVICES → Dipen's iPod** (a `next/link` back to
-  `/`). Each entry carries a `unit` noun for the status bar. The iPod's
-  **Settings is intentionally excluded** (device-only toggles). An
-  `itunesCatalog` test guards that every iPod section is still surfaced.
-- **Layout** (`ItunesApp`): title bar (`Dipen's iTunes`) → **toolbar**
-  (Apple-style SVG transport icons on the left, the elongated now-playing
-  display in the center, then a volume slider and the Grid/Cover Flow toggle on
-  the right for gallery sections) → body (sidebar + main pane) → **status bar**
-  (a live count of the current section, e.g. "16 guitars" / "37 songs"). The
-  `.window` is larger and `resize: both` (drag the corner).
+- **Sidebar IA** (`catalog.ts` + dynamic playlists): themed sections, each item
+  listed once — **MUSIC** (Guitars / YouTube / Instagram / SoundCloud /
+  Octavium), **PHOTOS** (Photos / Kitchen Wins), **COLLECTIONS** (Mug Collection
+  / Vinyls / Fridge Magnets / Recipes), **WRITING** (Articles / pennguytweets),
+  **ABOUT** (Professional / About), **PLAYLISTS** (one row per Recommendations
+  playlist, built at runtime — `loadPlaylists()`; Spotify rows open their own
+  track list, Apple rows link out), **ODDS & ENDS** (Concerts Seen / List / Wi-Fi
+  Names / Links), and **DEVICES → Dipen's iPod** (a `next/link` back to `/`).
+  Each entry carries a `unit` noun for the status bar. `ItunesApp` merges the
+  static `catalog` with the dynamic playlist entries and passes the list to
+  `Sidebar`, which is **drag-resizable** (a divider between it and the main pane).
+  The iPod's **Settings is intentionally excluded**; an `itunesCatalog` test
+  guards that every iPod section is still surfaced.
+- **Layout** (`ItunesApp`): title bar (`Dipen's iTunes`) → **toolbar** (circular
+  Apple-style transport buttons + the volume slider on the left, the now-playing
+  display kept **dead-center** via equal-width side zones, the Grid/Cover Flow
+  toggle on the right for galleries) → body (resizable sidebar + main pane) →
+  **status bar** (a live section count, e.g. "16 guitars" / "37 songs", plus an
+  artwork-size slider for galleries). The `.window` is larger and `resize: both`.
 - **Views** (`src/components/itunes/views/`): `GalleryPane` (**Grid by default**,
-  Cover Flow via the toolbar toggle — images), `TrackTable` (songs + plain
-  grouped lists), `VideoPane` (YouTube embeds + local UGG `<video>`),
-  `ReadingPane` (articles with lazy `bodyHtml`, recipes, timeline, tweets,
-  About), `StaticPhotoView` (Octavium/Vinyls/Magnets), `ExternalList` (links),
-  and `EmbedView` (the SoundCloud widget). Chrome: `TitleBar` + `Toolbar`
-  (wrapping `LcdStatus`) + `Sidebar` + `StatusBar`.
+  Cover Flow via the toolbar toggle; one image-size slider zooms both),
+  `TrackTable` (songs + plain grouped lists), `VideoPane` (YouTube embeds + local
+  UGG `<video>`, each showing its description/caption beneath the player),
+  `ReadingPane` (articles with lazy `bodyHtml`, recipes, timeline, About; the
+  reader fills the pane width and **single-entry sections like About drop the
+  list tier**), `TweetsView` (a Twitter-style pennguytweets feed with a
+  Latest/Shuffle toggle), `StaticPhotoView` (Octavium/Vinyls/Magnets), and
+  `ExternalList` (links). Chrome: `TitleBar` + `Toolbar` (wrapping `LcdStatus`) +
+  `Sidebar` + `StatusBar`.
 - **Cover Flow** is a *fork* of the iPod's: the pure transform math lives in
-  `views/coverflowMath.ts` (copied and scaled up), but focus is driven by local
-  React state (click / arrow keys / wheel), not the iPod store.
+  `views/coverflowMath.ts` (copied and scaled up), focus is driven by local
+  React state (click / arrow keys / wheel), and the focused item's caption +
+  description fill the space below the covers (no flip). The image-size slider
+  scales the whole 3-D scene.
 - **Playback is iTunes-local and isolated** — it never touches the iPod's
-  player singletons. `ItunesApp` owns a single hidden `<audio>` for Spotify's
-  keyless 30 s previews, driven by the top toolbar's transport + the seekable
-  display; YouTube uses a plain `<iframe>` embed (its own element, never
-  `ipod-yt-player`); SoundCloud is the self-playing widget iframe; UGG reuses
-  the stateless Range-streaming `/api/video/[file]` route via a native
-  `<video>`.
+  player singletons. `ItunesApp` drives two engines through one transport, keyed
+  by a `source`: a hidden `<audio>` for Spotify's keyless 30 s previews, and a
+  hidden **iTunes-local SoundCloud widget** (`src/lib/itunes/soundcloudPlayer.ts`,
+  a copy of the iPod's `soundcloud.ts`) that plays full SoundCloud tracks as a
+  library-style list — starting one source pauses the other. YouTube uses a plain
+  `<iframe>` embed (its own element, never `ipod-yt-player`); UGG reuses the
+  stateless Range-streaming `/api/video/[file]` route via a native `<video>`.
 - **Theme + color = chrome only.** The shared root layout already sets
   `data-theme` on `<html>` for `/itunes`. `app/itunes/itunes.module.css` defines
   the iTunes design **tokens** (gradient values *copied* from the iPod CSS, not
@@ -344,11 +354,12 @@ thing: the JSON served by the `/api/...` routes.
 - **Mobile**: `ItunesApp` redirects coarse-pointer / `max-width:767px` visitors
   back to `/` (the `.page` wrapper is also `display:none` there as a fallback).
 - **Intentional, documented duplication** (the price of strict isolation): the
-  signature gradient tokens, and the Octavium/Vinyls/Fridge Magnets
-  strings/images in `src/lib/itunes/static.ts`, are copied from the iPod side
-  rather than shared — keep those in sync if the originals change. (The iTunes
-  `ABOUT_TEXT` is **not** a mirror; it's written for the iTunes companion, while
-  the iPod keeps its own click-wheel version.)
+  signature gradient tokens, the Octavium/Vinyls/Fridge Magnets strings/images in
+  `src/lib/itunes/static.ts`, and the SoundCloud widget driver
+  (`src/lib/itunes/soundcloudPlayer.ts`, a copy of `src/lib/players/soundcloud.ts`)
+  are copied from the iPod side rather than shared — keep those in sync if the
+  originals change. (The iTunes `ABOUT_TEXT` is **not** a mirror; it's written for
+  the iTunes companion, while the iPod keeps its own click-wheel version.)
 
 ## Testing
 
