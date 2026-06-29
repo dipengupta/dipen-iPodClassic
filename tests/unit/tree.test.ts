@@ -57,10 +57,11 @@ describe('menu tree integrity', () => {
     expect(about).toContain('center button');
   });
 
-  it('Collections holds the mug coverflow and the static collection photos', () => {
+  it('Collections holds the mug list, the static collection photos, and recipes', () => {
     expect(findNode('collections')?.children?.map((c) => c.label)).toEqual([
-      'Mug Collection', 'Vinyls', 'Travel Mugs', 'Fridge Magnets',
+      'Mug Collection', 'Vinyls', 'Fridge Magnets', 'Recipes',
     ]);
+    expect(findNode('collections.mugs')?.view).toBe('list');
   });
 
   it('the root title is the status-bar boot title', () => {
@@ -69,8 +70,8 @@ describe('menu tree integrity', () => {
 
   it('the Misc section holds the fun sections in order', () => {
     expect(findNode('extras')?.children?.map((c) => c.label)).toEqual([
-      'Photos', 'Kitchen Wins', 'Recipes', 'Concerts', 'List',
-      'pennguytweets', 'Links', 'Wi-Fi Names', 'Settings',
+      'Photos', 'Kitchen Wins', 'Concerts Seen', 'List',
+      'pennguytweets', 'Links', 'Amusing Wi-Fi Names', 'Settings',
     ]);
   });
 

@@ -81,7 +81,7 @@ export const menuTree: MenuNode = {
         {
           id: 'collections.mugs',
           label: 'Mug Collection',
-          view: 'coverflow',
+          view: 'list',
           dataSource: 'mugs',
           previewImage: '/images/travel/mugs.webp',
         },
@@ -97,17 +97,6 @@ export const menuTree: MenuNode = {
           },
         },
         {
-          id: 'collections.travelMugs',
-          label: 'Travel Mugs',
-          view: 'photo',
-          previewImage: '/images/travel/mugs.webp',
-          payload: {
-            title: 'Travel Mugs',
-            imagePath: '/images/travel/mugs.webp',
-            text: 'The mug wall.',
-          },
-        },
-        {
           id: 'collections.magnets',
           label: 'Fridge Magnets',
           view: 'photo',
@@ -117,6 +106,12 @@ export const menuTree: MenuNode = {
             imagePath: '/images/travel/fridge-magnets.webp',
             text: 'Magnets from everywhere.',
           },
+        },
+        {
+          id: 'collections.recipes',
+          label: 'Recipes',
+          view: 'list',
+          dataSource: 'recipes',
         },
       ],
     },
@@ -158,14 +153,8 @@ export const menuTree: MenuNode = {
           previewImage: '/images/contact/pizza.webp',
         },
         {
-          id: 'extras.recipes',
-          label: 'Recipes',
-          view: 'list',
-          dataSource: 'recipes',
-        },
-        {
           id: 'extras.concerts',
-          label: 'Concerts',
+          label: 'Concerts Seen',
           view: 'list',
           dataSource: 'concerts',
           groupBy: 'year',
@@ -190,7 +179,7 @@ export const menuTree: MenuNode = {
         },
         {
           id: 'extras.wifi',
-          label: 'Wi-Fi Names',
+          label: 'Amusing Wi-Fi Names',
           view: 'list',
           dataSource: 'wifi',
         },

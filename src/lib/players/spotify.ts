@@ -20,9 +20,15 @@ export function initSpotify(
   audio.addEventListener('play', () => onPlaying(true));
   audio.addEventListener('pause', () => onPlaying(false));
   audio.addEventListener('ended', onEnded);
-  audio.addEventListener('timeupdate', () => {
+  // Report position + duration on every relevant event — not just `timeupdate`
+  // (which only fires while actually playing). `loadedmetadata`/`durationchange`
+  // surface the track length as soon as it's known, so the bar shows the right
+  // time even when autoplay is blocked and the track sits paused at 0:00.
+  const emit = () =>
     onProgress(audio.currentTime, Number.isFinite(audio.duration) ? audio.duration : 0);
-  });
+  audio.addEventListener('timeupdate', emit);
+  audio.addEventListener('loadedmetadata', emit);
+  audio.addEventListener('durationchange', emit);
 }
 
 /** Load (only if the src changed) and play. Re-calls with the same src resume. */

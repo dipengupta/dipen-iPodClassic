@@ -188,24 +188,39 @@ interface MugRow {
   detail: string;
 }
 
-const MUG_CATEGORY_LABEL: Record<string, string> = {
-  state: 'State mug',
-  city: 'City mug',
-  country: 'Country mug',
-  special: 'Special mug',
-};
+// Group order + plural headings for the grouped mug list.
+const MUG_GROUPS: Array<{ category: string; label: string }> = [
+  { category: 'state', label: 'States' },
+  { category: 'city', label: 'Cities' },
+  { category: 'country', label: 'Countries' },
+  { category: 'special', label: 'Special' },
+];
 
 async function mugs(): Promise<FrameItem[]> {
   const { items } = await fetchJson<{ items: MugRow[] }>('/api/content/mugs');
-  return items.map((m) => {
-    const lines = [MUG_CATEGORY_LABEL[m.category] ?? 'Mug'];
-    if (m.detail) lines.push(m.detail);
-    lines.push(m.giftedBy ? `Gifted by ${m.giftedBy}` : 'Self-acquired');
+  // Category groups in fixed order; each opens a list of mugs showing who
+  // gifted each one at a glance.
+  const byCategory = new Map<string, MugRow[]>();
+  for (const mug of items) {
+    if (!byCategory.has(mug.category)) byCategory.set(mug.category, []);
+    byCategory.get(mug.category)!.push(mug);
+  }
+  return MUG_GROUPS.filter(({ category }) => byCategory.has(category)).map(({ category, label }) => {
+    const group = byCategory.get(category)!;
     return {
-      id: `mug-${m.id}`,
-      label: m.title,
-      sublabel: m.giftedBy ? `from ${m.giftedBy}` : undefined,
-      flipText: lines.join('\n'),
+      id: `mugs-${category}`,
+      label,
+      sublabel: String(group.length),
+      onSelect: {
+        kind: 'items',
+        title: label,
+        view: 'list',
+        items: group.map((m) => ({
+          id: `mug-${m.id}`,
+          label: m.title,
+          sublabel: m.giftedBy ? `from ${m.giftedBy}` : undefined,
+        })),
+      },
     };
   });
 }

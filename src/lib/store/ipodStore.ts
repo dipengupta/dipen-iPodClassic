@@ -85,7 +85,12 @@ const NOW_PLAYING_ITEM: FrameItem = {
   onSelect: { kind: 'nowPlaying' as const },
 };
 
-function settingsItems(theme: Theme, tweetShuffle: boolean, videoFullscreen: boolean): FrameItem[] {
+function settingsItems(
+  theme: Theme,
+  tweetShuffle: boolean,
+  videoFullscreen: boolean,
+  clickSound: boolean,
+): FrameItem[] {
   return [
     {
       id: 'settings.theme',
@@ -104,6 +109,12 @@ function settingsItems(theme: Theme, tweetShuffle: boolean, videoFullscreen: boo
       label: 'Video Fullscreen',
       sublabel: videoFullscreen ? 'On' : 'Off',
       onSelect: { kind: 'action', action: 'toggleVideoFullscreen' },
+    },
+    {
+      id: 'settings.clickSound',
+      label: 'Click Sound',
+      sublabel: clickSound ? 'On' : 'Off',
+      onSelect: { kind: 'action', action: 'toggleClickSound' },
     },
   ];
 }
@@ -142,6 +153,8 @@ export interface IpodState {
   tweetShuffle: boolean;
   /** Settings: crop portrait videos to fill the screen; the wheel then pans. */
   videoFullscreen: boolean;
+  /** Settings: whether the wheel click sound plays. */
+  clickSound: boolean;
   playback: PlaybackState;
   progress: PlaybackProgress;
   /** Scrub mode: center press on a playback screen; the wheel then seeks. */
@@ -162,6 +175,7 @@ export interface IpodState {
   setTheme: (theme: Theme) => void;
   setTweetShuffle: (on: boolean) => void;
   setVideoFullscreen: (on: boolean) => void;
+  setClickSound: (on: boolean) => void;
   pushNode: (node: MenuNode) => void;
   pushItems: (title: string, view: ViewType, items: FrameItem[]) => void;
   pushDetail: (view: ViewType, payload: DetailPayload) => void;
@@ -197,6 +211,7 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   theme: 'silver',
   tweetShuffle: false,
   videoFullscreen: false,
+  clickSound: true,
   playback: { source: null, index: -1, playing: false, queue: [] },
   progress: { position: 0, duration: 0 },
   scrubbing: false,
@@ -243,11 +258,23 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     }
   },
 
+  setClickSound: (on) => {
+    set({ clickSound: on });
+    clicker.setMuted(!on);
+    if (typeof document !== 'undefined') {
+      try {
+        localStorage.setItem('ipod-click-sound', on ? '1' : '0');
+      } catch {
+        // Storage can be unavailable (private mode); the setting just won't persist.
+      }
+    }
+  },
+
   pushNode: (node) => {
-    const { loadItems, theme, tweetShuffle, videoFullscreen } = get();
+    const { loadItems, theme, tweetShuffle, videoFullscreen, clickSound } = get();
     let frame: Frame;
     if (node.view === 'settings') {
-      frame = makeFrame({ title: node.label, view: 'settings', node, items: settingsItems(theme, tweetShuffle, videoFullscreen) });
+      frame = makeFrame({ title: node.label, view: 'settings', node, items: settingsItems(theme, tweetShuffle, videoFullscreen, clickSound) });
     } else if (node.children?.length) {
       frame = makeFrame({ title: node.label, view: node.view, node, items: itemsFromChildren(node) });
     } else if (node.dataSource) {
@@ -576,12 +603,14 @@ function executeSelect(state: IpodState, spec: SelectSpec): void {
         state.setTweetShuffle(!state.tweetShuffle);
       } else if (spec.action === 'toggleVideoFullscreen') {
         state.setVideoFullscreen(!state.videoFullscreen);
+      } else if (spec.action === 'toggleClickSound') {
+        state.setClickSound(!state.clickSound);
       }
       // Refresh the visible settings rows' sublabels.
-      const { stack, theme, tweetShuffle, videoFullscreen } = useIpodStore.getState();
+      const { stack, theme, tweetShuffle, videoFullscreen, clickSound } = useIpodStore.getState();
       const top = stack[stack.length - 1];
       if (top.view === 'settings') {
-        useIpodStore.getState().setFrameItems(top.key, settingsItems(theme, tweetShuffle, videoFullscreen));
+        useIpodStore.getState().setFrameItems(top.key, settingsItems(theme, tweetShuffle, videoFullscreen, clickSound));
       }
       break;
     }

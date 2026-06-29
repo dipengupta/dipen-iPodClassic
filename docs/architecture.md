@@ -180,7 +180,7 @@ detail view, follow an external link, or run an action).
 
 Two patterns worth copying: **About** (home menu) is a pure static node — a
 `textReader` `payload` with no table or API behind it. **Recipes** (under
-Misc) is the full data-driven shape: the builder groups rows into category
+Collections) is the full data-driven shape: the builder groups rows into category
 sub-lists (Food/Baking/Drinks/Tips & Tricks), and each recipe opens a
 scrollable `textReader` detail whose optional `sourceUrl` renders the
 "View Original" footer for recipes saved from the web.
@@ -192,10 +192,12 @@ card; Apple Music rows (no keyless control path) `kind: 'external'` and
 deep-link out. Tracks are committed seed + a keyless additive refresh (below).
 
 The simplest data-driven shape is the **group-then-scroll list** shared by
-**Concerts** (years → shows) and **List** (two headed groups → entries): the
-builder buckets `(category, name, sortOrder)` rows into a fixed set of groups,
-and each group `onSelect`s a `kind: 'items'` `list` of plain label rows. Copy
-that when a section is just headed lists of one-liners.
+**Concerts Seen** (years → shows), **List** (two headed groups → entries), and
+the **Mug Collection** (States/Cities/Countries/Special → each mug with its
+gifter — a plain list beats cover flow for imageless rows): the builder buckets
+`(category, name, sortOrder)` rows into a fixed set of groups, and each group
+`onSelect`s a `kind: 'items'` `list` of plain label rows. Copy that when a
+section is just headed lists of one-liners.
 
 Split-menu preview pane: a node's static `previewImage` is the default, but
 for the image-backed coverflow sections (guitars/photos/kitchen)
@@ -270,9 +272,11 @@ The Settings menu (`settingsItems` in `ipodStore.ts`) also holds the
 pennguytweets order toggle (newest-first vs shuffled) — a `tweetShuffle`
 store flag persisted in `localStorage` and re-read by the `tweets()` builder
 on every visit to the list, so each shuffled visit deals a fresh order —
-and the **Video Fullscreen** toggle (`videoFullscreen`, also
+the **Video Fullscreen** toggle (`videoFullscreen`, also
 `localStorage`-persisted), which crops portrait UGG episodes to fill the
-screen with wheel panning (see the UGG section).
+screen with wheel panning (see the UGG section), and a **Click Sound** toggle
+(`clickSound`) that drives `clicker.setMuted()` so the wheel ticks can be
+silenced (persisted in `localStorage`, restored in `Ipod.tsx`).
 
 ## Responsive
 

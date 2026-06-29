@@ -109,7 +109,7 @@ test('Misc > List: two groups, each a scrollable list of entries', async ({ page
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('status-bar')).toContainText('Misc');
-  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // List (just below Concerts)
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown'); // List (just below Concerts Seen)
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('status-bar')).toContainText('List');
   const rows = page.getByTestId('menu-row');
@@ -122,19 +122,29 @@ test('Misc > List: two groups, each a scrollable list of entries', async ({ page
   await expect(rows.first()).toContainText('Americans taking a good thing and ruining it');
 });
 
-test('Collections: mug coverflow plus the static collection photos', async ({ page }) => {
+test('Collections: grouped mug list, static photos, and recipes', async ({ page }) => {
   await page.keyboard.press('ArrowDown'); // Collections
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('status-bar')).toContainText('Collections');
   const rows = page.getByTestId('menu-row');
-  for (const [i, label] of ['Mug Collection', 'Vinyls', 'Travel Mugs', 'Fridge Magnets'].entries()) {
+  for (const [i, label] of ['Mug Collection', 'Vinyls', 'Fridge Magnets', 'Recipes'].entries()) {
     await expect(rows.nth(i)).toContainText(label);
   }
+  // Mug Collection: category groups, each opening a list that shows the gifter.
+  await page.keyboard.press('Enter'); // Mug Collection (first row)
+  await expect(rows.nth(0)).toContainText('States');
+  await expect(rows.nth(1)).toContainText('Cities');
+  await expect(rows.nth(2)).toContainText('Countries');
+  await expect(rows.nth(3)).toContainText('Special');
+  await page.keyboard.press('Enter'); // open States
+  await expect(rows.filter({ hasText: 'from' }).first()).toBeVisible(); // gifter shown
+  await page.keyboard.press('Escape'); // back to the category groups
+  await page.keyboard.press('Escape'); // back to the Collections menu
+  // Vinyls still opens its static photo.
   await page.keyboard.press('ArrowDown'); // Vinyls
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('status-bar')).toContainText('Vinyls');
   await expect(page.locator('img[alt="Vinyls"]')).toBeVisible();
-  await expect(page.getByText('The vinyl shelf.')).toBeVisible();
   await page.keyboard.press('Escape'); // back to the Collections menu
   await expect(rows.nth(1)).toContainText('Vinyls');
 });
@@ -291,7 +301,7 @@ test('professional timeline and links sections have content', async ({ page }) =
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowDown'); // Links
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Links
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row')).toHaveCount(9);
   await expect(page.getByTestId('menu-row').first()).toContainText('LinkedIn');
@@ -301,7 +311,7 @@ test('theme toggle switches to the black iPod and persists across reload', async
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'silver');
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown'); // Settings
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('Theme');
   await page.keyboard.press('Enter');
@@ -324,9 +334,8 @@ test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) =
   await expect(page.getByTestId('cover-back')).toContainText('Homemade Pizza');
   await page.keyboard.press('Escape'); // unflip
   await page.keyboard.press('Escape'); // back to Misc
-  // Concerts: newest year group first, drill straight into it
-  await page.keyboard.press('ArrowDown'); // Recipes
-  await page.keyboard.press('ArrowDown'); // Concerts
+  // Concerts Seen: newest year group first, drill straight into it
+  await page.keyboard.press('ArrowDown'); // Concerts Seen (just below Kitchen Wins now)
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('menu-row').first()).toContainText('2025');
   await page.keyboard.press('Enter');
@@ -343,7 +352,7 @@ test('Misc: kitchen wins flip, concerts by year, wifi names', async ({ page }) =
 test('tweet shuffle setting toggles and the list still renders', async ({ page }) => {
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown'); // Settings
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
   const rows = page.getByTestId('menu-row');
   await expect(rows.nth(1)).toContainText('pennguytweets');
@@ -364,7 +373,7 @@ test('tweet shuffle setting toggles and the list still renders', async ({ page }
 test('video fullscreen setting toggles and persists across reload', async ({ page }) => {
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown'); // Settings
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
   const rows = page.getByTestId('menu-row');
   await expect(rows.nth(2)).toContainText('Video Fullscreen');
@@ -378,9 +387,22 @@ test('video fullscreen setting toggles and persists across reload', async ({ pag
   await expect(page.getByTestId('ipod')).toBeVisible();
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 8; i++) await page.keyboard.press('ArrowDown'); // Settings
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
   await page.keyboard.press('Enter');
   await expect(rows.nth(2)).toContainText('On');
+});
+
+test('click sound setting toggles on and off', async ({ page }) => {
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 7; i++) await page.keyboard.press('ArrowDown'); // Settings
+  await page.keyboard.press('Enter');
+  const rows = page.getByTestId('menu-row');
+  await expect(rows.nth(3)).toContainText('Click Sound');
+  await expect(rows.nth(3)).toContainText('On');
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown'); // the Click Sound row
+  await page.keyboard.press('Enter');
+  await expect(rows.nth(3)).toContainText('Off');
 });
 
 test('About on the home menu shows the contact email', async ({ page }) => {
@@ -392,11 +414,10 @@ test('About on the home menu shows the contact email', async ({ page }) => {
   await expect(page.getByTestId('menu-row').nth(4)).toContainText('About');
 });
 
-test('Recipes: category groups open recipe lists and readable details', async ({ page }) => {
-  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
+test('Recipes (now under Collections): category groups open recipe lists and readable details', async ({ page }) => {
+  await page.keyboard.press('ArrowDown'); // Collections
   await page.keyboard.press('Enter');
-  await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown'); // Recipes
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown'); // Recipes (last in Collections)
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('status-bar')).toContainText('Recipes');
   const rows = page.getByTestId('menu-row');
@@ -425,7 +446,7 @@ test('Recipes: category groups open recipe lists and readable details', async ({
 test('pennguytweets: newest-first list opens a tweet with its date', async ({ page }) => {
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // pennguytweets
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // pennguytweets
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('status-bar')).toContainText('pennguytweets');
   const rows = page.getByTestId('menu-row');

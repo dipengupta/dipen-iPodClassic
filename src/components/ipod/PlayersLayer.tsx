@@ -147,7 +147,9 @@ export default function PlayersLayer() {
           data-testid="sc-widget"
         />
         {/* eslint-disable-next-line jsx-a11y/media-has-caption -- audio-only preview engine */}
-        <audio ref={spotifyAudioRef} preload="none" data-testid="spotify-audio" />
+        {/* preload metadata so the track length is known (and shown) even if
+            autoplay is blocked and the track sits paused. */}
+        <audio ref={spotifyAudioRef} preload="metadata" data-testid="spotify-audio" />
       </div>
     </>
   );

@@ -445,4 +445,18 @@ describe('settings', () => {
     expect(store().videoFullscreen).toBe(false);
     expect(store().stack[1].items?.[2].sublabel).toBe('Off');
   });
+
+  it('toggles the click sound and updates the row sublabel', () => {
+    store().pushNode(findNode('extras.settings')!);
+    expect(store().clickSound).toBe(true);
+    expect(store().stack[1].items?.[3].label).toBe('Click Sound');
+    expect(store().stack[1].items?.[3].sublabel).toBe('On');
+    for (let i = 0; i < 3; i++) store().handleInput({ type: 'scroll', dir: 1 }); // down to it
+    store().handleInput({ type: 'select' });
+    expect(store().clickSound).toBe(false);
+    expect(store().stack[1].items?.[3].sublabel).toBe('Off');
+    store().handleInput({ type: 'select' });
+    expect(store().clickSound).toBe(true);
+    expect(store().stack[1].items?.[3].sublabel).toBe('On');
+  });
 });
