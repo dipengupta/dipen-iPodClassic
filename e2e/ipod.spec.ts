@@ -183,6 +183,60 @@ test('Recommendations: Spotify playlist plays through the native Now Playing car
   await expect(page.getByTestId('spotify-audio')).toBeAttached();
 });
 
+async function playFirstSpotifyTrack(page: import('@playwright/test').Page) {
+  const rows = page.getByTestId('menu-row');
+  await page.keyboard.press('Enter'); // Music
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Recommendations
+  await page.keyboard.press('Enter'); // open the playlists (loads async)
+  await expect(rows.nth(0)).toContainText("Today's Top Hits");
+  await page.keyboard.press('Enter'); // open the first playlist
+  await expect(rows.first()).toBeVisible();
+  await page.keyboard.press('Enter'); // play the first track
+  await expect(page.getByTestId('now-playing')).toBeVisible();
+}
+
+test('Now Playing: hold-center and the main-menu item jump back to the card', async ({ page }) => {
+  await playFirstSpotifyTrack(page);
+  const card = page.getByTestId('now-playing');
+
+  // Auto-advance/transport no longer steals focus: from the track list, the
+  // hold-center shortcut is how you get back to the card.
+  await page.keyboard.press('Escape'); // back to the track list (a menu)
+  await expect(page.getByTestId('menu-row').first()).toBeVisible();
+  await page.keyboard.down('Enter');
+  await page.waitForTimeout(650); // pass the hold threshold
+  await page.keyboard.up('Enter');
+  await expect(card).toBeVisible();
+
+  // Escape home — a "Now Playing" row now sits at the bottom of the main menu.
+  for (let i = 0; i < 6; i++) await page.keyboard.press('Escape');
+  await expect(page.getByTestId('status-bar')).toContainText("Dipen's iPod");
+  const rows = page.getByTestId('menu-row');
+  await expect(rows.first()).toContainText('Music');
+  await expect(rows.last()).toContainText('Now Playing');
+  for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowDown'); // down to it
+  await expect(rows.last()).toHaveAttribute('data-selected', 'true');
+  await page.keyboard.press('Enter');
+  await expect(card).toBeVisible();
+});
+
+test('hold Play/Pause sleeps the screen; any key wakes it, audio keeps playing', async ({ page }) => {
+  await playFirstSpotifyTrack(page);
+  const overlay = page.getByTestId('sleep-overlay');
+  await expect(overlay).not.toHaveAttribute('data-asleep', 'true');
+
+  await page.keyboard.down('Space');
+  await page.waitForTimeout(650); // pass the hold threshold
+  await page.keyboard.up('Space');
+  await expect(overlay).toHaveAttribute('data-asleep', 'true');
+  // The hidden audio engine is untouched — music plays on while asleep.
+  await expect(page.getByTestId('spotify-audio')).toBeAttached();
+
+  // The first key only wakes the screen (and is otherwise swallowed).
+  await page.keyboard.press('ArrowDown');
+  await expect(overlay).not.toHaveAttribute('data-asleep', 'true');
+});
+
 test('reads an article: scroll with the wheel, View Original links out', async ({ page }) => {
   for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown'); // Articles
   await page.keyboard.press('Enter');

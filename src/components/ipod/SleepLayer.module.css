@@ -1,0 +1,21 @@
+/* Sits above everything on the screen (video stages are 30, scrub OSD 40). */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: #05070a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 420ms ease;
+}
+
+.asleep {
+  opacity: 0.8;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    transition: none;
+  }
+}

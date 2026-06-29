@@ -70,7 +70,8 @@
   overflow: hidden;
 }
 
-/* Simulated visualizer: scaleY only (composited), never height. */
+/* Calm simulated visualizer: a slow, gentle wave. scaleY only (composited),
+   never height; real spectrum data is unreachable across the iframe origins. */
 .eq {
   flex: 1;
   display: flex;
@@ -87,42 +88,37 @@
   background: linear-gradient(180deg, #6fb1f5 0%, #2f6fc4 100%);
   border-radius: 2px 2px 0 0;
   transform-origin: bottom;
-  transform: scaleY(0.2);
-  animation: eqA 1.1s ease-in-out infinite;
+  transform: scaleY(0.5);
+  animation: eqA 2.2s ease-in-out infinite;
 }
 
-.bar:nth-child(3n) { animation-name: eqB; animation-duration: 0.9s; }
-.bar:nth-child(3n + 1) { animation-name: eqC; animation-duration: 1.3s; }
-.bar:nth-child(2n) { animation-delay: 0.12s; }
-.bar:nth-child(3n + 2) { animation-delay: 0.27s; }
-.bar:nth-child(5n) { animation-delay: 0.45s; }
-.bar:nth-child(7n) { animation-duration: 0.7s; }
+/* Gentle phase + tempo variety only — no strobing fast bars. */
+.bar:nth-child(3n) { animation-name: eqB; animation-duration: 2.6s; }
+.bar:nth-child(3n + 1) { animation-name: eqC; animation-duration: 1.9s; }
+.bar:nth-child(2n) { animation-delay: 0.2s; }
+.bar:nth-child(3n + 2) { animation-delay: 0.4s; }
+.bar:nth-child(5n) { animation-delay: 0.3s; }
 
 .paused .bar {
   animation-play-state: paused;
 }
 
 @keyframes eqA {
-  0% { transform: scaleY(0.22); }
-  30% { transform: scaleY(0.85); }
-  55% { transform: scaleY(0.4); }
-  80% { transform: scaleY(1); }
-  100% { transform: scaleY(0.22); }
+  0% { transform: scaleY(0.42); }
+  50% { transform: scaleY(0.78); }
+  100% { transform: scaleY(0.42); }
 }
 
 @keyframes eqB {
-  0% { transform: scaleY(0.5); }
-  25% { transform: scaleY(0.15); }
-  60% { transform: scaleY(0.95); }
-  100% { transform: scaleY(0.5); }
+  0% { transform: scaleY(0.58); }
+  50% { transform: scaleY(0.36); }
+  100% { transform: scaleY(0.58); }
 }
 
 @keyframes eqC {
-  0% { transform: scaleY(0.3); }
-  40% { transform: scaleY(0.7); }
-  70% { transform: scaleY(0.25); }
-  90% { transform: scaleY(0.6); }
-  100% { transform: scaleY(0.3); }
+  0% { transform: scaleY(0.4); }
+  50% { transform: scaleY(0.68); }
+  100% { transform: scaleY(0.4); }
 }
 
 @media (prefers-reduced-motion: reduce) {

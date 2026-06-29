@@ -4,6 +4,8 @@ const ABOUT_TEXT = `Hi, I'm Dipen. This is my personal website, built as a 1:1 r
 
 New to one of these? Spin the click wheel (or use your arrow keys) to move up and down. Press the center button (or Enter) to open whatever's highlighted, and press Menu (the top of the wheel, or Esc/Backspace) to go back. That's the whole thing.
 
+One handy trick: when something's playing, press and hold the center button to jump straight to Now Playing from anywhere.
+
 So go explore: my music and guitars, articles I've written, my work history, recipes, photos, and a pile of other odds and ends under Misc. Poke around, there's more in here than it looks.
 
 Everything in here is real, built with Next.js, SQLite and a lot of CSS!
@@ -38,28 +40,24 @@ export const menuTree: MenuNode = {
           view: 'list',
           dataSource: 'youtube',
           groupBy: 'year',
-          previewImage: '/images/music/2024_youtube.webp',
         },
         {
           id: 'music.instagram',
           label: 'Instagram',
           view: 'list',
           dataSource: 'ugg',
-          previewImage: '/images/music/2024_insta.webp',
         },
         {
           id: 'music.soundcloud',
           label: 'SoundCloud',
           view: 'list',
           dataSource: 'soundcloud',
-          previewImage: '/images/music/soundcloud.webp',
         },
         {
           id: 'music.recommendations',
           label: 'Recommendations',
           view: 'list',
           dataSource: 'recommendations',
-          previewImage: '/images/music/soundcloud.webp',
         },
         {
           id: 'music.octavium',

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import PlayersLayer from './PlayersLayer';
 import ScreenRouter from './ScreenRouter';
+import SleepLayer from './SleepLayer';
 import StatusBar from './StatusBar';
 import styles from './Screen.module.css';
 
@@ -34,6 +35,7 @@ export default function Screen() {
           <StatusBar />
           <ScreenRouter />
           <PlayersLayer />
+          <SleepLayer />
         </div>
       </div>
     </div>

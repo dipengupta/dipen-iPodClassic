@@ -6,6 +6,12 @@
     "note": "What's on heavy rotation"
   },
   {
+    "title": "To Go Back To",
+    "service": "spotify",
+    "playlistUrl": "https://open.spotify.com/playlist/1RD9fERxWM7DhXpT7qxi4W",
+    "note": "Songs worth returning to"
+  },
+  {
     "title": "Ballroom & Slow Dancing",
     "service": "spotify",
     "playlistUrl": "https://open.spotify.com/playlist/1gx25dNRrrMjSukhTKOSiu",
@@ -28,6 +34,12 @@
     "service": "spotify",
     "playlistUrl": "https://open.spotify.com/playlist/1XQ6SqUXCr1kx8mkdvQod6",
     "note": "Easy acoustic mornings"
+  },
+  {
+    "title": "Whiskey Blues",
+    "service": "spotify",
+    "playlistUrl": "https://open.spotify.com/playlist/1jDdkmK6MB81CSkoRoG0KI",
+    "note": "Late-night blues"
   },
   {
     "title": "All Out 2010s",

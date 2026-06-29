@@ -63,6 +63,28 @@ function itemsFromChildren(node: MenuNode): FrameItem[] {
   }));
 }
 
+/** Which screen a source plays on. */
+function nowPlayingView(source: PlaybackSource): ViewType {
+  return source === 'soundcloud' || source === 'spotify' ? 'nowPlaying' : 'video';
+}
+
+/** The detail payload for a track's now-playing frame. */
+function nowPlayingPayload(source: PlaybackSource, track: PlayTrack): DetailPayload {
+  return source === 'youtube'
+    ? { title: track.title, videoId: track.id }
+    : source === 'ugg'
+      ? { title: track.title, videoSrc: track.videoSrc, caption: track.caption }
+      : { title: 'Now Playing' };
+}
+
+/** Appears at the bottom of the main menu once a track is loaded (like the
+ *  real Classic); jumps to the current Now Playing screen. */
+const NOW_PLAYING_ITEM: FrameItem = {
+  id: 'now-playing',
+  label: 'Now Playing',
+  onSelect: { kind: 'nowPlaying' as const },
+};
+
 function settingsItems(theme: Theme, tweetShuffle: boolean, videoFullscreen: boolean): FrameItem[] {
   return [
     {
@@ -124,12 +146,16 @@ export interface IpodState {
   progress: PlaybackProgress;
   /** Scrub mode: center press on a playback screen; the wheel then seeks. */
   scrubbing: boolean;
+  /** Display-off: the screen is dimmed (hold play/pause or idle). Audio plays on. */
+  asleep: boolean;
   /** Bumped on play/pause press; PlayersLayer toggles the active source. */
   playPauseNonce: number;
   /** Bumped on every wheel tick over a local video; shows the caption overlay. */
   captionNonce: number;
   /** Bumped on scrub-mode activity; keeps the video scrub OSD awake. */
   scrubNonce: number;
+  /** Bumped on every input; the idle-dim timer resets off it. */
+  activityNonce: number;
   loadItems?: (node: MenuNode) => Promise<FrameItem[]>;
 
   setLoadItems: (fn: (node: MenuNode) => Promise<FrameItem[]>) => void;
@@ -139,8 +165,11 @@ export interface IpodState {
   pushNode: (node: MenuNode) => void;
   pushItems: (title: string, view: ViewType, items: FrameItem[]) => void;
   pushDetail: (view: ViewType, payload: DetailPayload) => void;
-  playTrack: (source: PlaybackSource, queue: PlayTrack[], index: number) => void;
+  playTrack: (source: PlaybackSource, queue: PlayTrack[], index: number, navigate?: boolean) => void;
   skipTrack: (delta: 1 | -1) => void;
+  goToNowPlaying: () => void;
+  ensureHomeNowPlaying: () => void;
+  setAsleep: (on: boolean) => void;
   setPlaying: (playing: boolean) => void;
   setProgress: (position: number, duration: number) => void;
   setScrubbing: (on: boolean) => void;
@@ -171,9 +200,11 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   playback: { source: null, index: -1, playing: false, queue: [] },
   progress: { position: 0, duration: 0 },
   scrubbing: false,
+  asleep: false,
   playPauseNonce: 0,
   captionNonce: 0,
   scrubNonce: 0,
+  activityNonce: 0,
 
   setLoadItems: (fn) => set({ loadItems: fn }),
 
@@ -243,7 +274,7 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     }));
   },
 
-  playTrack: (source, queue, index) => {
+  playTrack: (source, queue, index, navigate = true) => {
     const track = queue[index];
     if (!track) return;
     set({
@@ -259,19 +290,15 @@ export const useIpodStore = create<IpodState>((set, get) => ({
       // Same gesture rule as ugg: start the hidden <audio> here, not in an effect.
       spotifyLoad(track.audioSrc);
     }
-    const view: ViewType =
-      source === 'soundcloud' || source === 'spotify' ? 'nowPlaying' : 'video';
-    const payload: DetailPayload =
-      source === 'youtube'
-        ? { title: track.title, videoId: track.id }
-        : source === 'ugg'
-          ? { title: track.title, videoSrc: track.videoSrc, caption: track.caption }
-          : { title: 'Now Playing' };
+    // The main menu gains a "Now Playing" entry once a track is loaded.
+    get().ensureHomeNowPlaying();
+    const view = nowPlayingView(source);
+    const payload = nowPlayingPayload(source, track);
     const { stack } = get();
     const top = stack[stack.length - 1];
     if (top.view === view) {
-      // Track-to-track skip: swap content in place, no slide animation.
-      // Scroll/pan state belongs to the previous track — reset it.
+      // Already on the playback screen: swap content in place (animates a
+      // skip). Scroll/pan state belongs to the previous track — reset it.
       set((s) => ({
         stack: s.stack.map((f, i) =>
           i === s.stack.length - 1
@@ -279,9 +306,12 @@ export const useIpodStore = create<IpodState>((set, get) => ({
             : f,
         ),
       }));
-    } else {
+    } else if (navigate) {
+      // Explicit track pick: jump to the Now Playing screen.
       get().pushDetail(view, payload);
     }
+    // Background advance (navigate === false while browsing elsewhere): the
+    // audio rolls on but the stack is left untouched — no focus stealing.
   },
 
   skipTrack: (delta) => {
@@ -289,8 +319,30 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     if (!playback.source) return;
     const next = playback.index + delta;
     if (next < 0 || next >= playback.queue.length) return;
-    playTrack(playback.source, playback.queue, next);
+    // Auto-advance and transport buttons never yank you to Now Playing.
+    playTrack(playback.source, playback.queue, next, false);
   },
+
+  goToNowPlaying: () => {
+    const { playback, stack } = get();
+    if (!playback.source) return;
+    const track = playback.queue[playback.index];
+    if (!track) return;
+    const view = nowPlayingView(playback.source);
+    if (stack[stack.length - 1].view === view) return; // already there
+    get().pushDetail(view, nowPlayingPayload(playback.source, track));
+  },
+
+  ensureHomeNowPlaying: () => {
+    set((s) => {
+      const root = s.stack[0];
+      if (root.items?.some((it) => it.id === 'now-playing')) return s;
+      const items = [...(root.items ?? itemsFromChildren(menuTree)), NOW_PLAYING_ITEM];
+      return { stack: s.stack.map((f, i) => (i === 0 ? { ...f, items } : f)) };
+    });
+  },
+
+  setAsleep: (on) => set((s) => (s.asleep === on ? s : { asleep: on })),
 
   setPlaying: (playing) => {
     set((s) =>
@@ -344,6 +396,14 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   },
 
   handleInput: (input) => {
+    // A dimmed screen wakes on the first input and swallows it (like the
+    // real iPod's backlight wake) — nothing else acts on that press.
+    if (get().asleep) {
+      set((s) => ({ asleep: false, activityNonce: s.activityNonce + 1 }));
+      return;
+    }
+    // Every input resets the idle-dim timer.
+    set((s) => ({ activityNonce: s.activityNonce + 1 }));
     const { stack } = get();
     const top = stack[stack.length - 1];
 
@@ -464,6 +524,18 @@ export const useIpodStore = create<IpodState>((set, get) => ({
         set((s) => ({ playPauseNonce: s.playPauseNonce + 1 }));
         break;
       }
+
+      case 'holdSelect': {
+        // Press-and-hold the center button: jump straight to Now Playing.
+        get().goToNowPlaying();
+        break;
+      }
+
+      case 'holdPlayPause': {
+        // Press-and-hold play/pause: sleep the screen (audio keeps playing).
+        get().setAsleep(true);
+        break;
+      }
     }
   },
 
@@ -473,6 +545,7 @@ export const useIpodStore = create<IpodState>((set, get) => ({
       playback: { source: null, index: -1, playing: false, queue: [] },
       progress: { position: 0, duration: 0 },
       scrubbing: false,
+      asleep: false,
     }),
 }));
 
@@ -492,6 +565,9 @@ function executeSelect(state: IpodState, spec: SelectSpec): void {
       break;
     case 'play':
       state.playTrack(spec.source, spec.queue, spec.index);
+      break;
+    case 'nowPlaying':
+      state.goToNowPlaying();
       break;
     case 'action': {
       if (spec.action === 'toggleTheme') {

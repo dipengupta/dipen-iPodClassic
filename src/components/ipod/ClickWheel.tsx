@@ -11,7 +11,7 @@ import {
   type WheelAccumulator,
   type WheelZone,
 } from '@/lib/input/wheel';
-import type { IpodInput } from '@/lib/input/keyboard';
+import { HOLD_MS, holdInputFor, type IpodInput } from '@/lib/input/keyboard';
 import { useIpodStore } from '@/lib/store/ipodStore';
 import styles from './ClickWheel.module.css';
 
@@ -32,6 +32,9 @@ interface DragState {
   lastAngle: number;
   acc: WheelAccumulator;
   scrubbing: boolean;
+  /** Hold-gesture timer (center / play-pause only) and whether it fired. */
+  holdTimer: ReturnType<typeof setTimeout> | null;
+  held: boolean;
 }
 
 export default function ClickWheel() {
@@ -49,18 +52,35 @@ export default function ClickWheel() {
     };
   };
 
+  const clearHold = (state: DragState) => {
+    if (state.holdTimer) clearTimeout(state.holdTimer);
+    state.holdTimer = null;
+  };
+
   const onPointerDown = (e: React.PointerEvent) => {
     unlockAudio();
-    const { cx, cy } = geometry();
+    const { cx, cy, wheelRadius, centerRadius } = geometry();
     wheelRef.current!.setPointerCapture(e.pointerId);
-    drag.current = {
+    const state: DragState = {
       pointerId: e.pointerId,
       startX: e.clientX,
       startY: e.clientY,
       lastAngle: angleAt(cx, cy, e.clientX, e.clientY),
       acc: createAccumulator(),
       scrubbing: false,
+      holdTimer: null,
+      held: false,
     };
+    // Arm a hold gesture if the press lands on the center or play-pause zone.
+    const startZone = zoneAt(cx, cy, e.clientX, e.clientY, wheelRadius, centerRadius);
+    const holdInput = startZone && holdInputFor(ZONE_INPUT[startZone]);
+    if (holdInput) {
+      state.holdTimer = setTimeout(() => {
+        state.held = true;
+        handleInput(holdInput);
+      }, HOLD_MS);
+    }
+    drag.current = state;
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
@@ -73,6 +93,7 @@ export default function ClickWheel() {
       const { cx, cy, centerRadius } = geometry();
       if (Math.hypot(state.startX - cx, state.startY - cy) <= centerRadius) return;
       state.scrubbing = true;
+      clearHold(state); // a wheel turn is not a hold
     }
     const { cx, cy } = geometry();
     const angle = angleAt(cx, cy, e.clientX, e.clientY);
@@ -90,7 +111,9 @@ export default function ClickWheel() {
     const state = drag.current;
     if (!state || state.pointerId !== e.pointerId) return;
     drag.current = null;
-    if (state.scrubbing) return;
+    clearHold(state);
+    // A wheel turn, or a hold that already fired its gesture, is not a tap.
+    if (state.scrubbing || state.held) return;
     const { cx, cy, wheelRadius, centerRadius } = geometry();
     const zone = zoneAt(cx, cy, e.clientX, e.clientY, wheelRadius, centerRadius);
     if (zone) {
@@ -107,7 +130,10 @@ export default function ClickWheel() {
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onPointerCancel={() => (drag.current = null)}
+      onPointerCancel={() => {
+        if (drag.current) clearHold(drag.current);
+        drag.current = null;
+      }}
     >
       <span className={`${styles.label} ${styles.menu}`}>MENU</span>
       <span className={`${styles.label} ${styles.prev}`}>

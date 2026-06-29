@@ -34,10 +34,16 @@ pixels once; never query the viewport inside a view.
    angles accumulate (`accumulate`) and emit one signed tick per 18°
    (`DETENT_DEG` — the tuning knob for wheel feel).
 2. `src/lib/input/keyboard.ts` maps keys to the same `IpodInput` events.
+   The center and play/pause buttons also have **press-and-hold gestures**
+   (`HOLD_MS`, ~500 ms): both `ClickWheel.tsx` and the keyboard listener in
+   `Ipod.tsx` arm a hold timer that fires `holdSelect` / `holdPlayPause` and
+   suppresses the tap, so a tap and a hold stay distinct.
 3. `ipodStore.handleInput` interprets events **per the active view**: menus
    move the selection, text views scroll by `SCROLL_STEP`, coverflow flips on
    select, media views treat select as play/pause. prev/next skip tracks
-   whenever media is loaded; otherwise they step the selection.
+   whenever media is loaded; otherwise they step the selection. **`holdSelect`
+   jumps to Now Playing** (`goToNowPlaying`); **`holdPlayPause` sleeps the
+   screen**. A dimmed screen swallows the first input (it only wakes).
 4. Every effective tick fires `clicker.tick()` (`src/lib/audio/clicker.ts`):
    a synthesized Web Audio click + `navigator.vibrate(5)`. The AudioContext is
    resumed on the first user gesture (iOS requirement; iOS has no vibration).
@@ -69,16 +75,29 @@ playback. `src/components/ipod/PlayersLayer.tsx` (mounted once in
   store starts it *inside the user's gesture* (`spotifyLoad` in `playTrack`).
 
 The store's `playback` slice (`{ source, index, playing, queue }`) is the
-single source of truth: `playTrack` pushes (or in-place updates) the
-now-playing frame, `skipTrack` moves through the queue, and starting one
-source pauses the others (there are four: `youtube`, `soundcloud`, `spotify`,
-`ugg` — the local-video stage below). While media is loaded, the **prev/next
-wheel buttons are transport controls** (selection-stepping otherwise), and the
-status bar shows a ▶ flag. `NowPlayingView` is the audio card (SoundCloud and
-Spotify, labeled by source) — track counter, title (sliding in from the skip
-direction), a simulated EQ visualizer (`scaleY`-only; real spectrum data is
-unreachable across the iframe origin) and the progress bar; `VideoView` is
-just a backdrop under the raised stages.
+single source of truth — `NowPlayingView` reads the current track live from it,
+not from a frame payload. `playTrack(source, queue, index, navigate)` is the
+hub: starting one source pauses the others (there are four: `youtube`,
+`soundcloud`, `spotify`, `ugg` — the local-video stage below). **`navigate`
+controls focus**: an explicit track pick (`kind: 'play'`) navigates to the card,
+but `skipTrack` — used by both auto-advance (`onEnded`) **and** the prev/next
+transport buttons — passes `navigate: false`, so a track that ends or is skipped
+while you're browsing a menu **plays on in the background without yanking you to
+Now Playing** (it only swaps in place if you're already on the card). To get
+back, the **main menu grows a "Now Playing" item** once a track is loaded
+(`ensureHomeNowPlaying`), and **holding the center button** jumps there from
+anywhere (`goToNowPlaying`). While media is loaded the status bar shows a ▶
+flag. `NowPlayingView` is the audio card (SoundCloud and Spotify, labeled by
+source) — track counter, title (sliding in from the skip direction), a calm
+simulated EQ (`scaleY`-only; real spectrum data is unreachable across the iframe
+origins) and the progress bar; `VideoView` is just a backdrop under the stages.
+
+**Sleep / display-off** (`SleepLayer`, mounted in `Screen.tsx`): holding
+play/pause sets `asleep`, and the screen also auto-dims after ~60 s idle (the
+Classic's backlight timeout; suppressed over an active video). A near-black
+overlay fades in above every stage while audio keeps playing; the first input
+only wakes it (`handleInput` swallows that press). `activityNonce` (bumped on
+every input) resets the idle timer.
 
 **Progress & scrubbing**: each player wrapper exposes `…SeekBy(seconds)` and
 reports position/duration into the store's `progress` slice (SoundCloud via

@@ -149,13 +149,25 @@ describe('playback', () => {
     expect(store().playback.index).toBe(2);
   });
 
-  it('prev/next act as transport controls while media is loaded', () => {
+  it('prev/next advance the track in the background without leaving the menu', () => {
     store().playTrack('youtube', queue, 0);
     store().handleInput({ type: 'menu' }); // back to the menu, media keeps playing
+    const depth = store().stack.length;
     store().handleInput({ type: 'next' });
     expect(store().playback.index).toBe(1);
-    // The skip re-opened the now-playing frame on top.
-    expect(store().stack[store().stack.length - 1].view).toBe('video');
+    // No focus stealing: the menu stays put, audio just rolls on.
+    expect(store().stack).toHaveLength(depth);
+    expect(store().stack[store().stack.length - 1].view).toBe('splitMenu');
+  });
+
+  it('prev/next still swap in place while on the now-playing screen', () => {
+    store().playTrack('youtube', queue, 0);
+    const depth = store().stack.length;
+    const key = store().stack[depth - 1].key;
+    store().handleInput({ type: 'next' });
+    expect(store().playback.index).toBe(1);
+    expect(store().stack).toHaveLength(depth);
+    expect(store().stack[depth - 1].key).toBe(key); // same frame, animates a skip
   });
 
   it('soundcloud playback pushes the nowPlaying card', () => {
@@ -169,6 +181,61 @@ describe('playback', () => {
     store().playTrack('youtube', queue, 0);
     store().setPlaying(false);
     expect(store().playback).toMatchObject({ playing: false, index: 0, source: 'youtube' });
+  });
+});
+
+describe('now playing access', () => {
+  const scQueue: PlayTrack[] = [{ id: '4', title: 'Old jam' }];
+
+  it('adds a Now Playing item to the bottom of the main menu once a track loads', () => {
+    expect(store().stack[0].items?.some((i) => i.id === 'now-playing')).toBe(false);
+    store().playTrack('soundcloud', scQueue, 0);
+    const items = store().stack[0].items!;
+    expect(items[items.length - 1]).toMatchObject({ id: 'now-playing', label: 'Now Playing' });
+    // Idempotent — a second track doesn't duplicate the row.
+    store().playTrack('soundcloud', scQueue, 0);
+    expect(store().stack[0].items!.filter((i) => i.id === 'now-playing')).toHaveLength(1);
+  });
+
+  it('goToNowPlaying opens the card from a menu and no-ops when already there', () => {
+    store().playTrack('soundcloud', scQueue, 0); // on the card
+    store().handleInput({ type: 'menu' }); // back to the root menu
+    expect(store().stack[store().stack.length - 1].view).toBe('splitMenu');
+    store().goToNowPlaying();
+    expect(store().stack[store().stack.length - 1].view).toBe('nowPlaying');
+    const depth = store().stack.length;
+    store().goToNowPlaying(); // already there → no-op
+    expect(store().stack).toHaveLength(depth);
+  });
+
+  it('goToNowPlaying does nothing when nothing is playing', () => {
+    const depth = store().stack.length;
+    store().goToNowPlaying();
+    expect(store().stack).toHaveLength(depth);
+  });
+
+  it('hold-center (holdSelect) jumps to Now Playing while a track is loaded', () => {
+    store().playTrack('soundcloud', scQueue, 0);
+    store().handleInput({ type: 'menu' });
+    store().handleInput({ type: 'holdSelect' });
+    expect(store().stack[store().stack.length - 1].view).toBe('nowPlaying');
+  });
+});
+
+describe('sleep / display-off', () => {
+  it('hold play/pause sleeps; the next input only wakes and is swallowed', () => {
+    store().handleInput({ type: 'scroll', dir: 1 });
+    const selected = store().stack[0].selectedIndex; // moved to 1
+    expect(selected).toBe(1);
+    store().handleInput({ type: 'holdPlayPause' });
+    expect(store().asleep).toBe(true);
+    // The first input only wakes — selection must not move.
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(store().asleep).toBe(false);
+    expect(store().stack[0].selectedIndex).toBe(selected);
+    // Inputs act normally again afterwards.
+    store().handleInput({ type: 'scroll', dir: 1 });
+    expect(store().stack[0].selectedIndex).toBe(selected + 1);
   });
 });
 
@@ -187,17 +254,17 @@ describe('local (ugg) video playback', () => {
     expect(store().playback.source).toBe('ugg');
   });
 
-  it('keeps playing behind the menu; prev/next stay transport controls', () => {
+  it('keeps playing behind the menu; prev/next advance in the background', () => {
     store().pushNode(findNode('music')!);
     store().playTrack('ugg', uggQueue, 0);
     store().handleInput({ type: 'menu' }); // back to the menu, audio keeps going
+    const depth = store().stack.length;
     expect(store().playback).toMatchObject({ source: 'ugg', index: 0 });
     store().handleInput({ type: 'next' });
     expect(store().playback.index).toBe(1);
-    // The skip re-opened the now-playing frame on top.
-    const top = store().stack[store().stack.length - 1];
-    expect(top.view).toBe('video');
-    expect(top.payload?.videoSrc).toBe('/api/video/ugg-203.mp4');
+    // The menu stays put — the next episode just plays behind it.
+    expect(store().stack).toHaveLength(depth);
+    expect(store().stack[store().stack.length - 1].view).toBe('splitMenu');
   });
 
   it('wheel ticks wake the caption overlay and scroll within bounds', () => {
