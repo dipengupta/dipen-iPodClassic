@@ -333,9 +333,14 @@ thing: the JSON served by the `/api/...` routes.
   `Sidebar` + `StatusBar`.
 - **Cover Flow** is a *fork* of the iPod's: the pure transform math lives in
   `views/coverflowMath.ts` (copied and scaled up), focus is driven by local
-  React state (click / arrow keys / wheel), and the focused item's caption +
-  description fill the space below the covers (no flip). The image-size slider
-  scales the whole 3-D scene.
+  React state (click / arrow keys / wheel / a horizontal scrubber under the
+  covers), and the focused item's caption + description fill the space below the
+  covers (no flip). The image-size slider enlarges the covers **in place**
+  (`coverTransform(offset, scale)` scales the fan distances; the perspective is
+  fixed — not a scene zoom).
+- **Track tables are keyboard-navigable**: `TrackTable` is focusable — arrow keys
+  move the row selection, **Enter** plays the selected song (or opens its link),
+  **Space** toggles play/pause. Single-click selects, double-click still plays.
 - **Playback is iTunes-local and isolated** — it never touches the iPod's
   player singletons. `ItunesApp` drives two engines through one transport, keyed
   by a `source`: a hidden `<audio>` for Spotify's keyless 30 s previews, and a
@@ -350,7 +355,8 @@ thing: the JSON served by the `/api/...` routes.
   imported) on `.page`, with `[data-theme='black']` overrides for the **chrome**
   (title bar, sidebar) only; the screen interior stays the classic light iTunes
   look in both themes. The status/now-playing display uses iTunes' pale
-  blue-aluminum panel (`--it-lcd`), not green.
+  blue-aluminum panel (`--it-lcd`), not green, and the scroll areas get
+  Apple-Aqua blue scrollbars (scoped to `.page` in `app/itunes/itunes.module.css`).
 - **Mobile**: `ItunesApp` redirects coarse-pointer / `max-width:767px` visitors
   back to `/` (the `.page` wrapper is also `display:none` there as a fallback).
 - **Intentional, documented duplication** (the price of strict isolation): the

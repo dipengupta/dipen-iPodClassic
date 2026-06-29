@@ -351,6 +351,7 @@ export default function ItunesApp() {
               currentTrackId: currentTrack?.id,
               playing: audio.playing,
               onPlay: playFromQueue,
+              onTogglePlay: togglePlay,
               pauseAudio,
               galleryMode,
               imageScale,
@@ -396,6 +397,7 @@ interface ViewHandlers {
   currentTrackId?: string;
   playing: boolean;
   onPlay: (queue: AudioTrack[], index: number, source: PlaybackSource) => void;
+  onTogglePlay: () => void;
   pauseAudio: () => void;
   galleryMode: GalleryMode;
   imageScale: number;
@@ -412,6 +414,7 @@ function renderView(data: SectionData, h: ViewHandlers) {
           currentTrackId={h.currentTrackId}
           playing={h.playing}
           onPlay={h.onPlay}
+          onTogglePlay={h.onTogglePlay}
         />
       );
     case 'video':

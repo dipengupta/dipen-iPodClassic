@@ -7,10 +7,10 @@ import styles from './CoverFlowView.module.css';
 
 /**
  * Desktop Cover Flow — a fork of the iPod's CoverFlowView. The pure transform
- * math lives in ./coverflowMath (scaled up for the larger canvas); focus is
- * driven by local React state (click / arrow keys / wheel). The focused item's
- * caption + description fill the space below the covers; the whole 3-D scene
- * zooms with the image-size slider.
+ * math lives in ./coverflowMath; focus is driven by local React state (click /
+ * arrow keys / wheel / the horizontal scrubber). The focused item's caption +
+ * description fill the space below the covers. The image-size slider enlarges
+ * the covers in place (the perspective is fixed — not a scene zoom).
  */
 
 export default function CoverFlowView({ items, scale = 1 }: { items: CoverItem[]; scale?: number }) {
@@ -51,6 +51,7 @@ export default function CoverFlowView({ items, scale = 1 }: { items: CoverItem[]
   }
 
   const current = items[focused];
+  const cover = COVER * scale;
 
   return (
     <div
@@ -61,7 +62,7 @@ export default function CoverFlowView({ items, scale = 1 }: { items: CoverItem[]
       onKeyDown={onKeyDown}
       onWheel={onWheel}
     >
-      <div className={styles.flow} style={{ ['--cf-scale' as string]: scale }}>
+      <div className={styles.flow}>
         {items.map((item, i) => {
           const offset = i - focused;
           if (Math.abs(offset) > RENDER_WINDOW) return null;
@@ -71,12 +72,13 @@ export default function CoverFlowView({ items, scale = 1 }: { items: CoverItem[]
               key={item.id}
               className={styles.coverSlot}
               style={{
-                transform: coverTransform(offset),
+                transform: coverTransform(offset, scale),
                 opacity: coverOpacity(offset),
                 zIndex: 20 - Math.abs(offset),
-                width: COVER,
-                height: COVER,
-                marginLeft: -COVER / 2,
+                width: cover,
+                height: cover,
+                marginLeft: -cover / 2,
+                marginTop: -cover / 2,
               }}
               onClick={() => !isFocused && setFocused(i)}
             >
@@ -104,6 +106,19 @@ export default function CoverFlowView({ items, scale = 1 }: { items: CoverItem[]
           );
         })}
       </div>
+      {items.length > 1 && (
+        <input
+          type="range"
+          className={styles.scroll}
+          data-testid="itunes-coverflow-scroll"
+          min={0}
+          max={items.length - 1}
+          step={1}
+          value={focused}
+          onChange={(e) => setFocused(Number(e.target.value))}
+          aria-label="Scroll covers"
+        />
+      )}
       <div className={styles.caption} data-testid="itunes-coverflow-caption">
         <span className={styles.captionTitle}>{current?.label}</span>
         {current?.flipText && <p className={styles.captionDesc}>{current.flipText}</p>}

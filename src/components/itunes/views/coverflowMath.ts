@@ -7,11 +7,16 @@
 export const RENDER_WINDOW = 6;
 export const COVER = 240;
 
-export function coverTransform(offset: number): string {
-  if (offset === 0) return 'translateX(0) translateZ(120px) rotateY(0deg)';
+/**
+ * Per-cover transform. `scale` enlarges the fan geometry (translate distances)
+ * in step with the cover size, so bigger covers spread proportionally — the
+ * perspective stays fixed, so it reads as "bigger artwork", not a camera zoom.
+ */
+export function coverTransform(offset: number, scale = 1): string {
+  if (offset === 0) return `translateX(0) translateZ(${120 * scale}px) rotateY(0deg)`;
   const side = Math.sign(offset);
-  const x = side * (120 + Math.min(Math.abs(offset), RENDER_WINDOW) * 44);
-  return `translateX(${x}px) translateZ(-90px) rotateY(${-side * 64}deg)`;
+  const x = side * (120 + Math.min(Math.abs(offset), RENDER_WINDOW) * 44) * scale;
+  return `translateX(${x}px) translateZ(${-90 * scale}px) rotateY(${-side * 64}deg)`;
 }
 
 export function coverOpacity(offset: number): number {

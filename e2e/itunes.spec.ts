@@ -44,6 +44,24 @@ test.describe('desktop iTunes view', () => {
     await page.getByTestId('itunes-toolbar').getByRole('button', { name: 'Cover Flow' }).click();
     await expect(page.getByTestId('itunes-coverflow')).toBeVisible();
     await expect(page.getByTestId('itunes-coverflow-caption')).not.toBeEmpty();
+    // The horizontal scrubber moves through the covers.
+    const scrubber = page.getByTestId('itunes-coverflow-scroll');
+    await expect(scrubber).toBeVisible();
+    await scrubber.fill('2');
+    await expect(page.getByTestId('itunes-coverflow-caption')).toContainText('3 of');
+  });
+
+  test('playlists: arrow keys + Enter play a song (no double-click)', async ({ page }) => {
+    // Only Spotify playlists render as buttons (Apple ones link out).
+    await page.getByTestId('itunes-playlist').first().click();
+    const table = page.getByTestId('itunes-tracktable');
+    await expect(table.locator('tbody tr').first()).toBeVisible();
+    await table.press('ArrowDown');
+    await table.press('Enter');
+    // The played row gets the "current" highlight (set immediately on play).
+    await expect(page.getByTestId('itunes-main').locator('tr[class*="current"]')).toBeVisible({
+      timeout: 8000,
+    });
   });
 
   test('pennguytweets renders a Twitter-style feed with a Shuffle toggle', async ({ page }) => {

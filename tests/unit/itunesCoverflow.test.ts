@@ -35,4 +35,12 @@ describe('iTunes Cover Flow math', () => {
   it('exposes the scaled-up cover size', () => {
     expect(COVER).toBe(240);
   });
+
+  it('the image-size scale enlarges the fan distances, not the rotation', () => {
+    // Bigger covers spread proportionally; perspective (rotation) is unchanged.
+    expect(coverTransform(0, 1.5)).toBe('translateX(0) translateZ(180px) rotateY(0deg)');
+    expect(coverTransform(1, 1.5)).toBe('translateX(246px) translateZ(-135px) rotateY(-64deg)');
+    // Default scale keeps the unscaled geometry.
+    expect(coverTransform(1, 1)).toBe(coverTransform(1));
+  });
 });

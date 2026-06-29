@@ -24,13 +24,20 @@
   border-top: 1px solid var(--it-hairline);
 }
 
-/* Drag handle between the sidebar and the main pane. */
+/* Thin drag handle between the sidebar and the main pane (wider invisible grab). */
 .divider {
+  position: relative;
   flex: 0 0 auto;
-  width: 5px;
+  width: 2px;
   cursor: col-resize;
   background: var(--it-hairline);
   touch-action: none;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  inset: 0 -4px;
 }
 
 .divider:hover {

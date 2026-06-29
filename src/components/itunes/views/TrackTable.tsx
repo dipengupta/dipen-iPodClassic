@@ -1,6 +1,7 @@
 'use client';
 
-import type { AudioTrack, PlaybackSource, TracksData } from '@/lib/itunes/types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { AudioTrack, PlaybackSource, TrackRow, TracksData } from '@/lib/itunes/types';
 import styles from './TrackTable.module.css';
 
 interface TrackTableProps {
@@ -9,16 +10,55 @@ interface TrackTableProps {
   currentTrackId?: string;
   playing: boolean;
   onPlay: (queue: AudioTrack[], index: number, source: PlaybackSource) => void;
+  onTogglePlay: () => void;
 }
 
-export default function TrackTable({ data, currentTrackId, playing, onPlay }: TrackTableProps) {
+export default function TrackTable({ data, currentTrackId, playing, onPlay, onTogglePlay }: TrackTableProps) {
   const { columns, groups, queue } = data;
   const source: PlaybackSource = data.source ?? 'spotify';
   const hasSecondary = Boolean(columns.secondary);
   const hasTime = Boolean(columns.time);
 
+  const allRows = useMemo(() => groups.flatMap((g) => g.rows), [groups]);
+  const firstSelectable = (rows: TrackRow[]) => {
+    const p = rows.findIndex((r) => r.playIndex != null);
+    return p >= 0 ? p : 0;
+  };
+  const [selId, setSelId] = useState<string | undefined>(allRows[firstSelectable(allRows)]?.id);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Reset selection + take keyboard focus when the section changes.
+  useEffect(() => {
+    setSelId(allRows[firstSelectable(allRows)]?.id);
+    wrapRef.current?.focus();
+  }, [allRows]);
+
+  const activate = (row?: TrackRow) => {
+    if (!row) return;
+    if (row.playIndex != null && queue) onPlay(queue, row.playIndex, source);
+    else if (row.href) window.open(row.href, '_blank', 'noopener,noreferrer');
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (allRows.length === 0) return;
+    const idx = Math.max(0, allRows.findIndex((r) => r.id === selId));
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelId(allRows[Math.min(allRows.length - 1, idx + 1)].id);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelId(allRows[Math.max(0, idx - 1)].id);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      activate(allRows[idx]);
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      onTogglePlay();
+    }
+  };
+
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} ref={wrapRef} tabIndex={0} onKeyDown={onKeyDown} data-testid="itunes-tracktable">
       <table className={styles.table}>
         <thead>
           <tr>
@@ -40,7 +80,9 @@ export default function TrackTable({ data, currentTrackId, playing, onPlay }: Tr
               queue={queue}
               source={source}
               currentTrackId={currentTrackId}
+              selectedId={selId}
               playing={playing}
+              onSelect={setSelId}
               onPlay={onPlay}
             />
           ))}
@@ -59,18 +101,22 @@ function GroupRows({
   queue,
   source,
   currentTrackId,
+  selectedId,
   playing,
+  onSelect,
   onPlay,
 }: {
   heading?: string;
-  rows: TracksData['groups'][number]['rows'];
+  rows: TrackRow[];
   colSpan: number;
   hasSecondary: boolean;
   hasTime: boolean;
   queue?: AudioTrack[];
   source: PlaybackSource;
   currentTrackId?: string;
+  selectedId?: string;
   playing: boolean;
+  onSelect: (id: string) => void;
   onPlay: (queue: AudioTrack[], index: number, source: PlaybackSource) => void;
 }) {
   return (
@@ -85,6 +131,7 @@ function GroupRows({
       {rows.map((row, i) => {
         const track = row.playIndex != null && queue ? queue[row.playIndex] : undefined;
         const isCurrent = Boolean(track && track.id === currentTrackId);
+        const isSelected = row.id === selectedId;
         const playable = Boolean(track);
         const onActivate = () => {
           if (track && queue) onPlay(queue, row.playIndex!, source);
@@ -93,9 +140,10 @@ function GroupRows({
         return (
           <tr
             key={row.id}
-            className={`${styles.row} ${isCurrent ? styles.current : ''} ${
+            className={`${styles.row} ${isCurrent ? styles.current : isSelected ? styles.selectedRow : ''} ${
               playable || row.href ? styles.actionable : ''
             }`}
+            onClick={() => onSelect(row.id)}
             onDoubleClick={onActivate}
           >
             <td className={styles.numCol}>
@@ -104,7 +152,10 @@ function GroupRows({
                   type="button"
                   className={styles.playBtn}
                   aria-label={isCurrent && playing ? 'Pause' : `Play ${row.name}`}
-                  onClick={onActivate}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onActivate();
+                  }}
                 >
                   {isCurrent && playing ? '❚❚' : '▶'}
                 </button>
