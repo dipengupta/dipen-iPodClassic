@@ -1,0 +1,107 @@
+.toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 62px;
+  padding: 0 16px;
+  background: var(--it-chrome);
+  border-bottom: 1px solid var(--it-hairline);
+}
+
+.left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The display fills the middle so it reads long, like the real iTunes. */
+.center {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #a9abb1;
+  background: linear-gradient(180deg, #ffffff, #e2e3e6);
+  border-radius: 6px;
+  width: 34px;
+  height: 28px;
+  color: #2f3136;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffffff, #d6d8dc);
+}
+
+.btn:active:not(:disabled) {
+  background: linear-gradient(180deg, #dfe1e5, #eceef1);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.play {
+  width: 46px;
+  height: 30px;
+}
+
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #5a6472;
+}
+
+.speaker {
+  display: inline-flex;
+}
+
+.volRange {
+  width: 84px;
+  height: 4px;
+  accent-color: #2f6fc4;
+  cursor: pointer;
+}
+
+.toggle {
+  display: inline-flex;
+  border: 1px solid #9b9da3;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.toggleBtn {
+  border: 0;
+  background: #f3f4f6;
+  color: #3c3d42;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.toggleBtn + .toggleBtn {
+  border-left: 1px solid #9b9da3;
+}
+
+.active {
+  background: var(--it-aqua);
+  color: #fff;
+}

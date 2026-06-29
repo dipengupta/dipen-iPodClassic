@@ -468,10 +468,10 @@ test('pennguytweets: newest-first list opens a tweet with its date', async ({ pa
   await expect(rows.nth(8)).toContainText(/\d{4}-\d{2}-\d{2}/);
 });
 
-test('the iTunes stub page is reachable', async ({ page }) => {
+test('the iTunes view is reachable and links back to the iPod', async ({ page }) => {
   await page.getByRole('link', { name: /iTunes view/ }).click();
   await expect(page).toHaveURL(/\/itunes/);
-  await expect(page.getByRole('heading', { name: /stub/i })).toBeVisible();
-  await page.getByRole('link', { name: /Back to the iPod/ }).click();
+  await expect(page.getByTestId('itunes-window')).toBeVisible();
+  await page.getByRole('link', { name: "Dipen's iPod" }).click();
   await expect(page.getByTestId('ipod')).toBeVisible();
 });

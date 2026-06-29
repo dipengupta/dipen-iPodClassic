@@ -1,8 +1,9 @@
 # Architecture
 
 A Next.js 15 (App Router) app with a SQLite content database, shipped as one
-Docker container. The entire UI is an iPod Classic; there are no conventional
-web pages besides the `/itunes` stub.
+Docker container. The primary UI is an iPod Classic at `/`; a second,
+desktop-only "iTunes" view at `/itunes` (see § "Desktop iTunes view") is a
+parallel display layer over the same data.
 
 ```
 Browser ──► <Ipod/> (client)                    Next.js route handlers
@@ -283,20 +284,90 @@ silenced (persisted in `localStorage`, restored in `Ipod.tsx`).
 One `<Ipod/>` component; differences are CSS-only (`Ipod.module.css`).
 Desktop centers a ~380 px device with a keyboard-hint strip and an `/itunes`
 corner link. Mobile (`max-width: 767px` or coarse pointer) fills the viewport
-with safe-area padding. `/itunes` is a stub for the future desktop companion.
+with safe-area padding, and the `/itunes` link is hidden.
+
+## Desktop iTunes view
+
+`/itunes` is a second, **desktop-only** display of the same content — an
+old-school iTunes-7 window — and is deliberately **independent of the iPod**:
+nothing under `src/components/ipod/**`, `src/lib/store/**`, `src/lib/players/**`,
+or `src/lib/menu/**` is imported or modified. The two views share exactly one
+thing: the JSON served by the `/api/...` routes.
+
+- **Two layers, one data spine.** The iPod's `dataSources.ts` is bound to the
+  iPod store and player singletons, so iTunes gets its own parallel data layer
+  in `src/lib/itunes/`: `loaders.ts` fetches the same routes the iPod uses
+  (`/api/content/[section]`, `/api/articles[/slug]`, `/api/youtube`,
+  `/api/video/[file]`) — so the live refresh-if-stale + seed fallback in those
+  handlers applies identically — and maps rows into the `SectionData`
+  view-models in `types.ts`. `catalog.ts` is the single source of truth for the
+  sidebar.
+- **Sidebar IA** (`catalog.ts`): themed sections, each item listed once —
+  **MUSIC** (Guitars / YouTube / Instagram / SoundCloud / Recommendations /
+  Concerts Seen / Octavium), **PHOTOS** (Photos / Kitchen Wins), **COLLECTIONS**
+  (Mug Collection / Vinyls / Fridge Magnets / Recipes), **WRITING** (Articles /
+  pennguytweets), **ABOUT** (Professional / About), **ODDS & ENDS** (List /
+  Wi-Fi Names / Links), and **DEVICES → Dipen's iPod** (a `next/link` back to
+  `/`). Each entry carries a `unit` noun for the status bar. The iPod's
+  **Settings is intentionally excluded** (device-only toggles). An
+  `itunesCatalog` test guards that every iPod section is still surfaced.
+- **Layout** (`ItunesApp`): title bar (`Dipen's iTunes`) → **toolbar**
+  (Apple-style SVG transport icons on the left, the elongated now-playing
+  display in the center, then a volume slider and the Grid/Cover Flow toggle on
+  the right for gallery sections) → body (sidebar + main pane) → **status bar**
+  (a live count of the current section, e.g. "16 guitars" / "37 songs"). The
+  `.window` is larger and `resize: both` (drag the corner).
+- **Views** (`src/components/itunes/views/`): `GalleryPane` (**Grid by default**,
+  Cover Flow via the toolbar toggle — images), `TrackTable` (songs + plain
+  grouped lists), `VideoPane` (YouTube embeds + local UGG `<video>`),
+  `ReadingPane` (articles with lazy `bodyHtml`, recipes, timeline, tweets,
+  About), `StaticPhotoView` (Octavium/Vinyls/Magnets), `ExternalList` (links),
+  and `EmbedView` (the SoundCloud widget). Chrome: `TitleBar` + `Toolbar`
+  (wrapping `LcdStatus`) + `Sidebar` + `StatusBar`.
+- **Cover Flow** is a *fork* of the iPod's: the pure transform math lives in
+  `views/coverflowMath.ts` (copied and scaled up), but focus is driven by local
+  React state (click / arrow keys / wheel), not the iPod store.
+- **Playback is iTunes-local and isolated** — it never touches the iPod's
+  player singletons. `ItunesApp` owns a single hidden `<audio>` for Spotify's
+  keyless 30 s previews, driven by the top toolbar's transport + the seekable
+  display; YouTube uses a plain `<iframe>` embed (its own element, never
+  `ipod-yt-player`); SoundCloud is the self-playing widget iframe; UGG reuses
+  the stateless Range-streaming `/api/video/[file]` route via a native
+  `<video>`.
+- **Theme + color = chrome only.** The shared root layout already sets
+  `data-theme` on `<html>` for `/itunes`. `app/itunes/itunes.module.css` defines
+  the iTunes design **tokens** (gradient values *copied* from the iPod CSS, not
+  imported) on `.page`, with `[data-theme='black']` overrides for the **chrome**
+  (title bar, sidebar) only; the screen interior stays the classic light iTunes
+  look in both themes. The status/now-playing display uses iTunes' pale
+  blue-aluminum panel (`--it-lcd`), not green.
+- **Mobile**: `ItunesApp` redirects coarse-pointer / `max-width:767px` visitors
+  back to `/` (the `.page` wrapper is also `display:none` there as a fallback).
+- **Intentional, documented duplication** (the price of strict isolation): the
+  signature gradient tokens, and the Octavium/Vinyls/Fridge Magnets
+  strings/images in `src/lib/itunes/static.ts`, are copied from the iPod side
+  rather than shared — keep those in sync if the originals change. (The iTunes
+  `ABOUT_TEXT` is **not** a mirror; it's written for the iTunes companion, while
+  the iPod keeps its own click-wheel version.)
 
 ## Testing
 
 - **Unit** (`tests/unit/`): wheel math (incl. ±π wraparound), store
   transitions and clamping, menu tree integrity, article template parsing,
-  feed parsing against real fixture XML in `tests/fixtures/`.
+  feed parsing against real fixture XML in `tests/fixtures/`. For iTunes:
+  `itunesLoaders` (row→view-model mapping with a stubbed `fetch`),
+  `itunesCatalog` (a regression guard that fails if a future iPod section is
+  not surfaced in the sidebar), and `itunesCoverflow` (the forked transform
+  math).
 - **Integration** (`tests/integration/`): seeding, fetcher caching/dedup/
   fallback, and API route handlers — all against in-memory SQLite with
   migrations applied; network stubbed.
 - **E2E** (`e2e/`, Playwright): desktop keyboard project and mobile
   touch-viewport project (tap zones, circular scrub via synthesized pointer
-  arcs, scrub-vs-tap discrimination). `npm run e2e` builds, seeds, and boots
-  the production server itself.
+  arcs, scrub-vs-tap discrimination). `e2e/itunes.spec.ts` covers the iTunes
+  view (sidebar groups, Cover Flow flip + Grid toggle, video mount, article
+  lazy-load, the DEVICES link back to the iPod, and the mobile redirect).
+  `npm run e2e` builds, seeds, and boots the production server itself.
 
 ## Docker
 

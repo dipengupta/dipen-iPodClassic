@@ -1,115 +1,60 @@
-.window {
-  max-width: 860px;
-  margin: 5vh auto;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #7a7c82;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
-  font-size: 13px;
-  background: #fff;
-}
+/*
+ * Page wrapper for the desktop iTunes view. Defines the iTunes design tokens
+ * (gradient values copied from the iPod view CSS — not imported, to keep the
+ * two layers independent) and the silver/black chrome tints. Tokens cascade by
+ * DOM inheritance, so every descendant iTunes component can read var(--it-*).
+ * The screen interior stays the classic light iTunes look in both themes;
+ * only the chrome tokens change under [data-theme='black'].
+ */
 
-.titleBar {
+.page {
+  /* Signature gradients */
+  --it-aqua: linear-gradient(180deg, #7db9f5 0%, #4a90e8 49%, #1f64d2 50%, #2e7ae0 100%);
+  --it-aqua-soft: linear-gradient(180deg, #7db9f5 0%, #2e7ae0 100%);
+  --it-chrome: linear-gradient(180deg, #fdfdfd 0%, #e8e9eb 50%, #d6d7da 51%, #c9cacd 100%);
+  --it-progress: linear-gradient(180deg, #6fb1f5, #2f6fc4);
+  /* iTunes' status display — pale blue-aluminum, not green. */
+  --it-lcd: linear-gradient(180deg, #eaeff5 0%, #cdd7e3 100%);
+  --it-lcd-text: #41506a;
+  --it-lcd-border: #9aa6b8;
+
+  /* Chrome surfaces (tinted by theme) */
+  --it-titlebar: linear-gradient(180deg, #e9eaec 0%, #c9cacd 100%);
+  --it-sidebar-bg: #dde4ec;
+  --it-sidebar-text: #2d2e33;
+  --it-sidebar-heading: #6b7686;
+  --it-window-border: #7a7c82;
+  --it-hairline: #b9bbc0;
+  --it-blue-link: #1f64d2;
+
+  /* Interior (theme-invariant light) */
+  --it-pane-bg: #ffffff;
+  --it-pane-alt: #f4f6f9;
+  --it-pane-text: #1f2024;
+  --it-pane-muted: #6a7686;
+
+  min-height: 100dvh;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 26px;
-  padding: 0 10px;
-  background: linear-gradient(180deg, #e9eaec 0%, #c9cacd 100%);
-  border-bottom: 1px solid #9b9da3;
-}
-
-.trafficLights {
-  display: flex;
-  gap: 6px;
-  width: 54px;
-}
-
-.trafficLights i {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-}
-
-.trafficLights i:nth-child(1) { background: #ff5f57; }
-.trafficLights i:nth-child(2) { background: #febc2e; }
-.trafficLights i:nth-child(3) { background: #28c840; }
-
-.trafficSpacer {
-  width: 54px;
-}
-
-.title {
-  font-weight: 700;
-  color: #3c3d42;
-}
-
-.lcd {
-  display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  gap: 8px;
-  height: 40px;
-  margin: 8px auto;
-  width: 60%;
-  border-radius: 6px;
-  border: 1px solid #9aa08a;
-  background: linear-gradient(180deg, #e7ecd8 0%, #cfd8b8 100%);
-  color: #4c5440;
-  font-size: 12px;
+  padding: 4vh 16px;
+  box-sizing: border-box;
 }
 
-.lcdNote {
-  font-size: 16px;
+/* Black skin: tint only the window chrome, never the interior. */
+:global([data-theme='black']) .page {
+  --it-titlebar: linear-gradient(180deg, #3d3f44 0%, #1f2024 100%);
+  --it-sidebar-bg: #2b2d31;
+  --it-sidebar-text: #dfe1e6;
+  --it-sidebar-heading: #8e9aab;
+  --it-window-border: #0c0d0f;
+  --it-hairline: #3a3c40;
 }
 
-.body {
-  display: flex;
-  min-height: 340px;
-  border-top: 1px solid #c5c7cc;
-}
-
-.sidebar {
-  width: 180px;
-  background: #dde4ec;
-  border-right: 1px solid #aab2bd;
-  padding: 10px 0;
-}
-
-.sidebarHeading {
-  font-size: 10px;
-  font-weight: 700;
-  color: #6b7686;
-  padding: 8px 12px 3px;
-}
-
-.sidebarItem {
-  padding: 3px 12px 3px 18px;
-  color: #2d2e33;
-}
-
-.sidebarSelected {
-  background: linear-gradient(180deg, #7db9f5 0%, #2e7ae0 100%);
-  color: #fff;
-  font-weight: 600;
-}
-
-.main {
-  flex: 1;
-  padding: 36px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.main h1 {
-  font-size: 20px;
-}
-
-.backLink {
-  margin-top: 12px;
-  color: #1f64d2;
-  text-decoration: none;
-  font-weight: 600;
+/* Desktop-only: small / coarse-pointer devices are redirected to the iPod,
+   but hide the window as a belt-and-suspenders fallback before the redirect. */
+@media (max-width: 767px), (pointer: coarse) {
+  .page {
+    display: none;
+  }
 }

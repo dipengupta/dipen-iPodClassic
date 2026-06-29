@@ -1,0 +1,123 @@
+.wrap {
+  height: 100%;
+  display: flex;
+  background: var(--it-pane-bg);
+}
+
+.list {
+  flex: 0 0 260px;
+  width: 260px;
+  overflow-y: auto;
+  border-right: 1px solid var(--it-hairline);
+  background: var(--it-pane-alt);
+  padding: 6px 0;
+}
+
+.group + .group {
+  margin-top: 6px;
+}
+
+.groupHeading {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--it-pane-muted);
+  padding: 6px 12px 3px;
+  margin: 0;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-bottom: 1px solid #e7eaee;
+  color: var(--it-pane-text);
+}
+
+.item:hover {
+  background: #e7edf4;
+}
+
+.selected,
+.selected:hover {
+  background: var(--it-aqua);
+  color: #fff;
+}
+
+.itemTitle {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemSub {
+  font-size: 10px;
+  color: var(--it-pane-muted);
+}
+
+.selected .itemSub {
+  color: #dce9fb;
+}
+
+.stage {
+  flex: 1;
+  overflow-y: auto;
+  background: #101114;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.player {
+  width: 100%;
+  max-width: 760px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: contain;
+  background: #000;
+}
+
+.playerTitle {
+  color: #f2f3f5;
+  font-size: 16px;
+  margin: 16px 0 0;
+}
+
+.caption {
+  color: #aeb4bd;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+}
+
+.empty {
+  color: #aeb4bd;
+  align-self: center;
+}

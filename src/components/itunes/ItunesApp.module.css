@@ -1,0 +1,47 @@
+.window {
+  width: min(1320px, 96vw);
+  height: min(860px, 92dvh);
+  /* Drag the bottom-right corner to resize (needs overflow != visible). */
+  resize: both;
+  overflow: hidden;
+  min-width: 720px;
+  min-height: 480px;
+  max-width: 96vw;
+  max-height: 92dvh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  border: 1px solid var(--it-window-border);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  background: var(--it-pane-bg);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  border-top: 1px solid var(--it-hairline);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--it-pane-bg);
+}
+
+.main > * {
+  flex: 1;
+  min-height: 0;
+}
+
+.state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--it-pane-muted);
+  font-size: 13px;
+}
