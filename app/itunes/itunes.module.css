@@ -76,9 +76,11 @@
   --it-hairline: #3a3c40;
 }
 
-/* Desktop-only: small / coarse-pointer devices are redirected to the iPod,
-   but hide the window as a belt-and-suspenders fallback before the redirect. */
-@media (max-width: 767px), (pointer: coarse) {
+/* Portrait phones / narrow windows are redirected to the iPod; hide the window
+   as a belt-and-suspenders fallback before the redirect runs. Landscape phones
+   stay on iTunes (the tilt feature), so this must not hide them. */
+@media (max-width: 767px) and (orientation: portrait),
+  (pointer: coarse) and (orientation: portrait) {
   .page {
     display: none;
   }

@@ -50,8 +50,10 @@ export default function Sidebar({ entries, selectedId, onSelect, width }: Sideba
                         <ItemBody entry={entry} />
                       </a>
                     ) : entry.href ? (
-                      // DEVICES → the iPod (internal route).
-                      <Link className={styles.item} href={entry.href}>
+                      // DEVICES → the iPod (the only internal route). The
+                      // ?view=ipod param pins the choice so the device-aware
+                      // redirect doesn't bounce them back to iTunes.
+                      <Link className={styles.item} href={`${entry.href}?view=ipod`}>
                         <ItemBody entry={entry} />
                       </Link>
                     ) : (

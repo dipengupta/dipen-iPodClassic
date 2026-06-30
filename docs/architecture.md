@@ -286,6 +286,47 @@ Desktop centers a ~380 px device with a keyboard-hint strip and an `/itunes`
 corner link. Mobile (`max-width: 767px` or coarse pointer) fills the viewport
 with safe-area padding, and the `/itunes` link is hidden.
 
+## Device-aware view selection
+
+On launch the visitor is routed to whichever front-end fits the device — iTunes
+on large screens, the iPod on small/touch — instead of always defaulting to the
+iPod. `src/lib/device/viewRouting.ts` is the single source of truth; the
+selection rule (`preferredView()`):
+
+- **landscape + coarse pointer → iTunes** (the phone-tilt feature),
+- **otherwise coarse / `max-width: 767px` → iPod**,
+- **otherwise (desktop) → iTunes**.
+
+A user who explicitly switches pins their choice in
+`localStorage['ipod-view-pref']`, which overrides the rule so they are never
+bounced back. The cross-links carry the intent as a **`?view=` query param**
+(`/itunes?view=itunes`, `/?view=ipod`) rather than pinning in an `onClick`: the
+param rides in the URL, so it survives the navigation regardless of hydration
+timing (an `onClick` can race the click and miss). Both the pre-hydration script
+and `useViewSync` read the param, call `pinView()`, and clean the URL.
+
+Two layers apply the same rule, by design:
+
+1. A **pre-hydration inline `<script>` in `app/layout.tsx`** (mirroring the theme
+   script) owns **load-time routing**: on every document load it reads the pin +
+   media queries and redirects before paint, so neither view flashes. It reads
+   `localStorage` fresh on each new document, so it reliably sees the pin a
+   cross-link wrote just before navigating. It duplicates the rule as a JS string
+   because it can't import — keep it in sync with `viewRouting.ts`.
+2. **`useViewSync(current)`** in `Ipod` and `ItunesApp` persists a `?view=` param
+   on mount (covers SPA navigations the script can't see) and owns the **live
+   two-way tilt**: it listens for `matchMedia('(orientation: landscape)')` changes
+   and switches routes as the phone rotates — but only while nothing is pinned.
+   This needs only the orientation media query, **not** the gyroscope
+   `DeviceOrientationEvent`, so no iOS permission prompt is involved. (It
+   deliberately does **not** redirect on mount by device: load-time routing is the
+   script's job — a mount redirect would fight a deliberate navigation.)
+
+The two pages can't disagree (both obey one `preferredView`), so there is no
+redirect loop. The iTunes CSS `display:none` belt-and-suspenders fallback
+(`app/itunes/itunes.module.css`) is scoped to **portrait** so it no longer hides
+a landscape phone.
+
 ## Desktop iTunes view
 
 `/itunes` is a second, **desktop-only** display of the same content — an
@@ -375,7 +416,8 @@ thing: the JSON served by the `/api/...` routes.
   `itunesLoaders` (row→view-model mapping with a stubbed `fetch`),
   `itunesCatalog` (a regression guard that fails if a future iPod section is
   not surfaced in the sidebar), and `itunesCoverflow` (the forked transform
-  math).
+  math). `viewRouting` covers the device-selection rule and the pinned-choice
+  override.
 - **Integration** (`tests/integration/`): seeding, fetcher caching/dedup/
   fallback, and API route handlers — all against in-memory SQLite with
   migrations applied; network stubbed.
@@ -384,6 +426,9 @@ thing: the JSON served by the `/api/...` routes.
   arcs, scrub-vs-tap discrimination). `e2e/itunes.spec.ts` covers the iTunes
   view (sidebar groups, Cover Flow flip + Grid toggle, video mount, article
   lazy-load, the DEVICES link back to the iPod, and the mobile redirect).
+  `e2e/deviceRouting.spec.ts` covers device-aware launch (desktop → iTunes,
+  portrait phone → iPod), the sticky pinned choice, and the live tilt
+  (landscape ↔ portrait switch via `setViewportSize`).
   `npm run e2e` builds, seeds, and boots the production server itself.
 
 ## Docker

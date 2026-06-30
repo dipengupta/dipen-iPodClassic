@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useViewSync } from '@/lib/device/viewRouting';
 import { unlockAudio } from '@/lib/audio/clicker';
 import { HOLD_MS, holdInputFor, inputForKey } from '@/lib/input/keyboard';
 import { loadItems } from '@/lib/menu/dataSources';
@@ -18,6 +19,10 @@ export default function Ipod() {
   const setClickSound = useIpodStore((s) => s.setClickSound);
   // Tracks a held center/play-pause key so we can tell a tap from a hold.
   const hold = useRef<{ key: string; timer: ReturnType<typeof setTimeout>; fired: boolean } | null>(null);
+
+  // Keep the route in step with the device: desktops / landscape phones go to
+  // iTunes, small/portrait devices stay here. Honours a pinned choice.
+  useViewSync('ipod');
 
   useEffect(() => {
     setLoadItems(loadItems);
@@ -97,7 +102,7 @@ export default function Ipod() {
       <p className={styles.hints} aria-hidden="true">
         ↑↓ scroll · Enter select · Esc menu · Space play/pause · hold Enter: Now Playing · hold Space: sleep
       </p>
-      <a className={styles.itunesLink} href="/itunes">
+      <a className={styles.itunesLink} href="/itunes?view=itunes">
         iTunes view →
       </a>
     </div>

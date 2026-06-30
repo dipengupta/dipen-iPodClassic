@@ -3,6 +3,18 @@ import { expect, test } from '@playwright/test';
 test.skip(({ isMobile }) => isMobile, 'desktop keyboard suite');
 
 test.beforeEach(async ({ page }) => {
+  // On desktop the iPod is only shown when explicitly chosen; pin it so the
+  // device-aware redirect doesn't send us to iTunes. Only seed the default when
+  // unset, so tests that deliberately switch to iTunes aren't re-pinned here.
+  await page.addInitScript(() => {
+    try {
+      if (!localStorage.getItem('ipod-view-pref')) {
+        localStorage.setItem('ipod-view-pref', 'ipod');
+      }
+    } catch {
+      /* private mode */
+    }
+  });
   await page.goto('/');
   await expect(page.getByTestId('ipod')).toBeVisible();
 });

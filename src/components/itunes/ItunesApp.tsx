@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useViewSync } from '@/lib/device/viewRouting';
 import { catalog, DEFAULT_ENTRY_ID, entryById } from '@/lib/itunes/catalog';
 import { loadPlaylist, loadPlaylists, loadSection } from '@/lib/itunes/loaders';
 import {
@@ -82,7 +82,6 @@ function soundcloudData(tracks: ScTrack[]): TracksData {
 }
 
 export default function ItunesApp() {
-  const router = useRouter();
   const [selectedId, setSelectedId] = useState(DEFAULT_ENTRY_ID);
   const [data, setData] = useState<SectionData | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -100,12 +99,9 @@ export default function ItunesApp() {
   const sourceRef = useRef<PlaybackSource>('spotify');
   const advanceRef = useRef<() => void>(() => {});
 
-  // Desktop-only: phones / coarse-pointer devices go to the iPod.
-  useEffect(() => {
-    if (window.matchMedia('(max-width: 767px), (pointer: coarse)').matches) {
-      router.replace('/');
-    }
-  }, [router]);
+  // Keep the route in step with the device: portrait phones go to the iPod,
+  // landscape phones / desktops stay here. Honours a pinned choice.
+  useViewSync('itunes');
 
   // The PLAYLISTS sidebar section is built from the Recommendations feed.
   useEffect(() => {
