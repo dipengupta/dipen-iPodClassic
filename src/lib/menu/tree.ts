@@ -113,6 +113,13 @@ export const menuTree: MenuNode = {
           view: 'list',
           dataSource: 'recipes',
         },
+        {
+          id: 'collections.alison',
+          label: 'Alison',
+          view: 'coverflow',
+          dataSource: 'alison',
+          previewImage: '/images/alison/alison-001.webp',
+        },
       ],
     },
     {

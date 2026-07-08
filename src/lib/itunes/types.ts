@@ -47,6 +47,7 @@ export type LoaderKey =
   | 'magnets'
   | 'recipes'
   | 'kitchen'
+  | 'alison'
   | 'concerts'
   | 'list'
   | 'tweets'

@@ -23,6 +23,7 @@ const IPOD_CONTENT_TO_LOADER: Record<string, LoaderKey> = {
   mugs: 'mugs',
   photos: 'photos',
   kitchen: 'kitchen',
+  alison: 'alison',
   recipes: 'recipes',
   concerts: 'concerts',
   wifi: 'wifi',
@@ -74,7 +75,7 @@ describe('iTunes catalog integrity', () => {
     const music = catalog.filter((e) => e.group === 'MUSIC').map((e) => e.label);
     expect(music).toEqual(['Guitars', 'YouTube', 'Instagram', 'SoundCloud', 'Octavium']);
     expect(catalog.filter((e) => e.group === 'COLLECTIONS').map((e) => e.label)).toEqual([
-      'Mug Collection', 'Vinyls', 'Fridge Magnets', 'Recipes',
+      'Mug Collection', 'Vinyls', 'Fridge Magnets', 'Recipes', 'Alison',
     ]);
     // Concerts Seen now lives under Odds & Ends (moved out of Music).
     expect(catalog.filter((e) => e.group === 'ODDS & ENDS').map((e) => e.label)).toEqual([

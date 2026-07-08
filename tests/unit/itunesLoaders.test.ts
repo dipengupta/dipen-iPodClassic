@@ -43,6 +43,12 @@ const responses: Record<string, unknown> = {
       { id: 4, title: 'Trail', description: '', imagePath: '/img/trail.webp' },
     ],
   },
+  '/api/content/alison': {
+    items: [
+      { id: 8, title: 'Alison', description: 'October 2022', imagePath: '/images/alison/alison-001.webp' },
+      { id: 9, title: 'Alison', description: 'December 2023', imagePath: '/images/alison/alison-095.webp' },
+    ],
+  },
   '/api/content/mugs': {
     items: [
       { id: 1, title: 'Texas', giftedBy: 'Mom', category: 'state', detail: '' },
@@ -100,6 +106,18 @@ describe('iTunes loaders', () => {
     expect(data.items[0].imagePath).toBe('/img/sunset.webp');
     expect(data.items[0].flipText).toBe('On the coast.');
     expect(data.items[1].flipText).toBe('Trail'); // empty description falls back to the title
+  });
+
+  it('alison photos become a cover-flow gallery with date flip text', async () => {
+    const data = (await loadSection('alison')) as CoverflowData;
+    expect(data.kind).toBe('coverflow');
+    expect(data.items).toHaveLength(2);
+    expect(data.items[0]).toMatchObject({
+      id: 'alison-8',
+      label: 'Alison',
+      imagePath: '/images/alison/alison-001.webp',
+      flipText: 'October 2022',
+    });
   });
 
   it('loadPlaylists returns one entry per playlist for the PLAYLISTS section', async () => {

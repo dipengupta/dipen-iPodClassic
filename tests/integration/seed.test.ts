@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { eq } from 'drizzle-orm';
 import { afterEach, describe, expect, it } from 'vitest';
 import * as schema from '@/lib/db/schema';
 import { clearAll, isSeeded, seedDb, syncSeed } from '@/lib/seed/seedDb';
@@ -20,6 +21,10 @@ describe('seedDb', () => {
     expect(db.select().from(schema.uggEpisodes).all()).toHaveLength(203);
     expect(db.select().from(schema.concerts).all().length).toBeGreaterThan(50);
     expect(db.select().from(schema.wifiNames).all()).toHaveLength(25);
+    // Gallery items split by category: 10 profile + 10 kitchen + 95 alison.
+    expect(
+      db.select().from(schema.galleryItems).where(eq(schema.galleryItems.category, 'alison')).all(),
+    ).toHaveLength(95);
   });
 
   it('parses article bodies into HTML', () => {

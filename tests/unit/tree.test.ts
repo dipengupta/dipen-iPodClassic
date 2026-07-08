@@ -9,7 +9,7 @@ const VALID_VIEWS: ViewType[] = [
 
 const DATA_SOURCES = [
   'articles', 'youtube', 'guitars', 'ugg', 'soundcloud',
-  'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi', 'list',
+  'mugs', 'photos', 'kitchen', 'alison', 'recipes', 'concerts', 'wifi', 'list',
   'timeline', 'links', 'tweets', 'recommendations',
 ];
 
@@ -57,11 +57,12 @@ describe('menu tree integrity', () => {
     expect(about).toContain('center button');
   });
 
-  it('Collections holds the mug list, the static collection photos, and recipes', () => {
+  it('Collections holds the mug list, the static collection photos, recipes, and Alison', () => {
     expect(findNode('collections')?.children?.map((c) => c.label)).toEqual([
-      'Mug Collection', 'Vinyls', 'Fridge Magnets', 'Recipes',
+      'Mug Collection', 'Vinyls', 'Fridge Magnets', 'Recipes', 'Alison',
     ]);
     expect(findNode('collections.mugs')?.view).toBe('list');
+    expect(findNode('collections.alison')?.view).toBe('coverflow');
   });
 
   it('the root title is the status-bar boot title', () => {

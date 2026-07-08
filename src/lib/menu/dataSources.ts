@@ -252,6 +252,16 @@ async function kitchen(): Promise<FrameItem[]> {
   }));
 }
 
+async function alison(): Promise<FrameItem[]> {
+  const { items } = await fetchJson<{ items: GalleryRow[] }>('/api/content/alison');
+  return items.map((p) => ({
+    id: `alison-${p.id}`,
+    label: p.title,
+    imagePath: p.imagePath,
+    flipText: p.description || p.title,
+  }));
+}
+
 interface RecipeRow {
   id: number;
   title: string;
@@ -545,6 +555,7 @@ const builders: Record<string, () => Promise<FrameItem[]>> = {
   mugs,
   photos,
   kitchen,
+  alison,
   recipes,
   concerts,
   wifi,

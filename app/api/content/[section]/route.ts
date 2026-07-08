@@ -40,6 +40,10 @@ const sections = {
     getDb().select().from(schema.galleryItems)
       .where(eq(schema.galleryItems.category, 'kitchen'))
       .orderBy(asc(schema.galleryItems.sortOrder)).all(),
+  alison: () =>
+    getDb().select().from(schema.galleryItems)
+      .where(eq(schema.galleryItems.category, 'alison'))
+      .orderBy(asc(schema.galleryItems.sortOrder)).all(),
   recipes: () =>
     getDb().select().from(schema.recipes).orderBy(asc(schema.recipes.sortOrder)).all(),
   concerts: () =>

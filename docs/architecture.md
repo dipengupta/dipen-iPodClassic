@@ -203,8 +203,16 @@ gifter — a plain list beats cover flow for imageless rows): the builder bucket
 `onSelect`s a `kind: 'items'` `list` of plain label rows. Copy that when a
 section is just headed lists of one-liners.
 
+**Alison** (under Collections) is the plain photo-gallery shape: a `coverflow`
+node with `dataSource: 'alison'`, backed by the shared `gallery_items` table
+filtered on `category = 'alison'` (same mechanism as Photos/Kitchen Wins, which
+use `profile`/`kitchen`). Each of the ~95 photos is labelled "Alison" and flips
+to its capture month/year, ordered oldest→newest. Adding a photo gallery is just
+a new `category` value in `gallery.json` plus the standard section wiring — no
+schema change.
+
 Split-menu preview pane: a node's static `previewImage` is the default, but
-for the image-backed coverflow sections (guitars/photos/kitchen)
+for the image-backed coverflow sections (guitars/photos/kitchen/alison)
 `SplitMenuView` lazily loads the section's images once per session and shows
 a random one on every highlight (static image as the fallback while loading).
 
@@ -251,7 +259,8 @@ Data layer below).
 
 The screen's largest physical rendering is ~800px wide (380px device at ~2×
 DPR), so **all images are committed pre-optimized**: WebP, max 800px long
-edge, quality 80 (`public/images/**` is ~3MB total). The committed
+edge, quality 80 (`public/images/**` is ~8MB total, ~5MB of which is the
+personal Alison photo gallery under `public/images/alison/`). The committed
 `scripts/optimize-images.ts` (sharp) does the conversion and deletes the
 heavy original.
 
@@ -361,7 +370,7 @@ thing: the JSON served by the `/api/...` routes.
 - **Sidebar IA** (`catalog.ts` + dynamic playlists): themed sections, each item
   listed once — **MUSIC** (Guitars / YouTube / Instagram / SoundCloud /
   Octavium), **PHOTOS** (Photos / Kitchen Wins), **COLLECTIONS** (Mug Collection
-  / Vinyls / Fridge Magnets / Recipes), **WRITING** (Articles / pennguytweets),
+  / Vinyls / Fridge Magnets / Recipes / Alison), **WRITING** (Articles / pennguytweets),
   **ABOUT** (Professional / About), **PLAYLISTS** (one row per Recommendations
   playlist, built at runtime — `loadPlaylists()`; Spotify rows open their own
   track list, Apple rows link out), **ODDS & ENDS** (Concerts Seen / List / Wi-Fi

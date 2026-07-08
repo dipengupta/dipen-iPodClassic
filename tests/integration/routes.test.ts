@@ -16,7 +16,7 @@ beforeAll(() => {
 
 describe('/api/content/[section]', () => {
   it('serves every registered section', async () => {
-    for (const section of ['guitars', 'mugs', 'photos', 'kitchen', 'recipes', 'concerts', 'wifi', 'list', 'timeline', 'links', 'ugg', 'tweets', 'recommendations']) {
+    for (const section of ['guitars', 'mugs', 'photos', 'kitchen', 'alison', 'recipes', 'concerts', 'wifi', 'list', 'timeline', 'links', 'ugg', 'tweets', 'recommendations']) {
       const res = await getContent(req, params({ section }));
       expect(res.status, section).toBe(200);
       const { items } = await res.json();
@@ -34,6 +34,11 @@ describe('/api/content/[section]', () => {
     expect(kitchen.items).toHaveLength(10);
     for (const item of kitchen.items) {
       expect(item.category).toBe('kitchen');
+    }
+    const alison = await (await getContent(req, params({ section: 'alison' }))).json();
+    expect(alison.items).toHaveLength(95);
+    for (const item of alison.items) {
+      expect(item.category).toBe('alison');
     }
     // The vinyl/mug/magnet rows moved into static tree nodes; the section is gone.
     const gallery = await getContent(req, params({ section: 'gallery' }));

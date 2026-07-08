@@ -35,10 +35,12 @@ docker compose up --build
   or empty feed may never blank a view or overwrite seeded content.
 - Plain `<img>` is fine inside the logical screen (fixed sizes); keep the
   eslint-disable comment pattern used in existing views.
-- **Images are committed pre-optimized** (WebP ≤800px, ~3MB total). Adding
+- **Images are committed pre-optimized** (WebP ≤800px). Adding
   one: drop it in `public/images/...`, run `npm run optimize:images`,
   reference the `.webp` path. Never commit raw multi-MB photos; never add
-  `next/image`/runtime optimization without discussion.
+  `next/image`/runtime optimization without discussion. `public/images/**` is
+  ~8MB total — most of it (~5MB) is the personal Alison photo gallery under
+  `public/images/alison/`; the rest of the site stays ~3MB.
 
 ## Adding a content section (the common task)
 

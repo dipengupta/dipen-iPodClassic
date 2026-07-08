@@ -226,6 +226,11 @@ async function photos(): Promise<SectionData> {
   return { kind: 'coverflow', items: galleryCovers(items, 'photo') };
 }
 
+async function alison(): Promise<SectionData> {
+  const { items } = await fetchJson<{ items: GalleryRow[] }>('/api/content/alison');
+  return { kind: 'coverflow', items: galleryCovers(items, 'alison') };
+}
+
 /** Playlist metadata for the dynamic PLAYLISTS sidebar section. */
 export async function loadPlaylists(): Promise<Playlist[]> {
   const { items } = await fetchJson<{ items: RecommendationRow[] }>(
@@ -451,6 +456,7 @@ const loaders: Record<LoaderKey, () => Promise<SectionData>> = {
   magnets,
   recipes,
   kitchen,
+  alison,
   concerts,
   list,
   tweets,
