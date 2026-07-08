@@ -36,6 +36,20 @@ export interface Frame {
 
 export type Theme = 'silver' | 'black';
 
+/** Wheel/button vibration strength on Android (iOS has no Vibration API). */
+export type HapticLevel = 'off' | 'light' | 'medium' | 'strong';
+/** Screen font: system stack, Helvetica-like (Arimo), or rounded (Fredoka). */
+export type FontMode = 'system' | 'authentic' | 'fun';
+
+export const HAPTIC_LEVELS: HapticLevel[] = ['off', 'light', 'medium', 'strong'];
+export const FONT_MODES: FontMode[] = ['system', 'authentic', 'fun'];
+
+/** Multiplier applied to each vibration duration per level. */
+const HAPTIC_SCALE: Record<HapticLevel, number> = { off: 0, light: 0.6, medium: 1, strong: 1.8 };
+
+const HAPTIC_LABEL: Record<HapticLevel, string> = { off: 'Off', light: 'Light', medium: 'Medium', strong: 'Strong' };
+const FONT_LABEL: Record<FontMode, string> = { system: 'System', authentic: 'Classic', fun: 'Rounded' };
+
 /** Logical pixels one wheel tick scrolls in text views (≈ one text line). */
 export const SCROLL_STEP = 16;
 
@@ -85,36 +99,48 @@ const NOW_PLAYING_ITEM: FrameItem = {
   onSelect: { kind: 'nowPlaying' as const },
 };
 
-function settingsItems(
-  theme: Theme,
-  tweetShuffle: boolean,
-  videoFullscreen: boolean,
-  clickSound: boolean,
-): FrameItem[] {
+type SettingsSnapshot = Pick<
+  IpodState,
+  'theme' | 'tweetShuffle' | 'videoFullscreen' | 'clickSound' | 'haptics' | 'font'
+>;
+
+function settingsItems(s: SettingsSnapshot): FrameItem[] {
   return [
     {
       id: 'settings.theme',
       label: 'Theme',
-      sublabel: theme === 'silver' ? 'Silver' : 'Black',
+      sublabel: s.theme === 'silver' ? 'Silver' : 'Black',
       onSelect: { kind: 'action', action: 'toggleTheme' },
     },
     {
       id: 'settings.tweetShuffle',
       label: 'pennguytweets',
-      sublabel: tweetShuffle ? 'Shuffled' : 'Newest First',
+      sublabel: s.tweetShuffle ? 'Shuffled' : 'Newest First',
       onSelect: { kind: 'action', action: 'toggleTweetShuffle' },
     },
     {
       id: 'settings.videoFullscreen',
       label: 'Video Fullscreen',
-      sublabel: videoFullscreen ? 'On' : 'Off',
+      sublabel: s.videoFullscreen ? 'On' : 'Off',
       onSelect: { kind: 'action', action: 'toggleVideoFullscreen' },
     },
     {
       id: 'settings.clickSound',
       label: 'Click Sound',
-      sublabel: clickSound ? 'On' : 'Off',
+      sublabel: s.clickSound ? 'On' : 'Off',
       onSelect: { kind: 'action', action: 'toggleClickSound' },
+    },
+    {
+      id: 'settings.haptics',
+      label: 'Haptics',
+      sublabel: HAPTIC_LABEL[s.haptics],
+      onSelect: { kind: 'action', action: 'cycleHaptics' },
+    },
+    {
+      id: 'settings.font',
+      label: 'Font',
+      sublabel: FONT_LABEL[s.font],
+      onSelect: { kind: 'action', action: 'cycleFont' },
     },
   ];
 }
@@ -155,6 +181,10 @@ export interface IpodState {
   videoFullscreen: boolean;
   /** Settings: whether the wheel click sound plays. */
   clickSound: boolean;
+  /** Settings: wheel/button vibration strength (Android only). */
+  haptics: HapticLevel;
+  /** Settings: screen font. */
+  font: FontMode;
   playback: PlaybackState;
   progress: PlaybackProgress;
   /** Scrub mode: center press on a playback screen; the wheel then seeks. */
@@ -176,6 +206,8 @@ export interface IpodState {
   setTweetShuffle: (on: boolean) => void;
   setVideoFullscreen: (on: boolean) => void;
   setClickSound: (on: boolean) => void;
+  setHaptics: (level: HapticLevel) => void;
+  setFont: (font: FontMode) => void;
   pushNode: (node: MenuNode) => void;
   pushItems: (title: string, view: ViewType, items: FrameItem[]) => void;
   pushDetail: (view: ViewType, payload: DetailPayload) => void;
@@ -212,6 +244,8 @@ export const useIpodStore = create<IpodState>((set, get) => ({
   tweetShuffle: false,
   videoFullscreen: false,
   clickSound: true,
+  haptics: 'medium',
+  font: 'system',
   playback: { source: null, index: -1, playing: false, queue: [] },
   progress: { position: 0, duration: 0 },
   scrubbing: false,
@@ -270,11 +304,37 @@ export const useIpodStore = create<IpodState>((set, get) => ({
     }
   },
 
+  setHaptics: (level) => {
+    set({ haptics: level });
+    clicker.setHapticScale(HAPTIC_SCALE[level]);
+    if (typeof document !== 'undefined') {
+      try {
+        localStorage.setItem('ipod-haptics', level);
+      } catch {
+        // Storage can be unavailable (private mode); the setting just won't persist.
+      }
+    }
+  },
+
+  setFont: (font) => {
+    set({ font });
+    if (typeof document !== 'undefined') {
+      document.documentElement.dataset.font = font;
+      try {
+        localStorage.setItem('ipod-font', font);
+        document.cookie = `ipod-font=${font};path=/;max-age=31536000`;
+      } catch {
+        // Storage can be unavailable (private mode); the font just won't persist.
+      }
+    }
+  },
+
   pushNode: (node) => {
-    const { loadItems, theme, tweetShuffle, videoFullscreen, clickSound } = get();
+    const state = get();
+    const { loadItems } = state;
     let frame: Frame;
     if (node.view === 'settings') {
-      frame = makeFrame({ title: node.label, view: 'settings', node, items: settingsItems(theme, tweetShuffle, videoFullscreen, clickSound) });
+      frame = makeFrame({ title: node.label, view: 'settings', node, items: settingsItems(state) });
     } else if (node.children?.length) {
       frame = makeFrame({ title: node.label, view: node.view, node, items: itemsFromChildren(node) });
     } else if (node.dataSource) {
@@ -605,12 +665,18 @@ function executeSelect(state: IpodState, spec: SelectSpec): void {
         state.setVideoFullscreen(!state.videoFullscreen);
       } else if (spec.action === 'toggleClickSound') {
         state.setClickSound(!state.clickSound);
+      } else if (spec.action === 'cycleHaptics') {
+        const i = HAPTIC_LEVELS.indexOf(state.haptics);
+        state.setHaptics(HAPTIC_LEVELS[(i + 1) % HAPTIC_LEVELS.length]);
+      } else if (spec.action === 'cycleFont') {
+        const i = FONT_MODES.indexOf(state.font);
+        state.setFont(FONT_MODES[(i + 1) % FONT_MODES.length]);
       }
       // Refresh the visible settings rows' sublabels.
-      const { stack, theme, tweetShuffle, videoFullscreen, clickSound } = useIpodStore.getState();
-      const top = stack[stack.length - 1];
+      const next = useIpodStore.getState();
+      const top = next.stack[next.stack.length - 1];
       if (top.view === 'settings') {
-        useIpodStore.getState().setFrameItems(top.key, settingsItems(theme, tweetShuffle, videoFullscreen, clickSound));
+        next.setFrameItems(top.key, settingsItems(next));
       }
       break;
     }

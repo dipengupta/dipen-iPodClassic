@@ -16,6 +16,19 @@ body {
   background: var(--backdrop);
 }
 
+/* ---- Screen font: switched by [data-font], applied to the iPod screen only
+   (see Screen.module.css .logical). The surrounding page keeps its own font. */
+:root,
+[data-font='system'] {
+  --screen-font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+[data-font='authentic'] {
+  --screen-font: var(--font-authentic), 'Helvetica Neue', Arial, sans-serif;
+}
+[data-font='fun'] {
+  --screen-font: var(--font-fun), 'Helvetica Neue', Arial, sans-serif;
+}
+
 /* ---- Device themes: silver (default) and black iPod Classic ---- */
 
 :root,

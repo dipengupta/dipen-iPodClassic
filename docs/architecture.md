@@ -46,8 +46,11 @@ pixels once; never query the viewport inside a view.
    jumps to Now Playing** (`goToNowPlaying`); **`holdPlayPause` sleeps the
    screen**. A dimmed screen swallows the first input (it only wakes).
 4. Every effective tick fires `clicker.tick()` (`src/lib/audio/clicker.ts`):
-   a synthesized Web Audio click + `navigator.vibrate(5)`. The AudioContext is
-   resumed on the first user gesture (iOS requirement; iOS has no vibration).
+   a synthesized Web Audio click + `vibrate(5)`. `vibrate()` scales its
+   duration by the **Haptics** setting (`clicker.setHapticScale`) and skips
+   entirely when it's Off; the same applies to the button-press buzzes in the
+   store's `select`/`menu` cases. The AudioContext is resumed on the first user
+   gesture (iOS requirement; iOS has no vibration).
 
 All wheel math is pure and unit-tested — tune `DETENT_DEG` fearlessly.
 
@@ -278,6 +281,18 @@ the **Video Fullscreen** toggle (`videoFullscreen`, also
 screen with wheel panning (see the UGG section), and a **Click Sound** toggle
 (`clickSound`) that drives `clicker.setMuted()` so the wheel ticks can be
 silenced (persisted in `localStorage`, restored in `Ipod.tsx`).
+
+Two more settings cycle through several values rather than toggling. **Haptics**
+(`haptics`: Off / Light / Medium / Strong) scales every `navigator.vibrate`
+duration via `clicker.setHapticScale` — Medium is the default 1× feel, Off
+disables vibration — persisted under `ipod-haptics`. **Font** (`font`: System /
+Classic / Retro) sets the iPod **screen** font only: it mirrors the theme
+mechanism exactly — a `data-font` attribute on `<html>`, a `--screen-font`
+variable in `globals.css` consumed by `Screen.module.css .logical`, and
+`localStorage` + cookie + the pre-hydration script (so a stale cookie can't
+flash the wrong font). Classic (Arimo, Helvetica-metric) fixes the Android
+fallback; Rounded (Fredoka) is a soft, playful face. Both custom fonts are
+self-hosted via `next/font/google` (no committed binaries).
 
 ## Responsive
 

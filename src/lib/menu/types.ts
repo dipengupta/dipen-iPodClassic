@@ -95,6 +95,6 @@ export type SelectSpec =
   | { kind: 'items'; title: string; view: ViewType; items: FrameItem[] }
   | { kind: 'detail'; view: ViewType; payload: DetailPayload }
   | { kind: 'external'; href: string }
-  | { kind: 'action'; action: 'toggleTheme' | 'toggleTweetShuffle' | 'toggleVideoFullscreen' | 'toggleClickSound' }
+  | { kind: 'action'; action: 'toggleTheme' | 'toggleTweetShuffle' | 'toggleVideoFullscreen' | 'toggleClickSound' | 'cycleHaptics' | 'cycleFont' }
   | { kind: 'play'; source: PlaybackSource; index: number; queue: PlayTrack[] }
   | { kind: 'nowPlaying' };

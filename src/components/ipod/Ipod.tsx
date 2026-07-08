@@ -17,6 +17,8 @@ export default function Ipod() {
   const setTweetShuffle = useIpodStore((s) => s.setTweetShuffle);
   const setVideoFullscreen = useIpodStore((s) => s.setVideoFullscreen);
   const setClickSound = useIpodStore((s) => s.setClickSound);
+  const setHaptics = useIpodStore((s) => s.setHaptics);
+  const setFont = useIpodStore((s) => s.setFont);
   // Tracks a held center/play-pause key so we can tell a tap from a hold.
   const hold = useRef<{ key: string; timer: ReturnType<typeof setTimeout>; fired: boolean } | null>(null);
 
@@ -31,14 +33,20 @@ export default function Ipod() {
     if (docTheme === 'black' || docTheme === 'silver') {
       setTheme(docTheme);
     }
+    const docFont = document.documentElement.dataset.font;
+    if (docFont === 'authentic' || docFont === 'fun' || docFont === 'system') {
+      setFont(docFont);
+    }
     try {
       if (localStorage.getItem('ipod-tweet-shuffle') === '1') setTweetShuffle(true);
       if (localStorage.getItem('ipod-video-fullscreen') === '1') setVideoFullscreen(true);
       if (localStorage.getItem('ipod-click-sound') === '0') setClickSound(false);
+      const h = localStorage.getItem('ipod-haptics');
+      if (h === 'off' || h === 'light' || h === 'medium' || h === 'strong') setHaptics(h);
     } catch {
       // Storage can be unavailable (private mode); the settings just won't restore.
     }
-  }, [setLoadItems, setTheme, setTweetShuffle, setVideoFullscreen, setClickSound]);
+  }, [setLoadItems, setTheme, setTweetShuffle, setVideoFullscreen, setClickSound, setHaptics, setFont]);
 
   useEffect(() => {
     const clearHold = () => {

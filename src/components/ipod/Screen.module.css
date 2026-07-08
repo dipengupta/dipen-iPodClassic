@@ -25,6 +25,7 @@
   flex-direction: column;
   background: #fff;
   color: #000;
+  font-family: var(--screen-font, 'Helvetica Neue', Helvetica, Arial, sans-serif);
   font-size: 12px;
   line-height: 1.25;
   position: relative;

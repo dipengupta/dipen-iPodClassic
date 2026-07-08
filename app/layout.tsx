@@ -1,6 +1,12 @@
 import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
+import { Arimo, Fredoka } from 'next/font/google';
 import './globals.css';
+
+// Self-hosted at build (no committed binaries). Exposed as CSS variables and
+// switched on the iPod screen via [data-font]; see globals.css / Screen.module.css.
+const authentic = Arimo({ subsets: ['latin'], variable: '--font-authentic', display: 'swap' });
+const fun = Fredoka({ subsets: ['latin'], variable: '--font-fun', display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Dipen Gupta — iPod',
@@ -20,17 +26,25 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const cookieTheme = cookieStore.get('ipod-theme')?.value;
   const theme = cookieTheme === 'black' ? 'black' : 'silver';
+  const cookieFont = cookieStore.get('ipod-font')?.value;
+  const font = cookieFont === 'authentic' || cookieFont === 'fun' ? cookieFont : 'system';
   return (
     // suppressHydrationWarning: the inline script below may legitimately
     // rewrite data-theme before hydration (localStorage wins over a stale
     // cookie), and browser extensions inject classes on <html>. Applies to
     // this element's attributes only — children are still verified.
-    <html lang="en" data-theme={theme} suppressHydrationWarning>
+    <html
+      lang="en"
+      data-theme={theme}
+      data-font={font}
+      className={`${authentic.variable} ${fun.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        {/* localStorage wins over the cookie pre-hydration so a stale cookie can't flash the wrong skin */}
+        {/* localStorage wins over the cookie pre-hydration so a stale cookie can't flash the wrong skin or font */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('ipod-theme');if(t==='black'||t==='silver'){document.documentElement.dataset.theme=t;}}catch(e){}`,
+            __html: `try{var t=localStorage.getItem('ipod-theme');if(t==='black'||t==='silver'){document.documentElement.dataset.theme=t;}var f=localStorage.getItem('ipod-font');if(f==='authentic'||f==='fun'||f==='system'){document.documentElement.dataset.font=f;}}catch(e){}`,
           }}
         />
         {/* Device-aware view: send desktops to iTunes and small/portrait

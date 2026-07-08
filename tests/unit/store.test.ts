@@ -459,4 +459,38 @@ describe('settings', () => {
     expect(store().clickSound).toBe(true);
     expect(store().stack[1].items?.[3].sublabel).toBe('On');
   });
+
+  it('cycles haptic strength and updates the row sublabel', () => {
+    store().pushNode(findNode('extras.settings')!);
+    expect(store().haptics).toBe('medium');
+    expect(store().stack[1].items?.[4].label).toBe('Haptics');
+    expect(store().stack[1].items?.[4].sublabel).toBe('Medium');
+    for (let i = 0; i < 4; i++) store().handleInput({ type: 'scroll', dir: 1 }); // down to it
+    store().handleInput({ type: 'select' });
+    expect(store().haptics).toBe('strong');
+    expect(store().stack[1].items?.[4].sublabel).toBe('Strong');
+    store().handleInput({ type: 'select' });
+    expect(store().haptics).toBe('off');
+    expect(store().stack[1].items?.[4].sublabel).toBe('Off');
+    store().handleInput({ type: 'select' });
+    expect(store().haptics).toBe('light');
+    store().handleInput({ type: 'select' });
+    expect(store().haptics).toBe('medium'); // wraps back to the default
+  });
+
+  it('cycles the screen font and updates the row sublabel', () => {
+    store().pushNode(findNode('extras.settings')!);
+    expect(store().font).toBe('system');
+    expect(store().stack[1].items?.[5].label).toBe('Font');
+    expect(store().stack[1].items?.[5].sublabel).toBe('System');
+    for (let i = 0; i < 5; i++) store().handleInput({ type: 'scroll', dir: 1 }); // down to it
+    store().handleInput({ type: 'select' });
+    expect(store().font).toBe('authentic');
+    expect(store().stack[1].items?.[5].sublabel).toBe('Classic');
+    store().handleInput({ type: 'select' });
+    expect(store().font).toBe('fun');
+    expect(store().stack[1].items?.[5].sublabel).toBe('Rounded');
+    store().handleInput({ type: 'select' });
+    expect(store().font).toBe('system'); // wraps back
+  });
 });

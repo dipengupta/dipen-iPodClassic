@@ -6,6 +6,8 @@
 
 let ctx: AudioContext | null = null;
 let muted = false;
+/** Multiplies every vibration duration; 0 disables haptics. Set from Settings. */
+let hapticScale = 1;
 
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -32,6 +34,10 @@ export function setMuted(value: boolean): void {
   muted = value;
 }
 
+export function setHapticScale(value: number): void {
+  hapticScale = value;
+}
+
 export function tick(): void {
   vibrate(5);
   if (muted) return;
@@ -51,9 +57,13 @@ export function tick(): void {
 }
 
 export function vibrate(ms: number): void {
+  if (hapticScale <= 0) return;
+  // Clamp non-zero results up to a small floor so the lightest setting is
+  // still felt on a phone (a 2–3ms buzz reads as nothing on a Pixel).
+  const scaled = Math.max(4, Math.round(ms * hapticScale));
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     try {
-      navigator.vibrate(ms);
+      navigator.vibrate(scaled);
     } catch {
       // Some browsers throw on vibrate without user activation; feedback is best-effort.
     }
