@@ -256,9 +256,9 @@ async function alison(): Promise<FrameItem[]> {
   const { items } = await fetchJson<{ items: GalleryRow[] }>('/api/content/alison');
   return items.map((p) => ({
     id: `alison-${p.id}`,
-    label: p.title,
+    label: p.description,
     imagePath: p.imagePath,
-    flipText: p.description || p.title,
+    flipText: p.title,
   }));
 }
 

@@ -206,8 +206,8 @@ section is just headed lists of one-liners.
 **Alison** (under Collections) is the plain photo-gallery shape: a `coverflow`
 node with `dataSource: 'alison'`, backed by the shared `gallery_items` table
 filtered on `category = 'alison'` (same mechanism as Photos/Kitchen Wins, which
-use `profile`/`kitchen`). Each of the ~95 photos is labelled "Alison" and flips
-to its capture month/year, ordered oldest→newest. Adding a photo gallery is just
+use `profile`/`kitchen`). Each of the ~95 photos is captioned with its capture
+month/year and flips to "Alison", ordered oldest→newest. Adding a photo gallery is just
 a new `category` value in `gallery.json` plus the standard section wiring — no
 schema change.
 

@@ -228,7 +228,15 @@ async function photos(): Promise<SectionData> {
 
 async function alison(): Promise<SectionData> {
   const { items } = await fetchJson<{ items: GalleryRow[] }>('/api/content/alison');
-  return { kind: 'coverflow', items: galleryCovers(items, 'alison') };
+  return {
+    kind: 'coverflow',
+    items: items.map((p) => ({
+      id: `alison-${p.id}`,
+      label: p.description,
+      imagePath: p.imagePath,
+      flipText: p.title,
+    })),
+  };
 }
 
 /** Playlist metadata for the dynamic PLAYLISTS sidebar section. */

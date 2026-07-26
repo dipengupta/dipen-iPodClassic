@@ -138,14 +138,16 @@ export default function ClickWheel() {
       <span className={`${styles.label} ${styles.menu}`}>MENU</span>
       <span className={`${styles.label} ${styles.prev}`}>
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M7 6h2v12H7z" />
-          <path d="M20 6v12l-9-6z" />
+          <path d="M5 6h2v12H5z" />
+          <path d="M15 6v12l-7-6z" />
+          <path d="M22 6v12l-7-6z" />
         </svg>
       </span>
       <span className={`${styles.label} ${styles.next}`}>
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M15 6h2v12h-2z" />
-          <path d="M4 6v12l9-6z" />
+          <path d="M2 6v12l7-6z" />
+          <path d="M9 6v12l7-6z" />
+          <path d="M17 6h2v12h-2z" />
         </svg>
       </span>
       <span className={`${styles.label} ${styles.playPause}`}>

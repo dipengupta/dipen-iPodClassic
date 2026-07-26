@@ -108,15 +108,15 @@ describe('iTunes loaders', () => {
     expect(data.items[1].flipText).toBe('Trail'); // empty description falls back to the title
   });
 
-  it('alison photos become a cover-flow gallery with date flip text', async () => {
+  it('alison photos become a cover-flow gallery captioned by date', async () => {
     const data = (await loadSection('alison')) as CoverflowData;
     expect(data.kind).toBe('coverflow');
     expect(data.items).toHaveLength(2);
     expect(data.items[0]).toMatchObject({
       id: 'alison-8',
-      label: 'Alison',
+      label: 'October 2022',
       imagePath: '/images/alison/alison-001.webp',
-      flipText: 'October 2022',
+      flipText: 'Alison',
     });
   });
 
