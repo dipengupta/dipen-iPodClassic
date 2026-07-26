@@ -81,7 +81,7 @@ Secrets live in `.env` only — never in code.
 | SoundCloud               | Live track list + audio via the hidden persistent widget   |
 | Music recommendations    | Curated playlists; Spotify tracks + 30s preview audio via the keyless embed feed (6h cache, committed seed fallback), Apple Music deep-links out; refresh via `npm run import:spotify` |
 | Instagram (UGG Chronicles) | Local MP4s in `data/videos/ugg` (gitignored) + committed `src/data/seed/ugg.json`; refresh via `npm run import:ugg` |
-| Tweets (pennguytweets)   | Scraped @20swithepennguy export, 710 tweets committed in `src/data/seed/tweets.json` |
+| Tweets (pennguytweets)   | Scraped @20swithepennguy export, 768 tweets committed in `src/data/seed/tweets.json` |
 | Guitars, mugs, places, timeline, links | Seeded from `src/data/seed/*.json`          |
 
 Live fetchers never leave the screen blank: on any failure they fall back to

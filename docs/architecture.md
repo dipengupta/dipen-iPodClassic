@@ -467,9 +467,12 @@ empty `/data` volume, then runs `server.js`. Pin Node 22 everywhere
 
 Production runs the same Docker image on a single Fly machine
 (`fly.toml`; app `dipen-ipod-classic`, region `iad`) with a volume named
-`ipod_data` mounted at `/data` — the entrypoint migrates + seeds it on first
-boot exactly like local Docker, and a non-empty DB is never re-seeded, so the
-volume's content survives `fly deploy`. **Never scale past one machine**:
+`ipod_data` mounted at `/data` — the entrypoint migrates + `syncSeed`s it on
+every boot exactly like local Docker. `syncSeed` re-seeds only the units whose
+committed seed-file fingerprint changed (recorded in `seed_meta`), so an edited
+seed file — e.g. new rows in `tweets.json` — lands automatically on the next
+`fly deploy` with no manual reseed, while unchanged units and live-fetched data
+already on the volume are left intact. **Never scale past one machine**:
 better-sqlite3 writes a local file and the volume belongs to one machine.
 
 - Deploy: `fly deploy` (builds the Dockerfile remotely).

@@ -5,7 +5,7 @@ import styles from './rows.module.css';
 
 const ROW_HEIGHT = 22;
 /** Rows rendered beyond the viewport on each side. Generous so short lists
-    (≤ ~60 rows) still mount fully, while huge ones (710 tweets) stay cheap. */
+    (≤ ~60 rows) still mount fully, while huge ones (768 tweets) stay cheap. */
 const OVERSCAN = 25;
 
 interface MenuRowsProps {

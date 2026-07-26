@@ -68,6 +68,6 @@ schema table → seed JSON + `seedDb.ts` → `sections` entry in
   `key`; `ScreenRouter` treats only `key` changes as navigations.
 - `npm run e2e` and `npm run dev` share port 3000 — stop one before the other.
 - Tweets are the committed @20swithepennguy scrape (`src/data/seed/tweets.json`,
-  710 rows); the `isSample` flag is legacy and always false now.
+  768 rows); the `isSample` flag is legacy and always false now.
 - The gitignore rule for local data is `/data/` (root-anchored) on purpose —
   a bare `data/` would also ignore `src/data/`, the committed seed content.
