@@ -95,6 +95,9 @@ describe('/api/content/[section]', () => {
     expect(items[0].isSample).toBe(false);
     // The last few scraped tweets have no URL; everything still serves.
     expect(items.every((t: { text: string }) => t.text.length > 0)).toBe(true);
+    // Dates are mandatory — every tweet carries a postedAt (recent ones are
+    // backfilled with their commit date).
+    expect(items.every((t: { postedAt: string | null }) => Boolean(t.postedAt))).toBe(true);
   });
 
   it('serves recommendations with Spotify tracks nested', async () => {

@@ -122,14 +122,16 @@ const SEED_UNITS: SeedUnit[] = [
     },
   },
   {
-    // Scraped @20swithepennguy export (number/text/rawText/date/url). A null
-    // date means the scraper couldn't resolve the tweet page (last few rows).
+    // Scraped @20swithepennguy export (number/text/rawText/date/url). Dates are
+    // mandatory; rows without a resolved date are backfilled with their commit
+    // date in the seed source, so a null here is a data error we fail on.
     name: 'tweets',
     tables: [schema.tweets],
     fingerprint: (seedDir) => fileFingerprint(seedDir, 'tweets.json'),
     seed(db, seedDir) {
-      const tweets = readJsonOptional<Array<{ number: number; text: string; date: string | null; url: string | null }>>(seedDir, 'tweets.json') ?? [];
+      const tweets = readJsonOptional<Array<{ number: number; text: string; date: string; url: string | null }>>(seedDir, 'tweets.json') ?? [];
       for (const t of tweets) {
+        if (!t.date) throw new Error(`tweet ${t.number} is missing a date; every tweet must have one`);
         db.insert(schema.tweets)
           .values({ number: t.number, text: t.text, postedAt: t.date, url: t.url ?? null, isSample: false })
           .onConflictDoNothing()

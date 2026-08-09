@@ -18,7 +18,7 @@ export const tweets = sqliteTable('tweets', {
   // Unique so re-running the seed can't duplicate the archive.
   number: integer('number').unique(),
   text: text('text').notNull(),
-  postedAt: text('posted_at'),
+  postedAt: text('posted_at').notNull(),
   url: text('url'),
   isSample: integer('is_sample', { mode: 'boolean' }).notNull().default(false),
 });

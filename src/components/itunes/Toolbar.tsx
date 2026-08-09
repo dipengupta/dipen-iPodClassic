@@ -20,6 +20,8 @@ interface ToolbarProps {
   showGalleryToggle: boolean;
   galleryMode: GalleryMode;
   onGalleryMode: (mode: GalleryMode) => void;
+  query: string;
+  onQuery: (query: string) => void;
 }
 
 // Apple-style transport glyphs (filled triangles + bars), drawn as SVG.
@@ -27,14 +29,16 @@ const ICON = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'currentColor'
 
 const PrevIcon = () => (
   <svg {...ICON}>
-    <path d="M6 6h2.3v12H6z" />
-    <path d="M20 6v12l-9.5-6z" />
+    <path d="M5 6h2v12H5z" />
+    <path d="M15 6v12l-7-6z" />
+    <path d="M22 6v12l-7-6z" />
   </svg>
 );
 const NextIcon = () => (
   <svg {...ICON}>
-    <path d="M4 6v12l9.5-6z" />
-    <path d="M15.7 6H18v12h-2.3z" />
+    <path d="M2 6v12l7-6z" />
+    <path d="M9 6v12l7-6z" />
+    <path d="M17 6h2v12h-2z" />
   </svg>
 );
 const PlayIcon = () => (
@@ -70,6 +74,8 @@ export default function Toolbar({
   showGalleryToggle,
   galleryMode,
   onGalleryMode,
+  query,
+  onQuery,
 }: ToolbarProps) {
   return (
     <div className={styles.toolbar} data-testid="itunes-toolbar">
@@ -109,6 +115,15 @@ export default function Toolbar({
         <LcdStatus nowPlaying={nowPlaying} onSeek={onSeek} />
       </div>
       <div className={styles.right}>
+        <input
+          type="search"
+          className={styles.search}
+          placeholder="Search…"
+          value={query}
+          onChange={(e) => onQuery(e.target.value)}
+          aria-label="Search everything"
+          data-testid="itunes-search"
+        />
         {showGalleryToggle && (
           <div className={styles.toggle} role="group" aria-label="View mode">
             <button

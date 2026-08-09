@@ -68,6 +68,13 @@ schema table → seed JSON + `seedDb.ts` → `sections` entry in
   `key`; `ScreenRouter` treats only `key` changes as navigations.
 - `npm run e2e` and `npm run dev` share port 3000 — stop one before the other.
 - Tweets are the committed @20swithepennguy scrape (`src/data/seed/tweets.json`,
-  768 rows); the `isSample` flag is legacy and always false now.
+  768 rows); the `isSample` flag is legacy and always false now. Every tweet
+  must have a `date` (`posted_at` is NOT NULL and the seeder throws on a missing
+  one); dateless scrapes are backfilled with their commit date.
 - The gitignore rule for local data is `/data/` (root-anchored) on purpose —
   a bare `data/` would also ignore `src/data/`, the committed seed content.
+- iTunes has a **global search** (`src/lib/search/searchContent.ts` +
+  `app/api/search/route.ts`). Adding a new iTunes content type? Add it there too,
+  emitting the right catalog `entryId` + a `focusId` matching that view's item id
+  (see `src/lib/itunes/loaders.ts`) so "open the exact item" keeps working. The
+  travel-map `locations` table is deliberately not searchable (no iTunes view).
