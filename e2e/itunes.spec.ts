@@ -51,6 +51,25 @@ test.describe('desktop iTunes view', () => {
     await expect(page.getByTestId('itunes-coverflow-caption')).toContainText('3 of');
   });
 
+  test('global search finds an item and opens it in its section', async ({ page }) => {
+    const box = page.getByTestId('itunes-search');
+    await box.fill('Montreal');
+    // Debounced results replace the main pane.
+    await expect(page.getByTestId('itunes-search-results')).toBeVisible();
+    const result = page
+      .getByTestId('itunes-search-result')
+      .filter({ hasText: 'Montreal' })
+      .first();
+    await expect(result).toBeVisible();
+    await result.click();
+    // Lands on the Mug Collection track table with the mug row visible.
+    const table = page.getByTestId('itunes-tracktable');
+    await expect(table).toBeVisible();
+    await expect(table.getByText('Montreal', { exact: true })).toBeVisible();
+    // Opening a result clears the query.
+    await expect(box).toHaveValue('');
+  });
+
   test('playlists: arrow keys + Enter play a song (no double-click)', async ({ page }) => {
     // Only Spotify playlists render as buttons (Apple ones link out).
     await page.getByTestId('itunes-playlist').first().click();

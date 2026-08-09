@@ -199,6 +199,30 @@ export interface ExternalData {
   rows: ExternalRow[];
 }
 
+// --- Search -----------------------------------------------------------------
+
+export interface SearchResultItem {
+  /** focusId — the destination view's item id (see loaders.ts id schemes). */
+  id: string;
+  /** Catalog entry to open when this result is clicked. */
+  entryId: string;
+  title: string;
+  snippet?: string;
+}
+
+export interface SearchResultGroup {
+  type: string;
+  label: string;
+  results: SearchResultItem[];
+}
+
+export interface SearchData {
+  kind: 'search';
+  query: string;
+  total: number;
+  groups: SearchResultGroup[];
+}
+
 export type SectionData =
   | CoverflowData
   | TracksData
@@ -206,7 +230,8 @@ export type SectionData =
   | ReadingData
   | TweetsData
   | StaticPhotoData
-  | ExternalData;
+  | ExternalData
+  | SearchData;
 
 /** Sidebar metadata for one Recommendations playlist (dynamic PLAYLISTS group). */
 export interface Playlist {

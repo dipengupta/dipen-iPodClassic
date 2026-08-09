@@ -9,17 +9,19 @@ export default function GalleryPane({
   data,
   mode,
   scale,
+  focusId,
 }: {
   data: CoverflowData;
   mode: GalleryMode;
   scale: number;
+  focusId?: string;
 }) {
   return (
     <div className={styles.wrap}>
       {mode === 'coverflow' ? (
-        <CoverFlowView items={data.items} scale={scale} />
+        <CoverFlowView items={data.items} scale={scale} focusId={focusId} />
       ) : (
-        <GridView items={data.items} scale={scale} />
+        <GridView items={data.items} scale={scale} focusId={focusId} />
       )}
     </div>
   );

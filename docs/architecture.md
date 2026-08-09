@@ -381,9 +381,10 @@ thing: the JSON served by the `/api/...` routes.
   The iPod's **Settings is intentionally excluded**; an `itunesCatalog` test
   guards that every iPod section is still surfaced.
 - **Layout** (`ItunesApp`): title bar (`Dipen's iTunes`) → **toolbar** (circular
-  Apple-style transport buttons + the volume slider on the left, the now-playing
-  display kept **dead-center** via equal-width side zones, the Grid/Cover Flow
-  toggle on the right for galleries) → body (resizable sidebar + main pane) →
+  Apple-style transport buttons — double-triangle skip glyphs, matching the iPod
+  wheel — + the volume slider on the left, the now-playing display kept
+  **dead-center** via equal-width side zones, a global **search field** and the
+  Grid/Cover Flow toggle on the right) → body (resizable sidebar + main pane) →
   **status bar** (a live section count, e.g. "16 guitars" / "37 songs", plus an
   artwork-size slider for galleries). The `.window` is larger and `resize: both`.
 - **Views** (`src/components/itunes/views/`): `GalleryPane` (**Grid by default**,
@@ -396,6 +397,18 @@ thing: the JSON served by the `/api/...` routes.
   Latest/Shuffle toggle), `StaticPhotoView` (Octavium/Vinyls/Magnets), and
   `ExternalList` (links). Chrome: `TitleBar` + `Toolbar` (wrapping `LcdStatus`) +
   `Sidebar` + `StatusBar`.
+- **Global search** (`SearchResults` view + `src/lib/search/searchContent.ts` +
+  `app/api/search/route.ts`): the toolbar search box (debounced ~250ms) replaces
+  the main pane with grouped, clickable results across **every** content source.
+  Matching is a case-insensitive substring scan in JS over the seeded rows plus
+  the static pages (no FTS index — the corpus is small; article HTML is stripped
+  first). Each result carries the target catalog `entryId` **and** a `focusId`
+  matching that view's item id, so clicking **opens the exact item**: `ItunesApp`
+  selects the section and threads `focusId` into the view, which scrolls to /
+  opens / plays / flashes the item (`views/useFocusScroll.ts` + `focus.module.css`
+  do the shared scroll+highlight; each view maps `focusId`→its element). The
+  travel-map **`locations` table is intentionally excluded** — iTunes has no map
+  view to open a location in.
 - **Cover Flow** is a *fork* of the iPod's: the pure transform math lives in
   `views/coverflowMath.ts` (copied and scaled up), focus is driven by local
   React state (click / arrow keys / wheel / a horizontal scrubber under the

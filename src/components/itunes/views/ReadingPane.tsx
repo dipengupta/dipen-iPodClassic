@@ -3,22 +3,29 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReadingData, ReadingEntry } from '@/lib/itunes/types';
 import styles from './ReadingPane.module.css';
+import { useFocusScroll } from './useFocusScroll';
 
 interface ArticleResponse {
   article: { bodyHtml: string };
 }
 
-export default function ReadingPane({ data }: { data: ReadingData }) {
+export default function ReadingPane({ data, focusId }: { data: ReadingData; focusId?: string }) {
   const entries = data.entries;
   const [selectedId, setSelectedId] = useState(entries[0]?.id);
   const [bodies, setBodies] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const reqId = useRef(0);
+  const setFocusRef = useFocusScroll(focusId);
 
   // Reset selection when the section changes (entries identity changes).
   useEffect(() => {
     setSelectedId(entries[0]?.id);
   }, [entries]);
+
+  // A search result deep-links to a specific entry — open it.
+  useEffect(() => {
+    if (focusId && entries.some((e) => e.id === focusId)) setSelectedId(focusId);
+  }, [focusId, entries]);
 
   const selected = entries.find((e) => e.id === selectedId);
 
@@ -55,6 +62,7 @@ export default function ReadingPane({ data }: { data: ReadingData }) {
                 <button
                   key={entry.id}
                   type="button"
+                  ref={entry.id === focusId ? setFocusRef : undefined}
                   className={`${styles.item} ${entry.id === selectedId ? styles.selected : ''}`}
                   aria-current={entry.id === selectedId || undefined}
                   onClick={() => setSelectedId(entry.id)}

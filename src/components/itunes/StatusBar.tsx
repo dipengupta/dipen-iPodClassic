@@ -39,6 +39,8 @@ function summarize(data: SectionData, label: string, unit?: string): string {
     case 'external':
       n = data.rows.length;
       break;
+    case 'search':
+      return `${data.total} ${data.total === 1 ? 'result' : 'results'}`;
     default:
       // embed / staticPhoto: no meaningful count — name the section instead.
       return label;

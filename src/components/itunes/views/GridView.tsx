@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import type { CoverItem } from '@/lib/itunes/types';
 import styles from './GridView.module.css';
+import { useFocusScroll } from './useFocusScroll';
 
 /** iTunes "grid" / album view: a wall of artwork with flip-to-read backs. */
-export default function GridView({ items, scale = 1 }: { items: CoverItem[]; scale?: number }) {
+export default function GridView({ items, scale = 1, focusId }: { items: CoverItem[]; scale?: number; focusId?: string }) {
   const [flipped, setFlipped] = useState<string | null>(null);
+  const setFocusRef = useFocusScroll(focusId);
   return (
     <div className={styles.wrap} data-testid="itunes-grid">
       <div className={styles.grid} style={{ ['--tile' as string]: `${Math.round(150 * scale)}px` }}>
@@ -14,6 +16,7 @@ export default function GridView({ items, scale = 1 }: { items: CoverItem[]; sca
           <button
             key={item.id}
             type="button"
+            ref={item.id === focusId ? setFocusRef : undefined}
             className={styles.cell}
             onClick={() => setFlipped((f) => (f === item.id ? null : item.id))}
           >

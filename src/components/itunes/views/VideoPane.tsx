@@ -3,20 +3,32 @@
 import { useEffect, useState } from 'react';
 import type { VideoData, VideoEntry } from '@/lib/itunes/types';
 import styles from './VideoPane.module.css';
+import { useFocusScroll } from './useFocusScroll';
 
 interface VideoPaneProps {
   data: VideoData;
   /** Called when a video starts, so the host can pause any audio playback. */
   onPlay?: () => void;
+  focusId?: string;
 }
 
-export default function VideoPane({ data, onPlay }: VideoPaneProps) {
+export default function VideoPane({ data, onPlay, focusId }: VideoPaneProps) {
   const all = data.groups.flatMap((g) => g.videos);
   const [selectedId, setSelectedId] = useState<string | undefined>(all[0]?.id);
+  const setFocusRef = useFocusScroll(focusId);
 
   useEffect(() => {
     setSelectedId(data.groups[0]?.videos[0]?.id);
   }, [data]);
+
+  // A search result deep-links to a specific video — open (and autoplay) it.
+  useEffect(() => {
+    if (focusId && all.some((v) => v.id === focusId)) {
+      setSelectedId(focusId);
+      onPlay?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- react to focusId/data only
+  }, [focusId, data]);
 
   const selected = all.find((v) => v.id === selectedId);
 
@@ -35,6 +47,7 @@ export default function VideoPane({ data, onPlay }: VideoPaneProps) {
               <button
                 key={v.id}
                 type="button"
+                ref={v.id === focusId ? setFocusRef : undefined}
                 className={`${styles.item} ${v.id === selectedId ? styles.selected : ''}`}
                 aria-current={v.id === selectedId || undefined}
                 onClick={() => select(v)}

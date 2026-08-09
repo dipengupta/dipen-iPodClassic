@@ -13,7 +13,7 @@ import styles from './CoverFlowView.module.css';
  * the covers in place (the perspective is fixed — not a scene zoom).
  */
 
-export default function CoverFlowView({ items, scale = 1 }: { items: CoverItem[]; scale?: number }) {
+export default function CoverFlowView({ items, scale = 1, focusId }: { items: CoverItem[]; scale?: number; focusId?: string }) {
   const [focused, setFocused] = useState(0);
   const wheelAt = useRef(0);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -21,6 +21,13 @@ export default function CoverFlowView({ items, scale = 1 }: { items: CoverItem[]
   useEffect(() => {
     setFocused(0);
   }, [items]);
+
+  // A search result deep-links to a specific cover — center it.
+  useEffect(() => {
+    if (!focusId) return;
+    const i = items.findIndex((item) => item.id === focusId);
+    if (i >= 0) setFocused(i);
+  }, [focusId, items]);
 
   const move = useCallback(
     (delta: number) => setFocused((f) => Math.max(0, Math.min(items.length - 1, f + delta))),

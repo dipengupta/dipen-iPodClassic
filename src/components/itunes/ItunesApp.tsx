@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useViewSync } from '@/lib/device/viewRouting';
 import { catalog, DEFAULT_ENTRY_ID, entryById } from '@/lib/itunes/catalog';
-import { loadPlaylist, loadPlaylists, loadSection } from '@/lib/itunes/loaders';
+import { loadPlaylist, loadPlaylists, loadSearch, loadSection } from '@/lib/itunes/loaders';
 import {
   getTracks,
   initSoundcloud,
@@ -30,6 +30,7 @@ import Toolbar, { type GalleryMode } from './Toolbar';
 import ExternalList from './views/ExternalList';
 import GalleryPane from './views/GalleryPane';
 import ReadingPane from './views/ReadingPane';
+import SearchResults from './views/SearchResults';
 import StaticPhotoView from './views/StaticPhotoView';
 import TrackTable from './views/TrackTable';
 import TweetsView from './views/TweetsView';
@@ -93,6 +94,11 @@ export default function ItunesApp() {
   const [sidebarWidth, setSidebarWidth] = useState(200);
   /** undefined while the widget resolves; [] if it failed. */
   const [scTracks, setScTracks] = useState<ScTrack[] | undefined>(undefined);
+  // Global search: `query` is the live input, `deferredQuery` the debounced value
+  // the load effect actually runs. `focus` deep-links a clicked result to its item.
+  const [query, setQuery] = useState('');
+  const [deferredQuery, setDeferredQuery] = useState('');
+  const [focus, setFocus] = useState<{ entryId: string; focusId: string } | null>(null);
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const scIframeRef = useRef<HTMLIFrameElement>(null);
@@ -142,6 +148,13 @@ export default function ItunesApp() {
       .catch(() => setScTracks([]));
   }, []);
 
+  // Debounce the search box so we only hit /api/search once typing settles.
+  useEffect(() => {
+    const id = setTimeout(() => setDeferredQuery(query), 250);
+    return () => clearTimeout(id);
+  }, [query]);
+  const searching = deferredQuery.trim().length >= 2;
+
   const entries = useMemo<CatalogEntry[]>(
     () => [...catalog, ...playlists.map(playlistEntry)],
     [playlists],
@@ -154,6 +167,16 @@ export default function ItunesApp() {
     setStatus('loading');
     setData(null);
     setGalleryMode('grid');
+
+    // Global search overrides the selected section while a query is active.
+    if (searching) {
+      loadSearch(deferredQuery)
+        .then((d) => !cancelled && (setData(d), setStatus('ready')))
+        .catch(() => !cancelled && setStatus('error'));
+      return () => {
+        cancelled = true;
+      };
+    }
 
     // SoundCloud: live widget tracks (preferred), else the link-out fallback.
     if (selectedId === SOUNDCLOUD_ID) {
@@ -194,11 +217,22 @@ export default function ItunesApp() {
     return () => {
       cancelled = true;
     };
-  }, [selectedId, scTracks]);
+  }, [selectedId, scTracks, searching, deferredQuery]);
 
   const onSelect = useCallback((e: CatalogEntry) => {
     if (e.href) return; // link entries (DEVICES / Apple playlists) are anchors
+    setQuery('');
+    setDeferredQuery('');
+    setFocus(null);
     setSelectedId(e.id);
+  }, []);
+
+  // Clicking a search result: clear the query and open the item in its section.
+  const onOpenResult = useCallback((entryId: string, focusId: string) => {
+    setQuery('');
+    setDeferredQuery('');
+    setFocus({ entryId, focusId });
+    setSelectedId(entryId);
   }, []);
 
   // --- Audio transport -----------------------------------------------------
@@ -290,7 +324,9 @@ export default function ItunesApp() {
       }
     : null;
 
-  const isGallery = entry?.view === 'coverflow';
+  const isGallery = !searching && entry?.view === 'coverflow';
+  // Deep-link a clicked result into the now-loaded section's view.
+  const focusId = focus && !searching && focus.entryId === selectedId ? focus.focusId : undefined;
 
   // --- Sidebar drag-resize -------------------------------------------------
   const dragRef = useRef<{ startX: number; startW: number } | null>(null);
@@ -326,6 +362,8 @@ export default function ItunesApp() {
         showGalleryToggle={Boolean(isGallery) && status === 'ready'}
         galleryMode={galleryMode}
         onGalleryMode={setGalleryMode}
+        query={query}
+        onQuery={setQuery}
       />
       <div className={styles.body}>
         <Sidebar entries={entries} selectedId={selectedId} onSelect={onSelect} width={sidebarWidth} />
@@ -351,13 +389,15 @@ export default function ItunesApp() {
               pauseAudio,
               galleryMode,
               imageScale,
+              focusId,
+              onOpenResult,
             })}
         </main>
       </div>
       <StatusBar
         data={data}
-        label={entry?.label ?? ''}
-        unit={entry?.unit}
+        label={searching ? 'Search' : entry?.label ?? ''}
+        unit={searching ? undefined : entry?.unit}
         loading={status !== 'ready'}
         showImageSlider={Boolean(isGallery) && status === 'ready'}
         imageScale={imageScale}
@@ -397,12 +437,15 @@ interface ViewHandlers {
   pauseAudio: () => void;
   galleryMode: GalleryMode;
   imageScale: number;
+  /** When set, the destination view scrolls to / opens this item id. */
+  focusId?: string;
+  onOpenResult: (entryId: string, focusId: string) => void;
 }
 
 function renderView(data: SectionData, h: ViewHandlers) {
   switch (data.kind) {
     case 'coverflow':
-      return <GalleryPane data={data} mode={h.galleryMode} scale={h.imageScale} />;
+      return <GalleryPane data={data} mode={h.galleryMode} scale={h.imageScale} focusId={h.focusId} />;
     case 'tracks':
       return (
         <TrackTable
@@ -411,18 +454,21 @@ function renderView(data: SectionData, h: ViewHandlers) {
           playing={h.playing}
           onPlay={h.onPlay}
           onTogglePlay={h.onTogglePlay}
+          focusId={h.focusId}
         />
       );
     case 'video':
-      return <VideoPane data={data} onPlay={h.pauseAudio} />;
+      return <VideoPane data={data} onPlay={h.pauseAudio} focusId={h.focusId} />;
     case 'reading':
-      return <ReadingPane data={data} />;
+      return <ReadingPane data={data} focusId={h.focusId} />;
     case 'tweets':
-      return <TweetsView data={data} />;
+      return <TweetsView data={data} focusId={h.focusId} />;
     case 'staticPhoto':
       return <StaticPhotoView data={data} />;
     case 'external':
-      return <ExternalList data={data} />;
+      return <ExternalList data={data} focusId={h.focusId} />;
+    case 'search':
+      return <SearchResults data={data} onOpen={h.onOpenResult} />;
     default:
       return null;
   }

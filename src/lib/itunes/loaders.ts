@@ -14,6 +14,7 @@ import type {
   LoaderKey,
   Playlist,
   ReadingEntry,
+  SearchData,
   SectionData,
   TrackGroup,
   TrackRow,
@@ -479,4 +480,10 @@ const loaders: Record<LoaderKey, () => Promise<SectionData>> = {
 
 export function loadSection(key: LoaderKey): Promise<SectionData> {
   return loaders[key]();
+}
+
+/** Global search across every content source (see src/lib/search). */
+export async function loadSearch(query: string): Promise<SectionData> {
+  const data = await fetchJson<Omit<SearchData, 'kind'>>(`/api/search?q=${encodeURIComponent(query)}`);
+  return { kind: 'search', ...data };
 }

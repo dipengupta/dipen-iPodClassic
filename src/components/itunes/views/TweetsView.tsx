@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { TweetCard, TweetsData } from '@/lib/itunes/types';
 import styles from './TweetsView.module.css';
+import { useFocusScroll } from './useFocusScroll';
 
 type Order = 'latest' | 'shuffle';
 
@@ -23,8 +24,9 @@ function fmtDate(iso?: string): string | null {
 }
 
 /** A Twitter-style feed for the pennguytweets archive, with an order toggle. */
-export default function TweetsView({ data }: { data: TweetsData }) {
+export default function TweetsView({ data, focusId }: { data: TweetsData; focusId?: string }) {
   const [order, setOrder] = useState<Order>('latest');
+  const setFocusRef = useFocusScroll(focusId);
   const list = useMemo(
     () => (order === 'shuffle' ? shuffle(data.tweets) : data.tweets),
     [order, data.tweets],
@@ -61,17 +63,33 @@ export default function TweetsView({ data }: { data: TweetsData }) {
       </header>
       <div className={styles.feed} data-testid="itunes-tweets">
         {list.map((t) => (
-          <Tweet key={t.id} tweet={t} handle={data.handle} displayName={data.displayName} />
+          <Tweet
+            key={t.id}
+            tweet={t}
+            handle={data.handle}
+            displayName={data.displayName}
+            innerRef={t.id === focusId ? setFocusRef : undefined}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function Tweet({ tweet, handle, displayName }: { tweet: TweetCard; handle: string; displayName: string }) {
+function Tweet({
+  tweet,
+  handle,
+  displayName,
+  innerRef,
+}: {
+  tweet: TweetCard;
+  handle: string;
+  displayName: string;
+  innerRef?: (el: HTMLElement | null) => void;
+}) {
   const date = fmtDate(tweet.date);
   return (
-    <article className={styles.tweet}>
+    <article className={styles.tweet} ref={innerRef}>
       <div className={styles.avatarSm} aria-hidden="true">
         🐧
       </div>

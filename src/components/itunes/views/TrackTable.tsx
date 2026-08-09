@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AudioTrack, PlaybackSource, TrackRow, TracksData } from '@/lib/itunes/types';
 import styles from './TrackTable.module.css';
+import { useFocusScroll } from './useFocusScroll';
 
 interface TrackTableProps {
   data: TracksData;
@@ -11,9 +12,10 @@ interface TrackTableProps {
   playing: boolean;
   onPlay: (queue: AudioTrack[], index: number, source: PlaybackSource) => void;
   onTogglePlay: () => void;
+  focusId?: string;
 }
 
-export default function TrackTable({ data, currentTrackId, playing, onPlay, onTogglePlay }: TrackTableProps) {
+export default function TrackTable({ data, currentTrackId, playing, onPlay, onTogglePlay, focusId }: TrackTableProps) {
   const { columns, groups, queue } = data;
   const source: PlaybackSource = data.source ?? 'spotify';
   const hasSecondary = Boolean(columns.secondary);
@@ -26,12 +28,19 @@ export default function TrackTable({ data, currentTrackId, playing, onPlay, onTo
   };
   const [selId, setSelId] = useState<string | undefined>(allRows[firstSelectable(allRows)]?.id);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const setFocusRef = useFocusScroll(focusId);
 
   // Reset selection + take keyboard focus when the section changes.
   useEffect(() => {
     setSelId(allRows[firstSelectable(allRows)]?.id);
-    wrapRef.current?.focus();
+    // preventScroll so a deep-linked row (below) can win the scroll.
+    wrapRef.current?.focus({ preventScroll: true });
   }, [allRows]);
+
+  // A search result deep-links to a specific row — select it.
+  useEffect(() => {
+    if (focusId && allRows.some((r) => r.id === focusId)) setSelId(focusId);
+  }, [focusId, allRows]);
 
   const activate = (row?: TrackRow) => {
     if (!row) return;
@@ -84,6 +93,8 @@ export default function TrackTable({ data, currentTrackId, playing, onPlay, onTo
               playing={playing}
               onSelect={setSelId}
               onPlay={onPlay}
+              focusId={focusId}
+              setFocusRef={setFocusRef}
             />
           ))}
         </tbody>
@@ -105,6 +116,8 @@ function GroupRows({
   playing,
   onSelect,
   onPlay,
+  focusId,
+  setFocusRef,
 }: {
   heading?: string;
   rows: TrackRow[];
@@ -118,6 +131,8 @@ function GroupRows({
   playing: boolean;
   onSelect: (id: string) => void;
   onPlay: (queue: AudioTrack[], index: number, source: PlaybackSource) => void;
+  focusId?: string;
+  setFocusRef: (el: HTMLElement | null) => void;
 }) {
   return (
     <>
@@ -140,6 +155,7 @@ function GroupRows({
         return (
           <tr
             key={row.id}
+            ref={row.id === focusId ? setFocusRef : undefined}
             className={`${styles.row} ${isCurrent ? styles.current : isSelected ? styles.selectedRow : ''} ${
               playable || row.href ? styles.actionable : ''
             }`}
