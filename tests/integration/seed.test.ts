@@ -18,7 +18,7 @@ describe('seedDb', () => {
     expect(db.select().from(schema.links).all()).toHaveLength(9);
     expect(db.select().from(schema.youtubeVideos).all().length).toBeGreaterThan(70);
     expect(db.select().from(schema.tweets).all()).toHaveLength(768);
-    expect(db.select().from(schema.uggEpisodes).all()).toHaveLength(203);
+    expect(db.select().from(schema.uggEpisodes).all()).toHaveLength(217);
     expect(db.select().from(schema.concerts).all().length).toBeGreaterThan(50);
     expect(db.select().from(schema.wifiNames).all()).toHaveLength(25);
     // Gallery items split by category: 10 profile + 10 kitchen + 95 alison.

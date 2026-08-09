@@ -120,14 +120,23 @@ and shares the same store state.
 The Instagram section plays the UGG Chronicles episodes from **on-device
 files** instead of embeds. The pieces:
 
-- **Import** (`npm run import:ugg -- --source "<UGG Project dir>"`,
-  `scripts/import-ugg.ts` + pure helpers in `scripts/ugg-lib.ts`): fixes the
-  export's UTF-8-as-latin-1 mojibake, recovers each episode's posting
-  timestamp from the official Instagram export (title match, then
-  caption-body match for the 2021 IGTV era; hard-fails rather than guess),
-  **moves** the MP4s to `data/videos/ugg/ugg-<ep>.mp4` (gitignored, ~2.7GB
-  never enters git), and writes the committed seed
-  `src/data/seed/ugg.json`. Idempotent — re-run it when new episodes land.
+- **Import** — two entry points, both fixing the export's UTF-8-as-latin-1
+  mojibake and writing the committed seed `src/data/seed/ugg.json` via the shared
+  pure helpers in `scripts/ugg-lib.ts`:
+  - `npm run import:ugg -- --source "<UGG Project dir>"` (`scripts/import-ugg.ts`)
+    — the original bespoke layout (`ugg_captions.json` + `UGG NNN - name.mp4`
+    videos), recovering timestamps from the official export (title match, then
+    caption-body match for the 2021 IGTV era; hard-fails rather than guess) and
+    **moving** the MP4s into `data/videos/ugg/`.
+  - `npm run import:ugg:instagram -- --source "<instagram-export>"`
+    (`scripts/import-ugg-instagram.ts`) — ingests a **standard Instagram data
+    export directly** (`your_instagram_activity/media/reels.json` +
+    `media/reels/YYYYMM/*.mp4`): parses each reel's caption/episode/timestamp,
+    **copies** (leaves the export intact) only episodes newer than what's already
+    seeded to `data/videos/ugg/ugg-<ep>.mp4`, and appends the new rows. This is
+    the yearly-refresh path.
+  - Both are additive/idempotent and keep the ~2.7GB of MP4s out of git; re-run
+    when new episodes land.
 - **Serving** (`app/api/video/[file]/route.ts`): streams with HTTP **Range**
   support (Safari requires 206s; Next's `public/` serving doesn't reliably
   honor Range in dev). Filenames are allowlisted (`ugg-N.mp4`), and the dir
@@ -492,8 +501,11 @@ better-sqlite3 writes a local file and the volume belongs to one machine.
 - Trial vs production: `fly.toml` ships in trial mode
   (`auto_stop_machines = "stop"`, `min_machines_running = 0`); for production
   flip to `"off"` / `1` so there are no cold starts.
-- Videos: the UGG MP4s are not in the image; upload them once with
-  `fly ssh sftp` into `/data/videos/ugg` (`VIDEOS_DIR` already points there).
+- Videos: the UGG MP4s are not in the image; upload them to `/data/videos/ugg`
+  on the volume with `fly ssh sftp` (`VIDEOS_DIR` already points there). New
+  episodes: after `fly deploy` reseeds `ugg.json` (fingerprint change), upload
+  just the new `ugg-<ep>.mp4` files — pipe `put` lines into `fly ssh sftp shell`
+  (check `fly volumes list` has room first).
 - Domain: `fly certs add <domain>`, then at the DNS host an A/AAAA record on
   the apex to the IPs from `fly ips list` and a CNAME `www` →
   `dipen-ipod-classic.fly.dev`, all DNS-only (no proxy) so Fly can issue certs.

@@ -3,6 +3,7 @@ import {
   buildSeedRows,
   episodeName,
   fixMojibake,
+  instagramCaptionEntry,
   parseEpisodeFromTitle,
   resolveTimestamps,
   videoFilename,
@@ -46,6 +47,26 @@ describe('episodeName', () => {
 
   it('falls back to the whole title without a pipe', () => {
     expect(episodeName('Just a jam')).toBe('Just a jam');
+  });
+});
+
+describe('instagramCaptionEntry', () => {
+  it('takes the first line as the title and keeps the full text as caption, fixing mojibake', () => {
+    // Instagram stores UTF-8 bytes decoded as latin-1; reproduce that here.
+    const clean =
+      "UGG Chronicles Ep. 217 | The Allman Brothers Band - Jessica, Guitar Cover\n\nWanted to learn this! I’ll do the solo next.\n\nThis was recorded ~July ’26";
+    const garbled = Buffer.from(clean, 'utf8').toString('latin1');
+    const entry = instagramCaptionEntry(garbled);
+    expect(entry).not.toBeNull();
+    expect(entry!.episode).toBe(217);
+    expect(entry!.title).toBe('UGG Chronicles Ep. 217 | The Allman Brothers Band - Jessica, Guitar Cover');
+    expect(episodeName(entry!.title)).toBe('The Allman Brothers Band - Jessica, Guitar Cover');
+    expect(entry!.caption).toContain('I’ll do the solo next.');
+    expect(entry!.caption).toContain('~July ’26');
+  });
+
+  it('returns null when the reel is not a UGG Chronicles episode', () => {
+    expect(instagramCaptionEntry('A random non-UGG reel caption')).toBeNull();
   });
 });
 

@@ -58,7 +58,8 @@ schema table → seed JSON + `seedDb.ts` → `sections` entry in
 - `src/data/seed/` — committed content (JSON + saved article HTML)
 - `data/ipod.db` — local SQLite (gitignored; recreate with `npm run seed`)
 - `data/videos/ugg/` — UGG Chronicles MP4s (gitignored, ~2.7GB; populated by
-  `npm run import:ugg`, streamed by `app/api/video/[file]`)
+  `npm run import:ugg` or `npm run import:ugg:instagram` for a raw Instagram
+  export, streamed by `app/api/video/[file]`)
 
 ## Gotchas
 

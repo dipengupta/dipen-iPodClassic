@@ -77,8 +77,8 @@ describe('/api/content/[section]', () => {
 
   it('serves UGG episodes most-recent first with playable fields', async () => {
     const { items } = await (await getContent(req, params({ section: 'ugg' }))).json();
-    expect(items.length).toBe(203);
-    expect(items[0].episode).toBe(204);
+    expect(items.length).toBe(217);
+    expect(items[0].episode).toBe(218);
     expect(items[items.length - 1].episode).toBe(1);
     for (const item of items.slice(0, 5)) {
       expect(item.filename).toMatch(/^ugg-\d+\.mp4$/);
