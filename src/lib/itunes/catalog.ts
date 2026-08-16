@@ -28,6 +28,7 @@ export const catalog: CatalogEntry[] = [
   { id: 'col-vinyls', label: 'Vinyls', icon: '💿', group: 'COLLECTIONS', view: 'staticPhoto', loader: 'vinyls' },
   { id: 'col-magnets', label: 'Fridge Magnets', icon: '🧲', group: 'COLLECTIONS', view: 'staticPhoto', loader: 'magnets' },
   { id: 'col-recipes', label: 'Recipes', icon: '🍳', group: 'COLLECTIONS', view: 'reading', loader: 'recipes', unit: 'recipe' },
+  { id: 'col-spices', label: 'Spice Blends', icon: '🌶', group: 'COLLECTIONS', view: 'reading', loader: 'spiceBlends', unit: 'blend' },
   { id: 'col-alison', label: 'Alison', icon: '🌳', group: 'COLLECTIONS', view: 'coverflow', loader: 'alison', unit: 'photo' },
 
   // --- WRITING -------------------------------------------------------------

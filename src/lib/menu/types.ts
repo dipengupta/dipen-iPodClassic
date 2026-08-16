@@ -19,6 +19,7 @@ export type DataSourceKey =
   | 'kitchen'
   | 'alison'
   | 'recipes'
+  | 'spiceBlends'
   | 'concerts'
   | 'wifi'
   | 'list'

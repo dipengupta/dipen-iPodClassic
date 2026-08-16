@@ -83,6 +83,12 @@ const responses: Record<string, unknown> = {
   '/api/soundcloud': {
     items: [{ id: 1, title: 'Demo Track', url: 'https://soundcloud.com/dipen-gupta/demo' }],
   },
+  '/api/content/spiceBlends': {
+    items: [
+      { id: 1, title: 'Saudi Kabsa Spice Blend', body: '- 1 tsp paprika', sourceUrl: 'https://www.themediterraneandish.com/kabsa-saudi-chicken-and-rice/', sourceLabel: 'The Mediterranean Dish' },
+      { id: 2, title: 'Indian Everyday Masala', body: '- turmeric', sourceUrl: null, sourceLabel: null },
+    ],
+  },
 };
 
 beforeEach(() => {
@@ -194,6 +200,19 @@ describe('iTunes loaders', () => {
       name: 'Demo Track',
       href: 'https://soundcloud.com/dipen-gupta/demo',
     });
+  });
+
+  it('spice blends load as a flat reading list with source links', async () => {
+    const data = (await loadSection('spiceBlends')) as ReadingData;
+    expect(data.kind).toBe('reading');
+    expect(data.entries).toHaveLength(2);
+    expect(data.entries[0]).toMatchObject({
+      id: 'spice-1',
+      title: 'Saudi Kabsa Spice Blend',
+      sourceLabel: 'The Mediterranean Dish',
+    });
+    expect(data.entries[0].heading).toBeUndefined(); // flat list, no category headings
+    expect(data.entries[1].sourceUrl).toBeUndefined(); // null source → omitted
   });
 
   it('about renders the static text without hitting the network', async () => {

@@ -114,6 +114,12 @@ export const menuTree: MenuNode = {
           dataSource: 'recipes',
         },
         {
+          id: 'collections.spiceBlends',
+          label: 'Spice Blends',
+          view: 'list',
+          dataSource: 'spiceBlends',
+        },
+        {
           id: 'collections.alison',
           label: 'Alison',
           view: 'coverflow',

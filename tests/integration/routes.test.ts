@@ -16,7 +16,7 @@ beforeAll(() => {
 
 describe('/api/content/[section]', () => {
   it('serves every registered section', async () => {
-    for (const section of ['guitars', 'mugs', 'photos', 'kitchen', 'alison', 'recipes', 'concerts', 'wifi', 'list', 'timeline', 'links', 'ugg', 'tweets', 'recommendations']) {
+    for (const section of ['guitars', 'mugs', 'photos', 'kitchen', 'alison', 'recipes', 'spiceBlends', 'concerts', 'wifi', 'list', 'timeline', 'links', 'ugg', 'tweets', 'recommendations']) {
       const res = await getContent(req, params({ section }));
       expect(res.status, section).toBe(200);
       const { items } = await res.json();
@@ -66,13 +66,25 @@ describe('/api/content/[section]', () => {
 
   it('serves recipes across the four categories with bodies and source links', async () => {
     const { items } = await (await getContent(req, params({ section: 'recipes' }))).json();
-    expect(items).toHaveLength(39);
+    expect(items).toHaveLength(38);
     const categories = new Set(items.map((r: { category: string }) => r.category));
     expect([...categories].sort()).toEqual(['baking', 'drinks', 'food', 'tips']);
     // Every recipe reads as text; link-backed ones keep the original URL.
     expect(items.every((r: { body: string }) => r.body.length > 0)).toBe(true);
     const tiramisu = items.find((r: { title: string }) => r.title === 'Tiramisu');
     expect(tiramisu.sourceUrl).toContain('tastesbetterfromscratch.com');
+    // Peri Peri moved out to the Spice Blends section.
+    expect(items.some((r: { title: string }) => r.title === 'Peri Peri Seasoning')).toBe(false);
+  });
+
+  it('serves spice blends & marinades as a flat list with bodies and source links', async () => {
+    const { items } = await (await getContent(req, params({ section: 'spiceBlends' }))).json();
+    expect(items).toHaveLength(11);
+    expect(items.every((r: { body: string }) => r.body.length > 0)).toBe(true);
+    const kabsa = items.find((r: { title: string }) => r.title === 'Saudi Kabsa Spice Blend');
+    expect(kabsa.sourceUrl).toContain('themediterraneandish.com');
+    // The pure blend that used to live under Recipes now lives here.
+    expect(items.some((r: { title: string }) => r.title === 'Peri Peri Seasoning')).toBe(true);
   });
 
   it('serves UGG episodes most-recent first with playable fields', async () => {

@@ -9,7 +9,7 @@ const VALID_VIEWS: ViewType[] = [
 
 const DATA_SOURCES = [
   'articles', 'youtube', 'guitars', 'ugg', 'soundcloud',
-  'mugs', 'photos', 'kitchen', 'alison', 'recipes', 'concerts', 'wifi', 'list',
+  'mugs', 'photos', 'kitchen', 'alison', 'recipes', 'spiceBlends', 'concerts', 'wifi', 'list',
   'timeline', 'links', 'tweets', 'recommendations',
 ];
 
@@ -57,9 +57,9 @@ describe('menu tree integrity', () => {
     expect(about).toContain('center button');
   });
 
-  it('Collections holds the mug list, the static collection photos, recipes, and Alison', () => {
+  it('Collections holds the mug list, the static collection photos, recipes, spice blends, and Alison', () => {
     expect(findNode('collections')?.children?.map((c) => c.label)).toEqual([
-      'Mug Collection', 'Vinyls', 'Fridge Magnets', 'Recipes', 'Alison',
+      'Mug Collection', 'Vinyls', 'Fridge Magnets', 'Recipes', 'Spice Blends', 'Alison',
     ]);
     expect(findNode('collections.mugs')?.view).toBe('list');
     expect(findNode('collections.alison')?.view).toBe('coverflow');

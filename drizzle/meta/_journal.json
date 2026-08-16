@@ -78,6 +78,13 @@
       "when": 1786294564878,
       "tag": "0010_adorable_cable",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1786884437060,
+      "tag": "0011_shiny_blonde_phantom",
+      "breakpoints": true
     }
   ]
 }

@@ -78,6 +78,13 @@ interface RecipeRow {
   sourceUrl: string | null;
   sourceLabel: string | null;
 }
+interface SpiceBlendRow {
+  id: number;
+  title: string;
+  body: string;
+  sourceUrl: string | null;
+  sourceLabel: string | null;
+}
 interface ConcertRow {
   id: number;
   year: string;
@@ -375,6 +382,20 @@ async function recipes(): Promise<SectionData> {
   return { kind: 'reading', entries };
 }
 
+async function spiceBlends(): Promise<SectionData> {
+  const { items } = await fetchJson<{ items: SpiceBlendRow[] }>('/api/content/spiceBlends');
+  return {
+    kind: 'reading',
+    entries: items.map((r) => ({
+      id: `spice-${r.id}`,
+      title: r.title,
+      text: r.body,
+      sourceUrl: r.sourceUrl ?? undefined,
+      sourceLabel: r.sourceLabel ?? undefined,
+    })),
+  };
+}
+
 async function professional(): Promise<SectionData> {
   const { items } = await fetchJson<{ items: TimelineRow[] }>('/api/content/timeline');
   return {
@@ -464,6 +485,7 @@ const loaders: Record<LoaderKey, () => Promise<SectionData>> = {
   vinyls,
   magnets,
   recipes,
+  spiceBlends,
   kitchen,
   alison,
   concerts,

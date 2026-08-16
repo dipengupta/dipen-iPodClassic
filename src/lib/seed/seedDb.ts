@@ -373,6 +373,25 @@ const SEED_UNITS: SeedUnit[] = [
       });
     },
   },
+  {
+    name: 'spiceBlends',
+    tables: [schema.spiceBlends],
+    fingerprint: (seedDir) => fileFingerprint(seedDir, 'spice-blends.json'),
+    seed(db, seedDir) {
+      const blends = readJsonOptional<Array<{ title: string; body: string; sourceUrl?: string; sourceLabel?: string }>>(seedDir, 'spice-blends.json') ?? [];
+      blends.forEach((blend, i) => {
+        db.insert(schema.spiceBlends)
+          .values({
+            title: blend.title,
+            body: blend.body,
+            sourceUrl: blend.sourceUrl ?? null,
+            sourceLabel: blend.sourceLabel ?? null,
+            sortOrder: i,
+          })
+          .run();
+      });
+    },
+  },
 ];
 
 export function isSeeded(db: Db): boolean {

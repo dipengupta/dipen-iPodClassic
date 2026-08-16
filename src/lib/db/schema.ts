@@ -87,6 +87,17 @@ export const recipes = sqliteTable('recipes', {
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
+// Spice blends & marinades: cuisine-specific flavour bases. A flat list (no
+// category grouping); link-backed ones keep the source URL for the footer.
+export const spiceBlends = sqliteTable('spice_blends', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  sourceUrl: text('source_url'),
+  sourceLabel: text('source_label'),
+  sortOrder: integer('sort_order').notNull().default(0),
+});
+
 export const timelineEntries = sqliteTable('timeline_entries', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   role: text('role').notNull(),

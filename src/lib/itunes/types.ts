@@ -46,6 +46,7 @@ export type LoaderKey =
   | 'vinyls'
   | 'magnets'
   | 'recipes'
+  | 'spiceBlends'
   | 'kitchen'
   | 'alison'
   | 'concerts'

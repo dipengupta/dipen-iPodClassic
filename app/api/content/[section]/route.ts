@@ -46,6 +46,8 @@ const sections = {
       .orderBy(asc(schema.galleryItems.sortOrder)).all(),
   recipes: () =>
     getDb().select().from(schema.recipes).orderBy(asc(schema.recipes.sortOrder)).all(),
+  spiceBlends: () =>
+    getDb().select().from(schema.spiceBlends).orderBy(asc(schema.spiceBlends.sortOrder)).all(),
   concerts: () =>
     getDb().select().from(schema.concerts).orderBy(asc(schema.concerts.sortOrder)).all(),
   wifi: () =>

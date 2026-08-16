@@ -455,6 +455,26 @@ test('Recipes (now under Collections): category groups open recipe lists and rea
   await expect(page.getByTestId('view-original')).toHaveAttribute('href', /tastesbetterfromscratch\.com/);
 });
 
+test('Spice Blends: a flat list of readable blends with source links', async ({ page }) => {
+  await page.keyboard.press('ArrowDown'); // Collections
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowDown'); // Spice Blends (after Recipes)
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('status-bar')).toContainText('Spice Blends');
+  const rows = page.getByTestId('menu-row');
+  // Flat list — no category groups; each blend opens straight in the reader.
+  await expect(rows.nth(0)).toContainText('Indian Everyday Masala');
+  await expect(rows.nth(1)).toContainText('Saudi Kabsa Spice Blend');
+  await page.keyboard.press('Enter'); // Indian Everyday Masala
+  await expect(page.getByTestId('reader-content').last()).toContainText('garam masala');
+  await page.keyboard.press('Escape'); // back to the list
+  // A link-backed blend keeps its View Original footer.
+  await page.keyboard.press('ArrowDown'); // Saudi Kabsa Spice Blend
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('reader-content').last()).toContainText('cardamom');
+  await expect(page.getByTestId('view-original').last()).toHaveAttribute('href', /themediterraneandish\.com/);
+});
+
 test('pennguytweets: newest-first list opens a tweet with its date', async ({ page }) => {
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown'); // Misc
   await page.keyboard.press('Enter');

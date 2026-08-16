@@ -196,7 +196,12 @@ Two patterns worth copying: **About** (home menu) is a pure static node — a
 Collections) is the full data-driven shape: the builder groups rows into category
 sub-lists (Food/Baking/Drinks/Tips & Tricks), and each recipe opens a
 scrollable `textReader` detail whose optional `sourceUrl` renders the
-"View Original" footer for recipes saved from the web.
+"View Original" footer for recipes saved from the web. **Spice Blends**
+(its sibling under Collections, backed by the `spice_blends` table — spice
+blends and marinades) is the same detail shape *without* the grouping level —
+the builder maps rows
+straight to `FrameItem`s, so the node opens a single flat list of blends rather
+than category sub-lists.
 
 **Recommendations** (Music, just above Octavium) shows the mixed-source pattern:
 each `recommendations` row is a playlist. Spotify rows open a native track list
@@ -379,7 +384,7 @@ thing: the JSON served by the `/api/...` routes.
 - **Sidebar IA** (`catalog.ts` + dynamic playlists): themed sections, each item
   listed once — **MUSIC** (Guitars / YouTube / Instagram / SoundCloud /
   Octavium), **PHOTOS** (Photos / Kitchen Wins), **COLLECTIONS** (Mug Collection
-  / Vinyls / Fridge Magnets / Recipes / Alison), **WRITING** (Articles / pennguytweets),
+  / Vinyls / Fridge Magnets / Recipes / Spice Blends / Alison), **WRITING** (Articles / pennguytweets),
   **ABOUT** (Professional / About), **PLAYLISTS** (one row per Recommendations
   playlist, built at runtime — `loadPlaylists()`; Spotify rows open their own
   track list, Apple rows link out), **ODDS & ENDS** (Concerts Seen / List / Wi-Fi
@@ -400,7 +405,7 @@ thing: the JSON served by the `/api/...` routes.
   Cover Flow via the toolbar toggle; one image-size slider zooms both),
   `TrackTable` (songs + plain grouped lists), `VideoPane` (YouTube embeds + local
   UGG `<video>`, each showing its description/caption beneath the player),
-  `ReadingPane` (articles with lazy `bodyHtml`, recipes, timeline, About; the
+  `ReadingPane` (articles with lazy `bodyHtml`, recipes, spice blends, timeline, About; the
   reader fills the pane width and **single-entry sections like About drop the
   list tier**), `TweetsView` (a Twitter-style pennguytweets feed with a
   Latest/Shuffle toggle), `StaticPhotoView` (Octavium/Vinyls/Magnets), and

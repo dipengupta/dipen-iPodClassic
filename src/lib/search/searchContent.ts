@@ -128,6 +128,21 @@ export function searchContent(db: Db, rawQuery: string): SearchResponse {
       })),
   );
 
+  // Spice blends & marinades
+  const spiceRows = db.select().from(schema.spiceBlends).orderBy(asc(schema.spiceBlends.sortOrder)).all();
+  add(
+    'spiceBlends',
+    'Spice Blends',
+    spiceRows
+      .filter((r) => firstMatch(q, [r.title, r.body]))
+      .map((r) => ({
+        id: `spice-${r.id}`,
+        entryId: 'col-spices',
+        title: r.title,
+        snippet: snippet(r.title.toLowerCase().includes(q) ? r.title : r.body, q),
+      })),
+  );
+
   // Videos — YouTube + UGG (available text only; no transcripts stored)
   const ytRows = db.select().from(schema.youtubeVideos).orderBy(desc(schema.youtubeVideos.publishedAt)).all();
   const uggRows = db.select().from(schema.uggEpisodes).orderBy(desc(schema.uggEpisodes.episode)).all();

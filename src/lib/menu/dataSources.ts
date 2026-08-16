@@ -318,6 +318,33 @@ async function recipes(): Promise<FrameItem[]> {
     });
 }
 
+interface SpiceBlendRow {
+  id: number;
+  title: string;
+  body: string;
+  sourceUrl: string | null;
+  sourceLabel: string | null;
+}
+
+// A flat list (no category grouping) — each blend opens in the text reader.
+async function spiceBlends(): Promise<FrameItem[]> {
+  const { items } = await fetchJson<{ items: SpiceBlendRow[] }>('/api/content/spiceBlends');
+  return items.map((row) => ({
+    id: `spice-${row.id}`,
+    label: row.title,
+    onSelect: {
+      kind: 'detail',
+      view: 'textReader',
+      payload: {
+        title: row.title,
+        text: row.body,
+        sourceUrl: row.sourceUrl ?? undefined,
+        sourceLabel: row.sourceLabel ?? undefined,
+      },
+    },
+  }));
+}
+
 interface ConcertRow {
   id: number;
   year: string;
@@ -557,6 +584,7 @@ const builders: Record<string, () => Promise<FrameItem[]>> = {
   kitchen,
   alison,
   recipes,
+  spiceBlends,
   concerts,
   wifi,
   list,
